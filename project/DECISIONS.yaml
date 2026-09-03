@@ -1,4 +1,4 @@
-version: 6
+version: 7
 updated: "2026-09-03"
 decisions:
   - id: DEC-001
@@ -121,4 +121,14 @@ decisions:
     status: accepted
     title: Gate-Requirement-Templates werden nach Kritikalität vorbelegt und bleiben editierbar
     rationale: Für den MVP wird low→Basis, medium→Standard, high→Elevated und critical→Critical als interne Startkonfiguration verwendet. Der Berater muss jedes Gate auf Basis von Rechtslage, Schutzbedarf, Policy und Risikoappetit anpassen können; ein Override wird explizit als Consultant-Override gespeichert.
+    source: INT-03
+  - id: DEC-025
+    status: accepted
+    title: Workflow-Staging und Question Applicability bleiben getrennte Zustände
+    rationale: Eine Frage darf durch Priorisierung nicht methodisch aus dem Scope verschwinden. Staging ordnet nur die Arbeitsreihenfolge; applicable, needs_review und not_applicable bleiben die eigenständige deterministische Anwendbarkeitsaussage.
+    source: INT-03
+  - id: DEC-026
+    status: accepted
+    title: needs_review erhält eine explizite Klärungsqueue
+    rationale: Ungeklärte Anwendbarkeit soll die unmittelbare Arbeitsqueue strukturieren, aber nie unsichtbar werden. Deshalb werden alle needs_review-Fragen sichtbar als clarification geführt und bleiben zusätzlich in der vollständigen Audit-Ansicht erhalten.
     source: INT-03
