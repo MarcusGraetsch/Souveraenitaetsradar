@@ -2,11 +2,11 @@
 
 ## Ziel
 
-Der Souveränitäts-Radar wird ab MVP-01 als lokal installierbare Webanwendung entwickelt. Die bestehende Excel-Datei bleibt Methoden-/Entwicklungsreferenz, ist aber nicht mehr die primäre Bedienoberfläche für Assessments.
+Der Souveränitäts-Radar wird als lokal installierbare Webanwendung entwickelt. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz, ist aber nicht die primäre Bedienoberfläche.
 
 Der Beratungsworkflow lautet:
 
-`Assessment anlegen -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
+`Assessment -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> optional LLM Bridge -> Human-reviewed Claims -> Hard Gates -> Ergebnis`
 
 ## MVP-Technologien
 
@@ -23,42 +23,73 @@ Der Beratungsworkflow lautet:
 
 Nicht Teil von MVP-01: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
 
-## Guided Workflow / Question Applicability
+## Guided Workflow
 
-Die 128 Fragen der Methodenbank sind **kein statischer Fragebogen**. Die Webanwendung erzeugt einen nachvollziehbaren Fragenpfad aus Assessment-Scope und einem separaten Relevanzprofil.
+Die 128 Fragen sind eine Methodenbank, kein statischer Fragebogen. Aus Assessment-Scope und Relevanzprofil entstehen drei Zustände: `applicable`, `not_applicable`, `needs_review`. Unklarheit darf eine Frage nie still ausblenden. Der Berater kann jederzeit zwischen `Relevante Fragen` und `Alle Fragen` wechseln.
 
-Das Relevanzprofil enthält Scope-Fakten wie:
+## Evidence Review
 
-- Service-Modell und Cloud-Bezug
-- Datenverarbeitung und Persistenz
-- Verschlüsselung und Schlüsselmodell
-- KI- bzw. agentische KI-Nutzung
-- Exit-/Portabilitätsrelevanz
-- Backup/Restore
-- Multi-Provider und Unterauftragnehmer
-- IAM, Logging/Monitoring, C5/C3A
+Evidence wird zunächst lokal erfasst und ist noch kein automatisch vertrauenswürdiger Nachweis. Der Berater bewertet je Evidence:
 
-Applicability wird im Methodenkern deterministisch bewertet. Es gibt genau drei Zustände:
+- Applied State: `asserted`, `available`, `documented`, `observed`, `configured`, `tested`, `attested`
+- Base Trust 0–5
+- Scope Fit 0–5
+- Freshness Fit 0–5
+- Review Status: `raw`, `normalized`, `reviewed`, `approved`, `rejected`
 
-- `applicable` – die bekannten Bedingungen sind erfüllt
-- `not_applicable` – die Bedingung ist nach dem aktuellen Scope sicher ausgeschlossen
-- `needs_review` – Kontext fehlt oder die natürliche Anwendbarkeitsregel ist noch nicht ausreichend operationalisiert
+Der effektive Trust ist intern definiert als Minimum aus Base Trust, Scope Fit und Freshness Fit. Evidence ohne Review bleibt `raw` mit Trust 0 und kann kein Hard Gate verifizieren.
 
-`needs_review` bleibt im Standardfragenpfad sichtbar. **Unklarheit darf nie dazu führen, dass eine Frage still verschwindet.** Im UI kann der Berater zusätzlich jederzeit auf `Alle Fragen` umschalten und auch sicher nicht anwendbare Fragen samt Begründung sehen.
+## Human-reviewed Claims
 
-Die heutige Engine operationalisiert bewusst nur sichere, generische Bedingungen. Noch nicht modellierte Anwendbarkeitsausdrücke werden konservativ als `needs_review` behandelt statt durch heuristische KI oder Providerlogik entschieden.
+Ein Claim ist eine vom Berater verantwortete Aussage, die Evidence mit einem Hard Gate verbindet. Claims können einen reinen Fakt dokumentieren oder zusätzlich ein Applied-Capability-Level 0–4 tragen.
+
+Nur `reviewed` oder `approved` Claims beeinflussen Hard Gates. LLM-Vorschläge werden **nicht automatisch** in Claims umgewandelt und erhalten keinen Gate-Einfluss ohne Human Review.
+
+Die interne Aggregation ist konservativ:
+
+- schwächste bestätigte Capability begrenzt das Gate
+- jeder Capability-Claim benötigt reviewed/approved Evidence
+- stärkster passender Nachweis kann einen einzelnen Claim stützen
+- schwächster belegter Capability-Claim begrenzt den Gate-Trust
+- fehlende Claims/Evidence bleiben `UNVERIFIED`
+
+Diese Logik ist interne Operationalisierung (`INT-03`), keine externe Normformel.
+
+## Hard Gates
+
+Die Webanwendung zeigt acht nicht kompensierbare Mindestanforderungen:
+
+1. HG-01 Jurisdiktion & Effective Control
+2. HG-02 Datenresidenz & Verarbeitung
+3. HG-03 Schlüsselhoheit
+4. HG-04 Exit & Portabilität
+5. HG-05 Operational Autonomy
+6. HG-06 Identity & Trust Anchors
+7. HG-07 Supply Chain Critical Dependencies
+8. HG-08 Security Minimum
+
+Zustände: `PASS`, `FAIL`, `UNVERIFIED`, `N/A`.
+
+Die technische Gate-Logik und Evidence-Logik bleiben getrennt. Ein technisches Requirement kann trotz starker Evidence `FAIL` sein. Umgekehrt bleibt eine technisch plausibel erfüllte Anforderung ohne ausreichende Evidence `UNVERIFIED`.
+
+## Gate Requirements
+
+Für den MVP werden die vorhandenen R4-Templates über Kritikalität vorbelegt:
+
+- low → Basis
+- medium → Standard
+- high → Elevated
+- critical → Critical
+
+Das ist **keine regulatorische Vorgabe**, sondern eine interne Startkonfiguration. Der Berater kann jedes Gate 0–4 überschreiben. Das System speichert dies als `consultant-override`.
 
 ## LLM Bridge
 
-Die erste Produktversion validiert den Nutzen von KI-Unterstützung, ohne gleichzeitig API-Key-Management, Kosten, Provider-Routing oder zusätzliche Datenübertragungen einzuführen.
-
-Die Anwendung erzeugt ein Prompt Package. Der Berater kopiert es in einen freigegebenen LLM-Chat und fügt das zurückgegebene JSON in den Radar ein. Das Backend validiert `assessment_id`, bekannte Question IDs, bekannte Evidence IDs und die JSON-Struktur. Der Import erzeugt **Vorschläge**, keine automatisch übernommenen Assessment-Antworten.
-
-Ab Guided Workflow enthält der LLM-Prompt nur offene `applicable`- und `needs_review`-Fragen. Die Applicability-Entscheidung selbst wird **nicht** an das LLM delegiert.
+Die Anwendung erzeugt ein Prompt Package für einen freigegebenen LLM-Chat. Das zurückgegebene JSON wird validiert und als Vorschlag gespeichert. Die LLM Bridge entscheidet weder Applicability noch Claims, Gate Requirements oder Risikoakzeptanz.
 
 ## Lokale Persistenz
 
-Laufzeitdaten befinden sich ausschließlich im PostgreSQL-Docker-Volume `sovradar_db_data`, in `.runtime/` und in `.env`. Diese Pfade dürfen nicht committed werden.
+Laufzeitdaten befinden sich im PostgreSQL-Docker-Volume `sovradar_db_data`, in `.runtime/` und in `.env`. Diese Pfade werden nicht committed.
 
 ## Lifecycle
 
@@ -71,7 +102,7 @@ cd Souveraenitaetsradar
 
 Betrieb: `./start.sh`, `./stop.sh`.
 
-Vollständige Datenlöschung: `./uninstall.sh`. Der Uninstaller verlangt explizit `DELETE` und entfernt anschließend Container, lokal gebaute Images, DB-Volume, `.runtime/` und `.env`. Das Git-Repository wird nur nach einer zweiten Bestätigung entfernt.
+Vollständige Datenlöschung: `./uninstall.sh`. Der Uninstaller verlangt explizit `DELETE` und entfernt Container, lokal gebaute Images, DB-Volume, `.runtime/` und `.env`. Das Git-Repository wird nur nach einer zweiten Bestätigung entfernt.
 
 ## Security Boundary MVP-01
 
@@ -85,16 +116,6 @@ Vollständige Datenlöschung: `./uninstall.sh`. Der Uninstaller verlangt explizi
 - Netzwerk-Bind `127.0.0.1` ist Default
 - `0.0.0.0` nur für vertrauenswürdige Testnetze, da Auth später kommt
 
-## Nächste Produktstufe
+## Danach
 
-Nach dem Guided Workflow sind die wichtigsten offenen Schritte:
-
-- Evidence -> Claim -> Hard Gate Integration
-- echte Gate-/Risikoansicht aus der Rule Engine
-- Human-Review-Übernahme einzelner LLM-Vorschläge in Answers
-- Assessment-/Evidence-Export und Backup
-- vollständiger synthetischer Consultant-Durchlauf auf sauberer VM
-- Dokumenttext-Extraktion
-- produktive Authentisierung
-
-Die Excel-Arbeitsmappe bleibt fachliche Referenz. Neue operative Funktionen werden primär im Repository und in der Webanwendung entwickelt.
+Nach Abschluss von NEXT-112 soll zunächst ein vollständiger synthetischer Consultant-Durchlauf auf einer sauberen Installation erfolgen. Erst danach sollten Export/Report, Dokumentextraktion oder weitere Automatisierung ausgebaut werden. Ziel ist zu prüfen, ob ein Berater den Workflow ohne Kenntnis der internen Methoden-/Maschinenebene tatsächlich bedienen kann.
