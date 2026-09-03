@@ -16,6 +16,8 @@ export type Assessment={
 }
 
 export type ApplicabilityStatus='applicable'|'not_applicable'|'needs_review'
+export type WorkflowStage='screening'|'clarification'|'deep_dive'|'completed'|'excluded'
+export type QuestionView='work'|'screening'|'clarification'|'deep_dive'|'completed'|'relevant'|'all'
 
 export type Question={
   id:string
@@ -33,6 +35,22 @@ export type Question={
   applicability_status?:ApplicabilityStatus
   applicability_reason?:string
   applicability_facts?:string[]
+  workflow_stage?:WorkflowStage
+  workflow_reason?:string
+  workflow_order?:number
+}
+
+export type QuestionWorkflowSummary={
+  assessment_id:string
+  total:number
+  relevant:number
+  work_queue:number
+  stages:Record<WorkflowStage,number>
+  applicability:Record<ApplicabilityStatus,number>
+  domains:Record<string,Record<WorkflowStage,number>>
+  next_stage:'screening'|'clarification'|'deep_dive'|'done'
+  stage_order:WorkflowStage[]
+  policy:string
 }
 
 export type RelevanceProfile={
