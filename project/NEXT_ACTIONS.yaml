@@ -1,4 +1,4 @@
-version: 9
+version: 10
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -31,18 +31,30 @@ priorities:
     phase: MVP-VALIDATION
     title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
     owner_role: evidence-analyst
-    status: in_progress
+    status: completed
     github_issue: 18
     branch: feature/next-114-synthetic-walkthrough
     depends_on: [NEXT-110, NEXT-111, NEXT-112]
     outputs: [synthetic walkthrough runner, clean-install lifecycle CI, validation report artifact, documented findings]
+    completion_note: "CI Run 33789278423 vollständig grün: python, frontend, compose-smoke und consultant-walkthrough. Artifact 9906680972. Gate-Test: HG-01 PASS, HG-03 FAIL, HG-04 UNVERIFIED; LLM-Import änderte weder Claims noch Gate States; install/stop/start/test/uninstall erfolgreich. UX-Finding 124/128 aktive Fragen wurde als NEXT-115 / Issue #20 ausgelagert."
+  - id: NEXT-115
+    priority: P0
+    phase: MVP-01C
+    title: Guided Workflow progressiv priorisieren
+    owner_role: methodologist
+    status: ready
+    github_issue: 20
+    depends_on: [NEXT-111, NEXT-114]
+    baseline: "NEXT-114 komplexer KI-Agent: 124/128 im Standardpfad, davon 83 applicable und 41 needs_review."
+    outputs: [deterministic workflow stages, clarification queue, deep-dive activation, gate/domain progress UI, regression tests]
     done_when:
-      - clean installation/start/test workflow is documented and CI-exercised.
-      - one synthetic assessment is completed from scope through Evidence Review and Hard Gates.
-      - LLM Bridge is exercised without automatic decision adoption.
-      - at least one PASS, one FAIL and one UNVERIFIED are intentionally demonstrated.
-      - UX blockers and method gaps become separate issues.
-      - stop/start and destructive uninstall are validated.
+      - unknown applicability remains visible and is never silently hidden.
+      - needs_review has a dedicated visible clarification queue.
+      - the default workflow is staged into immediate screening, clarification and deep-dive work.
+      - deeper questions are activated deterministically from scope, answers, evidence gaps or gate state rather than by LLM judgement.
+      - all 128 questions remain inspectable in an all-questions view.
+      - the NEXT-114 complex AI-agent fixture has a reproducible staged-workflow baseline.
+      - a simple public-content workload remains materially shorter than the complex AI-agent path.
   - id: NEXT-113
     priority: P1
     phase: MVP-01C
