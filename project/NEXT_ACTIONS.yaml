@@ -1,4 +1,4 @@
-version: 8
+version: 9
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -25,17 +25,19 @@ priorities:
     status: completed
     github_issue: 15
     outputs: [typed gate catalog, claim model, evidence-to-gate mapping, deterministic gate evaluation, Evidence Review, Claim CRUD, Gate Requirement Override, API/UI gate cards]
-    completion_note: PR #17 CI green for Core/API tests, frontend build and Docker Compose smoke; merge pending final state commit/review.
+    completion_note: PR #17 wurde nach grüner CI in main gemerged; Merge-SHA 85caf27f091ed728585c1db969eb325695f7e1db.
   - id: NEXT-114
     priority: P0
     phase: MVP-VALIDATION
     title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
     owner_role: evidence-analyst
-    status: ready
+    status: in_progress
     github_issue: 18
+    branch: feature/next-114-synthetic-walkthrough
     depends_on: [NEXT-110, NEXT-111, NEXT-112]
+    outputs: [synthetic walkthrough runner, clean-install lifecycle CI, validation report artifact, documented findings]
     done_when:
-      - clean installation/start/test workflow is documented.
+      - clean installation/start/test workflow is documented and CI-exercised.
       - one synthetic assessment is completed from scope through Evidence Review and Hard Gates.
       - LLM Bridge is exercised without automatic decision adoption.
       - at least one PASS, one FAIL and one UNVERIFIED are intentionally demonstrated.
