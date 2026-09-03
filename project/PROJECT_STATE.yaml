@@ -27,14 +27,14 @@ current_truth:
   - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
   - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
   - NEXT-102 Evidence Intake und NEXT-103 providerneutrales Gate/Evidence-Request-Mapping sind abgeschlossen.
-  - NEXT-112 ist implementiert: Evidence Review, Human-reviewed Claims, Gate Requirements und alle acht Hard Gates sind in API und Consultant-UI integriert.
+  - "NEXT-112 ist implementiert: Evidence Review, Human-reviewed Claims, Gate Requirements und alle acht Hard Gates sind in API und Consultant-UI integriert."
   - NEXT-112 CI war für Core/API-Tests, Frontend Build und Docker Compose Smoke grün; finaler Merge erfolgt nach diesem State-Commit und Self-Review.
   - Evidence wird vor Gate-Nutzung mit Applied State, Trust-Dimensionen und Review Status bewertet.
   - Human-reviewed Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
   - "Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
   - Gate-Requirements werden aus internen Kritikalitäts-Templates vorbelegt und bleiben pro Gate als Consultant-Override editierbar.
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
-  - Der nächste Schritt ist bewusst Validation statt weiterer Feature-Ausbau: ein vollständiger synthetischer Consultant-Durchlauf.
+  - "Der nächste Schritt ist bewusst Validation statt weiterer Feature-Ausbau: ein vollständiger synthetischer Consultant-Durchlauf."
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
 primary_artifacts:
