@@ -6,7 +6,7 @@ Das Projekt verbindet Informationssicherheits-Risikoanalyse, digitale Souveräni
 
 ## MVP-01: Consultant Web Application
 
-Die operative Produktentwicklung läuft ab jetzt als lokal installierbare Webanwendung. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz; für den täglichen Beratungsworkflow ist sie nicht mehr die primäre Oberfläche.
+Die operative Produktentwicklung läuft als lokal installierbare Webanwendung. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz; für den täglichen Beratungsworkflow ist sie nicht mehr die primäre Oberfläche.
 
 Aktueller MVP-Stack:
 
@@ -43,18 +43,30 @@ Default: `http://localhost:8080`
 
 ## Consultant Workflow
 
-`Assessment anlegen -> Scope -> Fragen -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
+`Assessment anlegen -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
 
-Im aktuellen Skeleton können Assessments angelegt, Fragen aus der kanonischen Methodenbank beantwortet, Evidence-Metadaten/Dateien lokal erfasst und LLM-Analysepakete erzeugt werden.
+Ein Assessment startet mit Workload, Kritikalität, Schutzbedarf, Kontrollraum und regulatorischem Kontext. Danach pflegt der Berater ein kompaktes **Relevanzprofil** mit Scope-Fakten wie Datenverarbeitung, Verschlüsselung, KI-Nutzung, Exit-Relevanz, IAM oder Unterauftragnehmern.
+
+Aus Assessment + Relevanzprofil erzeugt der Radar einen deterministischen Fragenpfad aus der kanonischen Question Bank. Applicability hat drei Zustände:
+
+- `applicable`
+- `not_applicable`
+- `needs_review`
+
+Unklare Bedingungen bleiben als `needs_review` sichtbar und werden niemals still ausgeblendet. Die Oberfläche bietet zusätzlich `Alle Fragen`, damit die Filterentscheidung jederzeit geprüft werden kann.
+
+Im aktuellen MVP können Assessments angelegt, Relevanzprofile gepflegt, relevante Fragen beantwortet, Evidence-Metadaten/Dateien lokal erfasst und LLM-Analysepakete erzeugt werden.
 
 Die **LLM Bridge** funktioniert bewusst ohne API:
 
-1. Radar erzeugt einen strukturierten Prompt.
+1. Radar erzeugt einen strukturierten Prompt mit offenen relevanten/zu prüfenden Fragen.
 2. Berater kopiert ihn in einen freigegebenen LLM-Chat seiner Wahl.
 3. LLM liefert strukturiertes JSON zurück.
 4. JSON wird in den Radar eingefügt.
 5. Das Backend validiert Assessment-ID, Question IDs, Evidence IDs und Schema.
 6. Ergebnisse bleiben **Vorschläge** und werden nicht automatisch als Beraterentscheidung übernommen.
+
+Die Applicability-Entscheidung selbst wird nicht an das LLM delegiert.
 
 Details: [`docs/product/MVP_01_CONSULTANT_WEBAPP.md`](docs/product/MVP_01_CONSULTANT_WEBAPP.md)
 
