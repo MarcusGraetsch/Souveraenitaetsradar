@@ -1,4 +1,4 @@
-version: 3
+version: 5
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -6,35 +6,42 @@ priorities:
     phase: MVP-01A
     title: Installierbaren Consultant-Webapp-Skeleton liefern
     owner_role: developer
-    status: in_progress
+    status: completed
     github_issue: 11
     outputs: [React/Vite Web UI, FastAPI Backend, PostgreSQL persistence, local evidence storage, Docker Compose, lifecycle scripts, Copy/Paste LLM Bridge]
     done_when:
       - Clean clone installs with ./install.sh.
       - Assessment CRUD, answers, evidence upload and LLM Bridge work end-to-end.
-      - CI validates Python, frontend build and compose config.
+      - CI validates Python, frontend build and compose smoke test.
       - uninstall removes all generated runtime data after explicit confirmation.
   - id: NEXT-111
     priority: P0
     phase: MVP-01B
     title: Consultant Question Applicability und Guided Workflow implementieren
     owner_role: methodologist
-    status: planned
+    status: completed
+    github_issue: 13
     depends_on: [NEXT-110]
+    outputs: [Relevanzprofil, deterministic applicability engine, guided question API, guided question UI, LLM Bridge filtering]
     done_when:
       - consultant does not have to manually work through all 128 questions.
       - applicability is deterministic and traceable.
+      - unknown applicability stays visible as needs_review.
+      - public website and sensitive AI agent produce different question paths.
+      - all questions remain inspectable in the UI.
   - id: NEXT-112
     priority: P0
     phase: MVP-01B
     title: Evidence -> Claim -> Hard Gate in Webanwendung integrieren
     owner_role: developer
     status: planned
-    depends_on: [NEXT-102, NEXT-103, NEXT-110]
+    github_issue: 15
+    depends_on: [NEXT-102, NEXT-103, NEXT-110, NEXT-111]
     done_when:
       - all eight hard gates are represented.
       - missing evidence remains UNVERIFIED.
       - LLM proposals never bypass human review.
+      - every gate result is traceable to claims, evidence and deterministic rules.
   - id: NEXT-113
     priority: P1
     phase: MVP-01C
@@ -48,7 +55,7 @@ priorities:
     title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
     owner_role: evidence-analyst
     status: planned
-    depends_on: [NEXT-110]
+    depends_on: [NEXT-110, NEXT-111]
     done_when:
       - clean VM installation documented.
       - one synthetic assessment is completed from scope to LLM Bridge and result.

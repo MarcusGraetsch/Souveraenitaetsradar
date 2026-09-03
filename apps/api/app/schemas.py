@@ -28,6 +28,32 @@ class AssessmentOut(AssessmentCreate):
     model_config = {"from_attributes": True}
 
 
+class RelevanceProfile(BaseModel):
+    service_model: Literal["unknown", "saas", "paas", "iaas", "managed-service", "on-prem", "other"] = "unknown"
+    cloud_service: bool | None = None
+    contract_in_scope: bool | None = None
+    data_processing: bool | None = None
+    persistent_data: bool | None = None
+    encryption_used: bool | None = None
+    key_model: Literal["unknown", "customer", "provider", "external", "mixed", "none"] = "unknown"
+    ai_used: bool | None = None
+    agentic_ai: bool | None = None
+    exit_relevant: bool | None = None
+    backup_relevant: bool | None = None
+    multi_provider: bool | None = None
+    subcontractors_used: bool | None = None
+    c5_relevant: bool | None = None
+    c3a_relevant: bool | None = None
+    iam_relevant: bool | None = None
+    logging_relevant: bool | None = None
+    internet_exposed: bool | None = None
+
+
+class RelevanceProfileOut(RelevanceProfile):
+    assessment_id: str
+    updated_at: datetime | None = None
+
+
 class AnswerUpsert(BaseModel):
     question_id: str
     answer_value: str = ""

@@ -19,8 +19,15 @@ RESPONSE_SCHEMA = {
 }
 
 
-def build_prompt(assessment: dict, answers: list[dict], evidence: list[dict]) -> str:
-    questions = load_questions()
+def build_prompt(
+    assessment: dict,
+    answers: list[dict],
+    evidence: list[dict],
+    *,
+    questions: list[dict] | None = None,
+    profile: dict | None = None,
+) -> str:
+    questions = questions if questions is not None else load_questions()
     answered = {item["question_id"] for item in answers if item.get("answer_value")}
     unresolved = [q for q in questions if q["id"] not in answered]
 
@@ -37,7 +44,14 @@ def build_prompt(assessment: dict, answers: list[dict], evidence: list[dict]) ->
         ]))
 
     question_lines = [
-        f"{q['id']} | {q['domain']} | {q['question']} | erwartete Evidenz: {q['expected_evidence']}"
+        " | ".join([
+            q["id"],
+            q["domain"],
+            q["question"],
+            f"Applicability: {q.get('applicability_status', 'unknown')}",
+            f"Grund: {q.get('applicability_reason', '')}",
+            f"erwartete Evidenz: {q['expected_evidence']}",
+        ])
         for q in unresolved
     ]
     current_answers = [
@@ -56,7 +70,8 @@ HARTE REGELN
 3. Fehlende Information ist fehlende Information – nicht PASS und nicht FAIL.
 4. Trenne Beobachtung, Annahme und Ableitung.
 5. Verweise in jedem Vorschlag auf vorhandene Evidence-IDs, sofern Evidence die Aussage stützt.
-6. Gib ausschließlich valides JSON im unten beschriebenen Format zurück. Keine Markdown-Codeblöcke und keine Einleitung.
+6. Fragen mit Applicability `needs_review` sind bewusst sichtbar: behandle sie nicht automatisch als anwendbar oder nicht anwendbar.
+7. Gib ausschließlich valides JSON im unten beschriebenen Format zurück. Keine Markdown-Codeblöcke und keine Einleitung.
 
 ASSESSMENT
 Assessment-ID: {assessment['id']}
@@ -69,14 +84,17 @@ Schutzbedarf C/I/A: {assessment.get('confidentiality', '')} / {assessment.get('i
 Ziel-Kontrollraum: {assessment.get('control_region', '')}
 Regulatorischer Kontext: {assessment.get('regulatory_context', '')}
 
+RELEVANZPROFIL
+{json.dumps(profile or {}, ensure_ascii=False, indent=2)}
+
 BEREITS ERFASSTE ANTWORTEN
 {chr(10).join(current_answers) if current_answers else '[noch keine Antworten]'}
 
 EVIDENCE-METADATEN / FREIGEGEBENE AUSZÜGE
 {chr(10).join(evidence_lines) if evidence_lines else '[noch keine Evidence erfasst]'}
 
-OFFENE FRAGEN
-{chr(10).join(question_lines)}
+OFFENE RELEVANTE / ZU PRÜFENDE FRAGEN
+{chr(10).join(question_lines) if question_lines else '[keine offenen relevanten Fragen]'}
 
 AUFGABE
 - Schlage Antworten nur dort vor, wo die bereitgestellte Evidence dies trägt.

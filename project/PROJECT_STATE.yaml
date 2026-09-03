@@ -5,7 +5,7 @@ project:
   current_phase: MVP-01
   current_phase_name: consultant-web-application
   method_version: "1.0"
-  product_version: "0.1.0-dev"
+  product_version: "0.2.0-dev"
   updated: "2026-09-03"
 
 purpose:
@@ -27,6 +27,10 @@ current_truth:
   - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung.
   - Dokumente liegen im MVP lokal unter .runtime; Object Storage folgt später.
   - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
+  - Der Consultant-Fragenpfad wird deterministisch aus Assessment-Scope und einem separaten Relevanzprofil abgeleitet.
+  - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
+  - Die LLM Bridge erhält nur relevante bzw. zu prüfende offene Fragen, entscheidet aber nicht über Applicability.
+  - NEXT-111 Guided Workflow ist implementiert und in PR-CI inklusive Compose-Smoke-Test validiert.
   - R5 Amazon-Bedrock-Public-Evidence bleibt Provider-Beispiel und methodischer Lernfall, nicht Zielarchitektur.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
@@ -35,6 +39,7 @@ primary_artifacts:
   web_app: apps/web/
   api_app: apps/api/
   compose: docker-compose.yml
+  applicability_engine: src/sovradar/applicability.py
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
   question_bank: data/method/question_bank/
   risk_taxonomy: data/method/risk_taxonomy.csv
@@ -53,6 +58,7 @@ quality_gates:
   customer_cloud_credentials_required: false
   llm_api_required_for_mvp: false
   uninstall_removes_generated_data: true
+  unknown_applicability_may_be_hidden: false
 
 blockers: []
 
@@ -63,15 +69,17 @@ open_method_questions:
     text: Inter-Rater-Konsistenz der Fragen-/Gate-Bewertung ist noch nicht empirisch gemessen.
   - id: OMQ-003
     text: C5:2026 Detailmapping und weitere Framework-Versionen müssen weiter verfeinert werden.
+  - id: OMQ-004
+    text: Die noch nicht deterministisch operationalisierten natürlichen Anwendbarkeitsregeln der Question Bank müssen schrittweise strukturiert werden; bis dahin bleiben sie needs_review.
 
 next_milestone:
-  id: MVP-01A
-  name: installable-consultant-skeleton
-  github_issue: 11
+  id: NEXT-112
+  name: evidence-claim-hard-gate-integration
+  github_issue: 15
   exit_criteria:
-    - Clean clone can be installed with ./install.sh.
-    - Web/API/PostgreSQL start with Docker Compose and pass ./test.sh.
-    - Consultant can create an assessment and answer method questions.
-    - Evidence metadata and local file upload work without external services.
-    - LLM Bridge can export a prompt and validate imported proposal JSON.
-    - ./uninstall.sh removes database volume, .runtime and .env after explicit confirmation.
+    - Alle acht Hard Gates sind in der Webanwendung sichtbar.
+    - Gate-Ergebnisse sind auf Human-reviewed Claims, Evidence und deterministische Regeln zurückführbar.
+    - Fehlende oder unzureichende Evidence bleibt UNVERIFIED.
+    - Technisch unterschrittene Mindestanforderungen können deterministisch FAIL erzeugen.
+    - PASS wird nur bei erfüllter technischer Anforderung und ausreichender Evidence erzeugt.
+    - LLM-Vorschläge haben ohne Human Review keine Gate-Auswirkung.
