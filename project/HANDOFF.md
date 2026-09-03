@@ -4,9 +4,9 @@
 
 Der Souveränitätsradar hat einen cloud-agnostischen Methodenkern und eine lokal installierbare Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI.
 
-NEXT-112 und NEXT-114 sind auf `main`. NEXT-114 hat den vollständigen installierten Consultant-Durchlauf erfolgreich validiert und dabei als wichtigstes UX-Finding gezeigt, dass beim komplexen KI-Agenten **124 von 128 Fragen** im bisherigen Standardpfad lagen: 83 `applicable`, 41 `needs_review`, 4 `not_applicable`.
+NEXT-112 und NEXT-114 sind auf `main`. NEXT-115 / Issue #20 ist jetzt implementiert und durch GitHub Actions Run `33794873133` vollständig grün validiert. PR #21 enthält die progressive Fragenpriorisierung.
 
-**NEXT-115 / Issue #20 ist jetzt implementiert und bereit für PR-/CI-Review.** Die Lösung verändert die Applicability nicht, sondern ergänzt eine separate, deterministische Arbeitspriorisierung.
+Die bisherige Fachbaseline bleibt unverändert: beim komplexen KI-Agenten 128 Fragen gesamt, 124 relevant, 83 `applicable`, 41 `needs_review`, 4 `not_applicable`. Neu ist, dass diese Fragen nicht mehr als eine einzige Arbeitsliste behandelt werden, sondern in getrennte Workflow-Stufen fallen.
 
 ## Consultant-Workflow
 
@@ -15,7 +15,7 @@ Assessment
   -> Scope / Kritikalität / CIA
   -> Relevanzprofil
   -> Progressive Questions
-       -> Screening / jetzt beantworten
+       -> Screening
        -> Klärung nötig
        -> Deep Dive
        -> Erledigt
@@ -27,6 +27,7 @@ Assessment
   -> Gate Requirements prüfen/überschreiben
   -> Hard Gates PASS / FAIL / UNVERIFIED / N/A
   -> Ergebnis
+  -> Export / Consultant Report  [NEXT-113]
 ```
 
 ## NEXT-115 – verbindliche Workflow-Regeln
@@ -57,47 +58,75 @@ Interne MVP-Operationalisierung `INT-03`:
 
 Die Stage ist Arbeitsreihenfolge/UX, keine Risikologik und keine normative Vorgabe. Ein LLM darf weder Applicability noch Stage deterministisch entscheiden.
 
-## Neue Produktbausteine
+## NEXT-115 – validierte Zahlen
 
-Branch: `feature/next-115-progressive-guided-workflow`
-Issue: #20
+CI Run: `33794873133`
+Artifact: `consultant-validation-reports`, ID `9908787146`
+
+### Komplexer KI-Agent
+
+Vor einer Testantwort:
+
+- total: 128
+- relevant: 124
+- applicable: 83
+- needs_review: 41
+- not_applicable: 4
+- screening: 44
+- clarification: 41
+- deep_dive: 39
+- completed: 0
+- excluded: 4
+- aktuelle work_queue: 85
+
+Nach Beantwortung einer Screening-Frage:
+
+- screening: 43
+- completed: 1
+- clarification: 41
+- deep_dive: 39
+- excluded: 4
+
+Die beantwortete Frage `OA-01` wechselte deterministisch nach `completed`; die Audit-Ansicht blieb bei 128 Fragen.
+
+### Öffentliche Inhaltswebsite
+
+- total: 128
+- relevant: 84
+- applicable: 43
+- needs_review: 41
+- not_applicable: 44
+- screening: 43
+- clarification: 41
+- deep_dive: 0
+- completed: 0
+- excluded: 44
+- aktuelle work_queue: 84
+
+Der relevante Gesamtpfad ist damit deutlich kürzer als beim komplexen KI-Agenten (84 vs. 124). Die unmittelbare Arbeitsqueue ist allerdings noch fast gleich groß (84 vs. 85), weil `work` aktuell Screening und Clarification zusammenfasst. Dieses Finding wurde **nicht verdeckt**, sondern als NEXT-116 / Issue #22 dokumentiert.
+
+## NEXT-115 – technische Ergebnisse
 
 Implementiert:
 
 - `WorkflowStage` und `WorkflowStageResult` im Applicability-Core
 - getrennte `evaluate_workflow_stage(...)`-Logik
-- `apply_to_questions(...)` berücksichtigt bereits beantwortete Fragen
-- API-Views für `work`, `screening`, `clarification`, `deep_dive`, `completed`, `relevant`, `all`
+- Questions-API mit `work`, `screening`, `clarification`, `deep_dive`, `completed`, `relevant`, `all`
 - `/api/assessments/{id}/question-workflow` mit Stage-, Applicability- und Domänenzahlen
-- Consultant-UI mit Stage-Navigation statt einer einzigen fast vollständigen Fragenliste
-- sichtbare Klärungsqueue für `needs_review`
-- vollständige Audit-/All-Questions-Ansicht
-- Unit- und API-Regressionstests
-- Real-Method-Bank-Test gegen alle 128 Fragen
-- `tools/validation/progressive_workflow_validation.py` als installierter End-to-End-Test
-- CI erweitert, damit NEXT-114 weiterhin als Regressionstest läuft und NEXT-115 einen eigenen maschinenlesbaren Report erzeugt
+- Consultant-UI mit progressiver Navigation und sichtbarer Klärungsqueue
+- Completed- und vollständige Audit-Ansicht
+- Unit-/API-/Real-Method-Bank-Regressionschecks
+- End-to-End-Runner `tools/validation/progressive_workflow_validation.py`
+- CI führt NEXT-114 weiter als Regressionstest und NEXT-115 zusätzlich aus
 
-## Baseline und Akzeptanz
+Alle Jobs des Validierungslaufs waren grün:
 
-Die NEXT-114-Fachbaseline darf sich nicht verändern:
-
-- Gesamt: 128
-- relevant: 124
-- `applicable`: 83
-- `needs_review`: 41
-- `not_applicable`: 4
-
-NEXT-115 muss zusätzlich zeigen:
-
-- alle 41 `needs_review` liegen sichtbar in `clarification`
-- `screening` ist nicht leer
-- `deep_dive` ist nicht leer
-- unmittelbare Arbeitsqueue ist kleiner als der alte relevante 124er-Pfad
-- eine beantwortete Screening-Frage wechselt in `completed`
-- alle 128 Fragen bleiben in `all` erhalten
-- ein einfacher Public-Content-Workload hat einen deutlich kleineren relevanten und unmittelbaren Arbeitsumfang als der komplexe KI-Agent
-
-Die exakten Stage-Zahlen werden aus dem CI-Artifact des NEXT-115-Validierungslaufs übernommen und danach in PROJECT_STATE/NEXT_ACTIONS dokumentiert.
+- Python/Core/API
+- Frontend Build
+- Docker Compose Smoke
+- NEXT-114 Consultant Walkthrough
+- NEXT-115 Progressive Workflow
+- Stop/Restart/Test/Uninstall
 
 ## Verbindliche Gate-Regeln bleiben unverändert
 
@@ -110,6 +139,19 @@ Die exakten Stage-Zahlen werden aus dem CI-Artifact des NEXT-115-Validierungslau
 - Requirement 0 ergibt `N/A`.
 - Technische Unterschreitung ergibt `FAIL`, auch bei starker Evidence.
 - Gate-Requirement-Defaults bleiben interne Startkonfigurationen und keine Normvorgaben.
+
+## Offenes UX-Finding – NEXT-116 / Issue #22
+
+NEXT-115 löst die fehlende Stufung. Es löst noch nicht vollständig die Größe der unmittelbaren ersten Arbeitsqueue. Der Public-Content-Fall hat zwar deutlich weniger relevante Fragen, aber fast dieselbe `work_queue`, weil 41 `needs_review`-Fragen und viele Basisfragen sofort sichtbar bleiben.
+
+NEXT-116 soll deshalb insbesondere prüfen:
+
+- `work` nur aus einer kleineren Screening-Queue bilden
+- Clarification separat sichtbar halten
+- weitere Basis-/Domänenfragen erst durch Scope, Answers, Evidence Gaps oder Gate State aktivieren
+- einfache und komplexe Workloads bereits in der ersten Consultant-Arbeitsstufe deutlicher unterscheiden
+
+Das ist eine Produkt-/Methodenverbesserung, keine externe Normanforderung.
 
 ## Regeln für andere Agents
 
@@ -124,14 +166,21 @@ Die exakten Stage-Zahlen werden aus dem CI-Artifact des NEXT-115-Validierungslau
 - Workflow Stage niemals als Ersatz für Applicability verwenden.
 - beantwortete oder ausgeschlossene Fragen aus der Audit-Ansicht nicht entfernen.
 - LLM niemals zum deterministischen Applicability-/Stage-Entscheider machen.
-- Alle 128 Fragen müssen über die Audit-/All-Questions-View inspizierbar bleiben.
+- alle 128 Fragen müssen über die Audit-/All-Questions-View inspizierbar bleiben.
 - substantielle Änderungen via Issue/Branch/PR/CI/Agent-Log.
 
-## Nächster Schritt
+## Nächster P0-Schritt – NEXT-113
 
-1. NEXT-115 PR gegen `main` öffnen.
-2. vollständige CI prüfen: Python/Core/API, Frontend, Compose, NEXT-114 Regression und NEXT-115 Progressive Workflow.
-3. NEXT-115 Artifact auswerten und exakte Stage-Zahlen dokumentieren.
-4. echte Findings als separate Issues erfassen; Testkriterien nicht zur Grünfärbung abschwächen.
-5. nach Self-Review und grüner CI squash-mergen und Issue #20 schließen.
-6. danach NEXT-113 (Backup/Export/Consultant Report) als nächsten Produktbaustein starten.
+Nach Merge von PR #21 ist der nächste P0-Produktbaustein **Assessment Backup, Export und Consultant Report**.
+
+Ziel:
+
+1. Assessment vollständig und reproduzierbar sichern/exportieren.
+2. Scope, Relevanzprofil, Antworten, Evidence-Metadaten/Reviews, Claims, Gate Requirements und Gate Results exportieren.
+3. Raw Evidence nicht unbeabsichtigt in Reports einbetten.
+4. Consultant Report strukturiert trennen in Fakten/Evidence, Capability/Gates, Risiken, Unsicherheit und Management-Entscheidungen.
+5. Provenienz sichtbar halten.
+6. Backup/Restore gegen synthetische Daten testen.
+7. Export/Report darf keine Gate States verändern.
+
+NEXT-116 / Issue #22 bleibt als P1-UX-Verbesserung parallel im Backlog.
