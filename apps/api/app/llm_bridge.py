@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import json
 
+from .export_api import router as export_router
+from .gate_api import router as gate_router
 from .method_catalog import load_questions
+
+# `main.py` already mounts the gate router. Keep auxiliary assessment routes on the
+# same mounted router until the API is split into a dedicated app/router registry.
+gate_router.include_router(export_router)
 
 
 RESPONSE_SCHEMA = {
