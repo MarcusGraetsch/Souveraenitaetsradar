@@ -30,6 +30,7 @@ current_truth:
   - Der Consultant-Fragenpfad wird deterministisch aus Assessment-Scope und einem separaten Relevanzprofil abgeleitet.
   - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
   - Die LLM Bridge erhält nur relevante bzw. zu prüfende offene Fragen, entscheidet aber nicht über Applicability.
+  - NEXT-111 Guided Workflow ist implementiert und in PR-CI inklusive Compose-Smoke-Test validiert.
   - R5 Amazon-Bedrock-Public-Evidence bleibt Provider-Beispiel und methodischer Lernfall, nicht Zielarchitektur.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
@@ -72,13 +73,13 @@ open_method_questions:
     text: Die noch nicht deterministisch operationalisierten natürlichen Anwendbarkeitsregeln der Question Bank müssen schrittweise strukturiert werden; bis dahin bleiben sie needs_review.
 
 next_milestone:
-  id: MVP-01B
-  name: guided-questions-and-hard-gates
-  github_issue: 13
+  id: NEXT-112
+  name: evidence-claim-hard-gate-integration
+  github_issue: 15
   exit_criteria:
-    - Relevanzprofil ist im Consultant-UI editierbar.
-    - Relevante und sicher nicht anwendbare Fragen werden deterministisch getrennt.
-    - needs_review bleibt sichtbar und begründet.
-    - Public-Website- und KI-Agent-Szenario erzeugen unterschiedliche Fragenpfade.
-    - LLM Bridge verwendet den Guided-Workflow-Fragenpfad.
-    - Danach wird Evidence -> Claim -> Hard Gate als NEXT-112 integriert.
+    - Alle acht Hard Gates sind in der Webanwendung sichtbar.
+    - Gate-Ergebnisse sind auf Human-reviewed Claims, Evidence und deterministische Regeln zurückführbar.
+    - Fehlende oder unzureichende Evidence bleibt UNVERIFIED.
+    - Technisch unterschrittene Mindestanforderungen können deterministisch FAIL erzeugen.
+    - PASS wird nur bei erfüllter technischer Anforderung und ausreichender Evidence erzeugt.
+    - LLM-Vorschläge haben ohne Human Review keine Gate-Auswirkung.
