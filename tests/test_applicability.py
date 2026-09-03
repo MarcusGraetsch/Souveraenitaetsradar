@@ -1,8 +1,10 @@
 from sovradar.applicability import (
     ApplicabilityStatus,
+    WorkflowStage,
     apply_to_questions,
     default_profile,
     evaluate_applicability,
+    evaluate_workflow_stage,
 )
 
 
@@ -73,10 +75,10 @@ def test_high_confidentiality_rule_is_deterministic():
 
 def test_public_site_and_sensitive_ai_agent_have_different_paths():
     questions = [
-        {"id": "Q1", "applicability": "immer"},
-        {"id": "Q2", "applicability": "wenn generative KI/Agenten"},
-        {"id": "Q3", "applicability": "wenn Vertraulichkeit hoch/sehr hoch"},
-        {"id": "Q4", "applicability": "wenn Exit relevant"},
+        {"id": "Q1", "applicability": "immer", "requiredness": "Basis", "domain": "Scope"},
+        {"id": "Q2", "applicability": "wenn generative KI/Agenten", "requiredness": "Bedingt", "domain": "KI"},
+        {"id": "Q3", "applicability": "wenn Vertraulichkeit hoch/sehr hoch", "requiredness": "Bedingt", "domain": "Daten"},
+        {"id": "Q4", "applicability": "wenn Exit relevant", "requiredness": "Bedingt", "domain": "Exit"},
     ]
     public = assessment(
         workload_type="application",
@@ -109,3 +111,59 @@ def test_public_site_and_sensitive_ai_agent_have_different_paths():
 
     assert public_active == {"Q1"}
     assert ai_active == {"Q1", "Q2", "Q3", "Q4"}
+
+
+def test_needs_review_is_explicit_clarification_not_excluded():
+    question = {"id": "Q1", "domain": "Daten", "requiredness": "Bedingt"}
+    applicability = evaluate_applicability(
+        "wenn Verschlüsselung",
+        assessment(),
+        {"encryption_used": None},
+    )
+    stage = evaluate_workflow_stage(question, applicability)
+    assert stage.stage is WorkflowStage.CLARIFICATION
+
+
+def test_basis_applicable_question_is_screening():
+    question = {"id": "Q1", "domain": "Governance", "requiredness": "Basis"}
+    applicability = evaluate_applicability("immer", assessment(), {})
+    stage = evaluate_workflow_stage(question, applicability)
+    assert stage.stage is WorkflowStage.SCREENING
+
+
+def test_conditional_applicable_question_is_deep_dive():
+    question = {"id": "Q1", "domain": "Exit", "requiredness": "Bedingt"}
+    applicability = evaluate_applicability(
+        "wenn Exit relevant",
+        assessment(),
+        {"exit_relevant": True},
+    )
+    stage = evaluate_workflow_stage(question, applicability)
+    assert stage.stage is WorkflowStage.DEEP_DIVE
+
+
+def test_answered_question_moves_to_completed_without_changing_applicability():
+    questions = [
+        {"id": "Q1", "applicability": "immer", "requiredness": "Basis", "domain": "Scope"},
+    ]
+    result = apply_to_questions(
+        questions,
+        assessment(),
+        {},
+        answered_question_ids={"Q1"},
+    )[0]
+    assert result["applicability_status"] == "applicable"
+    assert result["workflow_stage"] == "completed"
+
+
+def test_not_applicable_question_is_excluded_but_remains_in_result():
+    questions = [
+        {"id": "Q1", "applicability": "wenn generative KI/Agenten", "requiredness": "Bedingt", "domain": "KI"},
+    ]
+    result = apply_to_questions(
+        questions,
+        assessment(workload_type="application"),
+        default_profile(assessment(workload_type="application")),
+    )[0]
+    assert result["applicability_status"] == "not_applicable"
+    assert result["workflow_stage"] == "excluded"
