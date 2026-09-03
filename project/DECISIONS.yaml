@@ -1,4 +1,4 @@
-version: 4
+version: 5
 updated: "2026-09-03"
 decisions:
   - id: DEC-001
@@ -106,4 +106,14 @@ decisions:
     status: accepted
     title: Ein separates Relevanzprofil steuert den Consultant-Fragenpfad
     rationale: Scope-Fakten wie KI-Nutzung, Datenverarbeitung, Verschlüsselung, Exit, IAM oder Unterauftragnehmer sind Kontext für die Fragenwahl und keine Assessment-Antworten. Sie werden getrennt gespeichert und bleiben nachvollziehbar editierbar.
+    source: INT-03
+  - id: DEC-022
+    status: accepted
+    title: Human-bestätigte Claims bilden die Brücke zwischen Evidence und Hard Gates
+    rationale: Roh-Evidence oder LLM-Vorschläge dürfen Gate-Zustände nicht direkt verändern. Erst reviewed/approved Claims mit nachvollziehbaren Evidence-Links werden von der deterministischen Rule Engine ausgewertet.
+    source: INT-03
+  - id: DEC-023
+    status: accepted
+    title: Hard-Gate-Aggregation ist konservativ und evidenzbegrenzt
+    rationale: Pro Gate begrenzt die schwächste bestätigte Capability-Aussage das Applied-Capability-Level; jeder Capability-Claim benötigt reviewed/approved Evidence. Fehlende oder unzureichende Evidence führt zu UNVERIFIED. Diese Aggregation ist interne Operationalisierung und keine externe Normformel.
     source: INT-03
