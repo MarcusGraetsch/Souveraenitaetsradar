@@ -11,6 +11,8 @@ import type {
   GateRequirement,
   LlmImport,
   Question,
+  QuestionView,
+  QuestionWorkflowSummary,
   RelevanceProfile,
   AppliedState,
 } from './types'
@@ -35,8 +37,9 @@ export const api={
     }),
   deleteAssessment:(id:string)=>request<void>(`/api/assessments/${id}`,{method:'DELETE'}),
   questions:()=>request<Question[]>('/api/method/questions'),
-  assessmentQuestions:(id:string,view:'relevant'|'all'='relevant')=>
+  assessmentQuestions:(id:string,view:QuestionView='relevant')=>
     request<Question[]>(`/api/assessments/${id}/questions?view=${view}`),
+  questionWorkflow:(id:string)=>request<QuestionWorkflowSummary>(`/api/assessments/${id}/question-workflow`),
   profile:(id:string)=>request<RelevanceProfile>(`/api/assessments/${id}/profile`),
   saveProfile:(id:string,payload:RelevanceProfile)=>
     request<RelevanceProfile>(`/api/assessments/${id}/profile`,{
