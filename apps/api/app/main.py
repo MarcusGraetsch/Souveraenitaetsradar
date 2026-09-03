@@ -30,7 +30,7 @@ from .schemas import (
 )
 from .settings import settings
 
-app = FastAPI(title="Souveränitäts-Radar API", version="0.3.0")
+app = FastAPI(title="Souveränitäts-Radar API", version="0.4.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -98,6 +98,23 @@ def profile_out(assessment: Assessment, db: Session) -> RelevanceProfileOut:
         assessment_id=assessment.id,
         updated_at=row.updated_at if row else None,
         **values,
+    )
+
+
+def evaluated_questions(assessment: Assessment, db: Session) -> list[dict]:
+    answered_ids = set(
+        db.scalars(
+            select(Answer.question_id).where(
+                Answer.assessment_id == assessment.id,
+                Answer.answer_value != "",
+            )
+        ).all()
+    )
+    return apply_to_questions(
+        load_questions(),
+        as_assessment(assessment).model_dump(),
+        profile_dict(assessment, db),
+        answered_question_ids=answered_ids,
     )
 
 
@@ -193,18 +210,69 @@ def assessment_questions(
     assessment = db.get(Assessment, assessment_id)
     if not assessment:
         raise HTTPException(404, "Assessment not found")
-    if view not in {"relevant", "all"}:
-        raise HTTPException(400, "view must be relevant or all")
-    evaluated = apply_to_questions(
-        load_questions(),
-        as_assessment(assessment).model_dump(),
-        profile_dict(assessment, db),
-    )
+    allowed_views = {
+        "work",
+        "screening",
+        "clarification",
+        "deep_dive",
+        "completed",
+        "relevant",
+        "all",
+    }
+    if view not in allowed_views:
+        raise HTTPException(400, f"view must be one of: {', '.join(sorted(allowed_views))}")
+
+    evaluated = evaluated_questions(assessment, db)
     if view == "relevant":
-        evaluated = [q for q in evaluated if q["applicability_status"] != "not_applicable"]
+        evaluated = [q for q in evaluated if q["workflow_stage"] != "excluded"]
+    elif view == "work":
+        evaluated = [q for q in evaluated if q["workflow_stage"] in {"screening", "clarification"}]
+    elif view != "all":
+        evaluated = [q for q in evaluated if q["workflow_stage"] == view]
+
     if domain:
         evaluated = [q for q in evaluated if q["domain"] == domain]
     return evaluated
+
+
+@app.get("/api/assessments/{assessment_id}/question-workflow")
+def question_workflow(assessment_id: str, db: Session = Depends(get_db)):
+    assessment = db.get(Assessment, assessment_id)
+    if not assessment:
+        raise HTTPException(404, "Assessment not found")
+
+    evaluated = evaluated_questions(assessment, db)
+    stages = {stage: 0 for stage in ["screening", "clarification", "deep_dive", "completed", "excluded"]}
+    applicability = {state: 0 for state in ["applicable", "needs_review", "not_applicable"]}
+    domains: dict[str, dict[str, int]] = {}
+
+    for question in evaluated:
+        stage = question["workflow_stage"]
+        state = question["applicability_status"]
+        stages[stage] += 1
+        applicability[state] += 1
+        domain = question["domain"] or "Ohne Domäne"
+        bucket = domains.setdefault(domain, {name: 0 for name in stages})
+        bucket[stage] += 1
+
+    next_stage = "done"
+    for candidate in ["screening", "clarification", "deep_dive"]:
+        if stages[candidate] > 0:
+            next_stage = candidate
+            break
+
+    return {
+        "assessment_id": assessment_id,
+        "total": len(evaluated),
+        "relevant": len(evaluated) - stages["excluded"],
+        "work_queue": stages["screening"] + stages["clarification"],
+        "stages": stages,
+        "applicability": applicability,
+        "domains": domains,
+        "next_stage": next_stage,
+        "stage_order": ["screening", "clarification", "deep_dive", "completed", "excluded"],
+        "policy": "INT-03 progressive-workflow-v1",
+    }
 
 
 @app.get("/api/assessments/{assessment_id}/answers", response_model=list[AnswerOut])
@@ -319,20 +387,17 @@ def llm_prompt(assessment_id: str, db: Session = Depends(get_db)):
         for row in db.scalars(select(Evidence).where(Evidence.assessment_id == assessment_id)).all()
     ]
     profile = profile_dict(assessment, db)
-    relevant_questions = apply_to_questions(
-        load_questions(),
-        as_assessment(assessment).model_dump(),
-        profile,
-    )
-    relevant_questions = [
-        q for q in relevant_questions if q["applicability_status"] != "not_applicable"
+    open_questions = [
+        q
+        for q in evaluated_questions(assessment, db)
+        if q["workflow_stage"] in {"screening", "clarification", "deep_dive"}
     ]
     return {
         "prompt": build_prompt(
             as_assessment(assessment).model_dump(),
             answers,
             evidence,
-            questions=relevant_questions,
+            questions=open_questions,
             profile=profile,
         )
     }

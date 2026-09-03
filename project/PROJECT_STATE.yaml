@@ -3,9 +3,9 @@ project:
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
   current_phase: MVP-01C
-  current_phase_name: progressive-guided-workflow
+  current_phase_name: assessment-reporting-export
   method_version: "1.0"
-  product_version: "0.3.0-dev"
+  product_version: "0.4.0-dev"
   updated: "2026-09-03"
 
 purpose:
@@ -26,20 +26,25 @@ current_truth:
   - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung mit lokalem Dokument-Speicher.
   - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
   - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
-  - NEXT-102 Evidence Intake und NEXT-103 providerneutrales Gate/Evidence-Request-Mapping sind abgeschlossen.
-  - "NEXT-112 ist implementiert und auf main: Evidence Review, Human-reviewed Claims, Gate Requirements und alle acht Hard Gates sind in API und Consultant-UI integriert."
-  - "NEXT-112 Merge-SHA: 85caf27f091ed728585c1db969eb325695f7e1db."
+  - "NEXT-112 ist auf main: Evidence Review, Human-reviewed Claims, Gate Requirements und alle acht Hard Gates sind in API und Consultant-UI integriert."
   - Evidence wird vor Gate-Nutzung mit Applied State, Trust-Dimensionen und Review Status bewertet.
   - Human-reviewed Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
   - "Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
   - Gate-Requirements werden aus internen Kritikalitäts-Templates vorbelegt und bleiben pro Gate als Consultant-Override editierbar.
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
-  - "NEXT-114 ist erfolgreich validiert: GitHub Actions Run 33789278423 war für python, frontend, compose-smoke und consultant-walkthrough vollständig grün."
-  - "NEXT-114 reproduzierte im laufenden Produkt HG-01 PASS, HG-03 FAIL und HG-04 UNVERIFIED; der LLM-Import änderte weder Claim-Anzahl noch Gate States."
-  - "NEXT-114 validierte Clean Checkout, install.sh, stop.sh, start.sh, test.sh und vollständige Deinstallation; Artifact-ID 9906680972 enthält den maschinenlesbaren Report."
-  - Der synthetische NEXT-114-Fall ist providerneutral; alle technischen/vertraglichen Merkmale sind ausdrücklich Testannahmen und keine Providerfakten.
-  - "Wichtigstes NEXT-114-Finding: beim breit gescopten KI-Agenten lagen 124 von 128 Fragen im Standardpfad, davon 83 applicable und 41 needs_review."
-  - NEXT-115 / Issue #20 ist deshalb der nächste P0-Schritt und soll den Workflow deterministisch in Screening, Klärung und Deep Dive stufen, ohne needs_review zu verstecken.
+  - "NEXT-114 ist auf main und validierte den vollständigen Consultant-Lifecycle inklusive PASS/FAIL/UNVERIFIED und LLM-Negativkontrolle."
+  - "NEXT-114 Baseline: komplexer KI-Agent = 128 total, 124 relevant, 83 applicable, 41 needs_review, 4 not_applicable."
+  - "NEXT-115 ist fachlich und technisch validiert: CI Run 33794873133 vollständig grün; Artifact 9908787146."
+  - Applicability und Workflow-Priorisierung sind getrennte Zustände; Workflow Stage ersetzt keine fachliche Applicability.
+  - "NEXT-115 Stufen: screening, clarification, deep_dive, completed, excluded."
+  - needs_review wird vollständig in einer sichtbaren clarification-Queue geführt und niemals still ausgeblendet.
+  - answered questions wechseln in completed und bleiben in der All-Questions-/Audit-Ansicht sichtbar.
+  - deterministisch not_applicable Fragen liegen in excluded und bleiben vollständig inspizierbar.
+  - "NEXT-115 komplexer KI-Agent: 44 screening, 41 clarification, 39 deep_dive, 0 completed, 4 excluded; nach einer Testantwort 43 screening + 1 completed."
+  - "NEXT-115 Public-Content-Fall: 84 relevant, 43 screening, 41 clarification, 0 deep_dive, 44 excluded."
+  - "Alle NEXT-115 Akzeptanzchecks bestanden: Audit-Vollständigkeit, Baseline-Erhalt, sichtbares needs_review, Staging, Completed-Transition und einfacher-vs-komplexer Pfad."
+  - "Verbleibende UX-Grenze: aktuelle work_queue ist 85 beim komplexen KI-Agenten und 84 beim Public-Content-Fall, weil Screening und Clarification zusammengezählt werden. Das ist als NEXT-116 / Issue #22 dokumentiert und wird nicht verdeckt."
+  - LLM darf weder Applicability noch Workflow Stage deterministisch entscheiden.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
 primary_artifacts:
@@ -53,6 +58,7 @@ primary_artifacts:
   gate_evaluation_engine: src/sovradar/gate_evaluation.py
   evidence_intake: src/sovradar/intake.py
   synthetic_walkthrough: tools/validation/synthetic_consultant_walkthrough.py
+  progressive_workflow_validation: tools/validation/progressive_workflow_validation.py
   validation_runbook: docs/validation/NEXT_114_SYNTHETIC_WALKTHROUGH.md
   validation_result: docs/validation/NEXT_114_RESULT_2026-09-03.md
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
@@ -62,7 +68,6 @@ primary_artifacts:
   hard_gates: data/method/r4_hard_gates.csv
   factor_rules: data/method/r4_factor_rules.csv
   evidence_request_catalog: data/method/evidence_request_catalog.csv
-  evidence_pack_schema: schemas/evidence-pack.schema.json
 
 quality_gates:
   provenance_required: true
@@ -78,6 +83,9 @@ quality_gates:
   gate_requirement_defaults_are_regulatory_requirements: false
   synthetic_provider_assumptions_may_be_presented_as_provider_facts: false
   llm_may_decide_question_applicability: false
+  workflow_stage_may_replace_applicability: false
+  needs_review_may_be_silently_hidden: false
+  all_questions_audit_view_required: true
 
 blockers: []
 
@@ -94,16 +102,20 @@ open_method_questions:
     text: Die interne Aggregation mehrerer Capability-Claims pro Gate muss im späteren Inter-Rater-/Kundenpilot kalibriert werden.
   - id: OMQ-006
     text: Der progressive Fragenworkflow muss priorisieren, ohne komplexe Workloads durch stilles Wegfiltern methodisch zu verengen.
+  - id: OMQ-007
+    text: Die einfache MVP-Regel Basis/Scope→Screening und sonst applicable→Deep Dive muss nach realen Consultant-Durchläufen weiter kalibriert werden.
+  - id: OMQ-008
+    text: Die aktuelle work_queue fasst Screening und Clarification zusammen und differenziert einfache vs. komplexe Workloads noch nicht ausreichend; NEXT-116 / Issue #22 adressiert das.
 
 next_milestone:
-  id: NEXT-115
-  name: progressive-guided-workflow
-  github_issue: 20
-  baseline: "NEXT-114: komplexer KI-Agent 124/128 im Standardpfad; 83 applicable, 41 needs_review."
+  id: NEXT-113
+  name: assessment-backup-export-consultant-report
+  priority: P0
   exit_criteria:
-    - Der Consultant sieht zuerst eine priorisierte Screening-/Arbeitsqueue statt fast aller Fragen gleichzeitig.
-    - needs_review bleibt in einer sichtbaren Klärungsqueue.
-    - Deep-Dive-Fragen werden deterministisch durch Scope, Answers, Evidence Gaps oder Gate State aktiviert.
-    - Alle Fragen bleiben jederzeit inspizierbar.
-    - LLM entscheidet nicht über Applicability oder Workflow-Stufe.
-    - Ein einfacher Workload bleibt deutlich kürzer als der komplexe KI-Agent-Fall.
+    - Ein Assessment kann vollständig und reproduzierbar exportiert/gesichert werden.
+    - Der Export enthält Scope, Relevanzprofil, Antworten, Evidence-Metadaten/Reviews, Claims, Gate Requirements und Gate Results.
+    - Raw Evidence wird nicht unbeabsichtigt in einen Report eingebettet.
+    - Ein Consultant Report trennt Fakten/Evidence, Capability/Gates, Risiken, Unsicherheit und Management-Entscheidungen.
+    - Provenienz und interne vs. externe Anforderungen bleiben sichtbar.
+    - Backup/Restore wird gegen einen synthetischen Assessment-Datensatz getestet.
+    - Report-/Exportfunktionen verändern keine deterministischen Gate States.

@@ -12,11 +12,26 @@ class ApplicabilityStatus(str, Enum):
     NEEDS_REVIEW = "needs_review"
 
 
+class WorkflowStage(str, Enum):
+    SCREENING = "screening"
+    CLARIFICATION = "clarification"
+    DEEP_DIVE = "deep_dive"
+    COMPLETED = "completed"
+    EXCLUDED = "excluded"
+
+
 @dataclass(frozen=True)
 class ApplicabilityResult:
     status: ApplicabilityStatus
     reason: str
     matched_facts: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class WorkflowStageResult:
+    stage: WorkflowStage
+    reason: str
+    order: int
 
 
 def _norm(value: str | None) -> str:
@@ -238,18 +253,89 @@ def evaluate_applicability(
     )
 
 
+def evaluate_workflow_stage(
+    question: dict[str, Any],
+    applicability: ApplicabilityResult,
+    *,
+    answered: bool = False,
+) -> WorkflowStageResult:
+    """Prioritize a question without changing its applicability.
+
+    Internal MVP operationalization (INT-03):
+    - excluded is reserved for deterministically not-applicable questions;
+    - answered questions move to completed but stay inspectable;
+    - needs_review always goes to an explicit clarification queue;
+    - applicable Basis/scope questions are immediate screening work;
+    - other applicable questions are a deterministic deep-dive queue.
+
+    The stage is an ordering/UX concept, never a replacement for the
+    applicability result and never an LLM decision.
+    """
+
+    if applicability.status is ApplicabilityStatus.NOT_APPLICABLE:
+        return WorkflowStageResult(
+            WorkflowStage.EXCLUDED,
+            "Deterministisch nicht anwendbar; bleibt in der Audit-Ansicht sichtbar.",
+            50,
+        )
+    if answered:
+        return WorkflowStageResult(
+            WorkflowStage.COMPLETED,
+            "Für diese Frage liegt bereits eine Assessment-Antwort vor.",
+            40,
+        )
+    if applicability.status is ApplicabilityStatus.NEEDS_REVIEW:
+        return WorkflowStageResult(
+            WorkflowStage.CLARIFICATION,
+            "Anwendbarkeit ist noch nicht eindeutig; Frage bleibt in der sichtbaren Klärungsqueue.",
+            20,
+        )
+
+    requiredness = _norm(str(question.get("requiredness", "")))
+    domain = _norm(str(question.get("domain", "")))
+    if requiredness in {"basis", "mandatory", "pflicht"} or "scope" in domain:
+        return WorkflowStageResult(
+            WorkflowStage.SCREENING,
+            "Anwendbare Basis-/Scope-Frage; im unmittelbaren Screening priorisiert.",
+            10,
+        )
+
+    return WorkflowStageResult(
+        WorkflowStage.DEEP_DIVE,
+        "Anwendbare Vertiefungsfrage; nach Screening/Klärung im Deep Dive bearbeiten.",
+        30,
+    )
+
+
 def apply_to_questions(
     questions: Iterable[dict[str, Any]],
     assessment: dict[str, Any],
     profile: dict[str, Any] | None = None,
+    answered_question_ids: Iterable[str] | None = None,
 ) -> list[dict[str, Any]]:
+    answered = set(answered_question_ids or ())
     result: list[dict[str, Any]] = []
     for question in questions:
         decision = evaluate_applicability(question.get("applicability"), assessment, profile)
+        stage = evaluate_workflow_stage(
+            question,
+            decision,
+            answered=question.get("id") in answered,
+        )
         result.append({
             **question,
             "applicability_status": decision.status.value,
             "applicability_reason": decision.reason,
             "applicability_facts": list(decision.matched_facts),
+            "workflow_stage": stage.stage.value,
+            "workflow_reason": stage.reason,
+            "workflow_order": stage.order,
         })
-    return result
+    return sorted(
+        result,
+        key=lambda item: (
+            int(item.get("workflow_order", 99)),
+            str(item.get("domain", "")),
+            str(item.get("id", "")),
+        ),
+    )

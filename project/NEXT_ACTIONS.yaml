@@ -1,4 +1,4 @@
-version: 10
+version: 12
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -42,26 +42,32 @@ priorities:
     phase: MVP-01C
     title: Guided Workflow progressiv priorisieren
     owner_role: methodologist
-    status: ready
+    status: completed
     github_issue: 20
+    github_pr: 21
+    branch: feature/next-115-progressive-guided-workflow
     depends_on: [NEXT-111, NEXT-114]
-    baseline: "NEXT-114 komplexer KI-Agent: 124/128 im Standardpfad, davon 83 applicable und 41 needs_review."
-    outputs: [deterministic workflow stages, clarification queue, deep-dive activation, gate/domain progress UI, regression tests]
-    done_when:
-      - unknown applicability remains visible and is never silently hidden.
-      - needs_review has a dedicated visible clarification queue.
-      - the default workflow is staged into immediate screening, clarification and deep-dive work.
-      - deeper questions are activated deterministically from scope, answers, evidence gaps or gate state rather than by LLM judgement.
-      - all 128 questions remain inspectable in an all-questions view.
-      - the NEXT-114 complex AI-agent fixture has a reproducible staged-workflow baseline.
-      - a simple public-content workload remains materially shorter than the complex AI-agent path.
-  - id: NEXT-113
+    outputs: [deterministic workflow stages, clarification queue, deep-dive queue, completed/excluded audit states, workflow summary API, staged consultant UI, regression tests, progressive workflow validation runner]
+    completion_note: "PR #21 CI Run 33794873133 vollständig grün. NEXT-114 Baseline blieb 128 total / 124 relevant / 83 applicable / 41 needs_review / 4 not_applicable. Komplexer KI-Agent wurde in 44 screening, 41 clarification, 39 deep_dive, 4 excluded gestuft; nach einer Antwort 43 screening + 1 completed. Public-Content-Fall: 84 relevant, 43 screening, 41 clarification, 0 deep_dive, 44 excluded. Alle Akzeptanzchecks bestanden. Verbleibende UX-Grenze der nahezu gleich großen unmittelbaren Work Queue wurde transparent als NEXT-116 / Issue #22 ausgelagert."
+    validation_run: 33794873133
+    validation_artifact: 9908787146
+  - id: NEXT-116
     priority: P1
+    phase: MVP-UX
+    title: Screening und Klärungsqueue für einfache Workloads weiter reduzieren
+    owner_role: methodologist
+    status: planned
+    github_issue: 22
+    depends_on: [NEXT-115]
+    baseline: "NEXT-115: komplexer KI-Agent work_queue 85 (44 screening + 41 clarification); Public-Content work_queue 84 (43 + 41). Relevant gesamt bereits 124 vs 84."
+    outputs: [smaller immediate screening queue, separate clarification workstream, deterministic gate/domain activation, improved simple-vs-complex differentiation]
+  - id: NEXT-113
+    priority: P0
     phase: MVP-01C
     title: Assessment Backup, Export und Consultant Report implementieren
     owner_role: developer
-    status: planned
-    depends_on: [NEXT-112, NEXT-114]
+    status: ready
+    depends_on: [NEXT-112, NEXT-114, NEXT-115]
   - id: NEXT-101
     priority: P0
     phase: R6A
