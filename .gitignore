@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local evidence / sensitive assessment outputs
+r6_evidence/
+evidence/raw/
+evidence/private/
+*.secret.json
+*.credentials*
+.env
+.env.*
+
+# Office temp files
+~$*.xlsx
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,52 @@
+version: "0.7"
+provenance: INT-01
+warning: >-
+  Alle numerischen Schwellen in dieser Datei sind interne, konfigurierbare
+  Defaultwerte. Sie sind keine regulatorischen Normschwellen.
+
+capability_levels:
+  min: 0
+  max: 4
+
+evidence_required_trust:
+  requirement_0: 0
+  requirement_1: 2
+  requirement_2: 3
+  requirement_3: 4
+  requirement_4: 4
+
+exit_transition_ratio:
+  very_good_max: 0.5
+  good_max: 1.0
+  weak_max: 2.0
+  above: critical
+
+cutover_downtime_ratio:
+  very_good_max: 0.5
+  good_max: 1.0
+  weak_max: 2.0
+  above: critical
+
+autonomy_coverage:
+  very_good_min: 1.0
+  good_min: 0.75
+  weak_min: 0.25
+  below: critical
+
+concentration_share:
+  low_max: 0.25
+  medium_max: 0.50
+  high_max: 0.75
+  above: very_high
+  floor_rule:
+    min_critical_functions_same_group: 2
+    substitutability_max: 1
+    minimum_result: high
+
+ki_portability:
+  components:
+    - data_control
+    - model_portability
+    - agent_tool_policy_portability
+  floor: min
+  index: "25 * average(components)"

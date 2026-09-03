@@ -1,0 +1,60 @@
+project:
+  name: Souveraenitaetsradar
+  repository: MarcusGraetsch/Souveraenitaetsradar
+  status: active
+  current_phase: R6
+  current_phase_name: technical-evidence-pilot
+  method_version: "0.9"
+  updated: "2026-09-03"
+
+purpose:
+  statement: >-
+    Entwicklung einer belastbaren, nachvollziehbaren und später KI-gestützten
+    Methode sowie eines Tools zur Bewertung digitaler Souveränitätsrisiken von
+    Cloud-, Plattform- und KI-Lösungen.
+
+current_truth:
+  - BSI-200-3-basierte Risikoanalyse bleibt Prozess-/Risikokern, wird aber um souveränitätsspezifische Risikotypen ergänzt.
+  - Security Capability, Sovereignty Capability, Workload Sovereignty Risk und Evidence Confidence werden getrennt behandelt.
+  - Nicht kompensierbare Mindestanforderungen werden vor gewichteten Vergleichswerten geprüft.
+  - Provider/Service Capability wird von Applied Capability getrennt.
+  - Applied Capability folgt den Zuständen available -> selected -> configured -> tested -> attested.
+  - Fehlende Evidence führt zu UNVERIFIED/EVIDENCE HOLD und nicht zu einem erfundenen PASS oder FAIL.
+  - R5 wurde mit realer öffentlicher Amazon-Bedrock-Evidence durchgeführt.
+  - R6 Collector/Normalizer ist implementiert, aber noch nicht gegen einen autorisierten AWS-Account gelaufen.
+
+primary_artifacts:
+  workbook_reference: artifacts/method/README.md
+  question_bank: data/method/question_bank/
+  risk_taxonomy: data/method/risk_taxonomy.csv
+  source_register: data/method/source_register.csv
+  hard_gates: data/method/r4_hard_gates.csv
+  factor_rules: data/method/r4_factor_rules.csv
+  evidence_collector: tools/aws-bedrock-evidence/sovradar_aws_evidence_collect.sh
+  evidence_normalizer: tools/aws-bedrock-evidence/r6_normalize_evidence.py
+
+quality_gates:
+  provenance_required: true
+  pr_review_for_substantial_changes: true
+  deterministic_rule_tests_required: true
+  raw_customer_evidence_in_repo: false
+  automatic_risk_acceptance_allowed: false
+
+blockers:
+  - id: B-001
+    text: Autorisierter AWS-Account-Lauf für R6 steht aus.
+  - id: B-002
+    text: HG-04 Exit/Portabilität benötigt einen realen Migrationstest/PoC.
+  - id: B-003
+    text: HG-05 Operational Autonomy benötigt fachliche Autonomieanforderung plus Exercise/Test.
+  - id: B-004
+    text: Aktueller C5-Bericht muss sicher bezogen und versions-/scope-spezifisch geprüft werden.
+
+next_milestone:
+  id: R6b
+  name: first-applied-capability-run
+  exit_criteria:
+    - Realer read-only Evidence-Lauf abgeschlossen.
+    - P0 Evidence Gaps für Modell/Inference, IAM/Agent und KMS bewertet.
+    - Gate Engine liefert erste echte PASS/FAIL/UNVERIFIED-Ergebnisse.
+    - Keine Secrets oder Kundendaten im Repository.

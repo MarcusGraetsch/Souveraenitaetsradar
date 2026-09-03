@@ -1,0 +1,1 @@
+Use `AGENTS.md` as the canonical project instruction file. Before making changes, also read `project/PROJECT_STATE.yaml`, `project/HANDOFF.md`, and `project/NEXT_ACTIONS.yaml`. Follow provenance, evidence, review, and safety rules defined there.

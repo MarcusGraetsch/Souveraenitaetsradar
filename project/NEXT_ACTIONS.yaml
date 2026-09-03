@@ -1,0 +1,105 @@
+version: 1
+updated: "2026-09-03"
+
+priorities:
+  - id: NEXT-001
+    priority: P0
+    phase: R6b
+    title: Autorisierten AWS-Bedrock-Evidence-Lauf durchführen
+    owner_role: cloud-security-engineer
+    status: ready
+    inputs:
+      - AWS CLI v2 Profile mit Read-Rechten
+      - Region
+      - Bedrock Agent ID
+      - Model ID
+      - Inference Profile ID sofern verwendet
+    outputs:
+      - _manifest.jsonl
+      - _errors.jsonl
+      - normalized_evidence.json
+      - technical_findings.json
+    done_when:
+      - Collector-Lauf ist reproduzierbar.
+      - P0 AccessDenied sind dokumentiert oder behoben.
+      - Keine Write-/Invoke-Operation ist erfolgt.
+
+  - id: NEXT-002
+    priority: P0
+    phase: R6b
+    title: Normalisierte Evidence in Gate Engine importieren
+    owner_role: developer
+    status: planned
+    depends_on: [NEXT-001]
+    outputs:
+      - technical evidence objects
+      - applied capability states
+      - gate results
+    done_when:
+      - HG-02, HG-03, HG-06 und HG-08 können aus Evidence vorbewertet werden.
+      - UNVERIFIED bleibt möglich und explizit.
+
+  - id: NEXT-003
+    priority: P0
+    phase: R6b
+    title: R6 Datenmodell als echte Python-Domain-Modelle implementieren
+    owner_role: developer
+    status: started
+    inputs:
+      - schemas/evidence.schema.json
+      - schemas/assessment.schema.json
+      - config/rules/r4-defaults.yaml
+    done_when:
+      - Parser/Validator für Evidence vorhanden.
+      - GateResult und Trust-Berechnung getestet.
+
+  - id: NEXT-004
+    priority: P1
+    phase: R6c
+    title: Exit- und Portability-PoC für Bedrock-Agentenstack definieren
+    owner_role: architect
+    status: planned
+    outputs:
+      - alternative runtime/model target
+      - export/import inventory
+      - cutover and rollback test design
+    done_when:
+      - HG-04 kann aus realem Test bewertet werden.
+
+  - id: NEXT-005
+    priority: P1
+    phase: R6c
+    title: Operational-Autonomy-Requirement mit Business/BCM definieren
+    owner_role: methodologist
+    status: planned
+    done_when:
+      - geforderte Autonomiedauer ist begründet.
+      - degraded/fallback mode ist beschrieben.
+      - Exercise-Plan existiert.
+
+  - id: NEXT-006
+    priority: P1
+    phase: R7
+    title: Aktuellen C5-Bericht und C5:2026-Mapping bearbeiten
+    owner_role: evidence-analyst
+    status: planned
+    notes:
+      - Prüfbericht nicht unzulässig ins Repo kopieren.
+      - Framework-Version und Audit-Periode getrennt speichern.
+
+  - id: NEXT-007
+    priority: P1
+    phase: R7
+    title: Portfolio-/Dependency-Graph für Konzentrationsrisiko entwerfen
+    owner_role: architect
+    status: planned
+    notes:
+      - DataGerry/CMDB- und DORA-RoI-artige Datenmodelle berücksichtigen.
+
+  - id: NEXT-008
+    priority: P2
+    phase: MVP
+    title: CLI/MVP für Assessment Run entwickeln
+    owner_role: developer
+    status: planned
+    depends_on: [NEXT-002, NEXT-003]
