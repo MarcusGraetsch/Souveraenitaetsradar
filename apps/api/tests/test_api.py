@@ -6,7 +6,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(tempfile.mkdtemp(prefix="sovradar-api-test-"))
-METHOD_DIR = ROOT / "method" / "question_bank"
+METHOD_ROOT = ROOT / "method"
+METHOD_DIR = METHOD_ROOT / "question_bank"
 METHOD_DIR.mkdir(parents=True)
 with (METHOD_DIR / "test.csv").open("w", encoding="utf-8", newline="") as handle:
     writer = csv.writer(handle, delimiter=";")
@@ -28,9 +29,36 @@ with (METHOD_DIR / "test.csv").open("w", encoding="utf-8", newline="") as handle
         "G z.S9", "SOV-3", "", "INT-01", "", "Exposure", "internal-method", "", "",
     ])
 
+with (METHOD_ROOT / "r4_hard_gates.csv").open("w", encoding="utf-8", newline="") as handle:
+    writer = csv.writer(handle, delimiter=";")
+    writer.writerow([
+        "Gate-ID", "Gate", "Prüfgegenstand", "Capability 0", "Capability 1",
+        "Capability 2", "Capability 3", "Capability 4", "Basis Req", "Standard Req",
+        "Elevated Req", "Critical Req", "Source IDs", "Provenienz / Herleitung",
+    ])
+    for index in range(1, 9):
+        gate_id = f"HG-{index:02d}"
+        writer.writerow([
+            gate_id, f"Gate {index}", f"Prüfgegenstand {index}", "0", "1", "2", "3", "4",
+            1, 2, 3, 3, "INT-01", "Interne Testdefinition",
+        ])
+
+with (METHOD_ROOT / "evidence_request_catalog.csv").open("w", encoding="utf-8", newline="") as handle:
+    writer = csv.writer(handle, delimiter=";")
+    writer.writerow([
+        "Request-ID", "Gate-ID", "Claim area", "Acceptable evidence examples",
+        "Required for", "Provider-neutral follow-up", "Preferred applied state",
+        "Typical min trust", "Provenance",
+    ])
+    for index in range(1, 9):
+        writer.writerow([
+            f"ER-{index:03d}", f"HG-{index:02d}", f"Claim {index}", "document; test",
+            "all", f"Follow-up {index}?", "tested", "3", "INT-02",
+        ])
+
 os.environ["DATABASE_URL"] = f"sqlite:///{ROOT / 'test.db'}"
 os.environ["SOVRADAR_RUNTIME_DIR"] = str(ROOT / "runtime")
-os.environ["SOVRADAR_METHOD_DIR"] = str(ROOT / "method")
+os.environ["SOVRADAR_METHOD_DIR"] = str(METHOD_ROOT)
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import delete  # noqa: E402
@@ -39,8 +67,11 @@ from apps.api.app.main import app  # noqa: E402
 from apps.api.app.models import (  # noqa: E402
     Answer,
     Assessment,
+    AssessmentClaim,
     AssessmentProfile,
     Evidence,
+    EvidenceReview,
+    GateRequirement,
     LlmImport,
 )
 
@@ -50,7 +81,16 @@ client = TestClient(app)
 
 def reset_db() -> None:
     with SessionLocal() as db:
-        for model in (LlmImport, Answer, Evidence, AssessmentProfile, Assessment):
+        for model in (
+            LlmImport,
+            AssessmentClaim,
+            GateRequirement,
+            EvidenceReview,
+            Answer,
+            Evidence,
+            AssessmentProfile,
+            Assessment,
+        ):
             db.execute(delete(model))
         db.commit()
 
@@ -183,3 +223,140 @@ def test_llm_import_rejects_unknown_ids():
             },
         )
         assert response.status_code == 422
+
+
+def test_hard_gate_api_pass_fail_and_unverified_flow():
+    reset_db()
+    with client:
+        assessment = client.post(
+            "/api/assessments",
+            json={"name": "Gate Pilot", "criticality": "medium"},
+        ).json()
+        assessment_id = assessment["id"]
+
+        catalog = client.get("/api/method/hard-gates")
+        assert catalog.status_code == 200
+        assert len(catalog.json()) == 8
+
+        initial = client.get(f"/api/assessments/{assessment_id}/gates")
+        assert initial.status_code == 200
+        assert len(initial.json()) == 8
+        hg04 = next(item for item in initial.json() if item["gate_id"] == "HG-04")
+        assert hg04["requirement_level"] == 2
+        assert hg04["requirement_source"] == "criticality-template:standard"
+        assert hg04["final_state"] == "UNVERIFIED"
+
+        evidence = client.post(
+            f"/api/assessments/{assessment_id}/evidence",
+            data={"title": "Exit-Test", "evidence_type": "test", "description": "Testnachweis"},
+        ).json()
+        evidence_id = evidence["id"]
+
+        review = client.put(
+            f"/api/assessments/{assessment_id}/evidence/{evidence_id}/review",
+            json={
+                "applied_state": "tested",
+                "base_trust": 4,
+                "scope_fit": 4,
+                "freshness_fit": 4,
+                "review_status": "reviewed",
+            },
+        )
+        assert review.status_code == 200
+        assert review.json()["effective_trust"] == 4
+
+        claim = client.post(
+            f"/api/assessments/{assessment_id}/claims",
+            json={
+                "gate_id": "HG-04",
+                "statement": "Exit wurde end-to-end getestet.",
+                "review_status": "reviewed",
+                "capability_level": 2,
+                "evidence_ids": [evidence_id],
+                "question_ids": ["DK-03"],
+            },
+        )
+        assert claim.status_code == 201
+
+        passed = client.get(f"/api/assessments/{assessment_id}/gates").json()
+        hg04 = next(item for item in passed if item["gate_id"] == "HG-04")
+        assert hg04["technical_state"] == "PASS"
+        assert hg04["evidence_state"] == "VERIFIED"
+        assert hg04["final_state"] == "PASS"
+        assert evidence_id in hg04["evidence_ids"]
+
+        override = client.put(
+            f"/api/assessments/{assessment_id}/gate-requirements/HG-04",
+            json={"requirement_level": 3},
+        )
+        assert override.status_code == 200
+        assert override.json()["source"] == "consultant-override"
+
+        failed = client.get(f"/api/assessments/{assessment_id}/gates").json()
+        hg04 = next(item for item in failed if item["gate_id"] == "HG-04")
+        assert hg04["technical_state"] == "FAIL"
+        assert hg04["final_state"] == "FAIL"
+
+
+def test_unreviewed_claim_and_evidence_cannot_change_gate():
+    reset_db()
+    with client:
+        assessment = client.post("/api/assessments", json={"name": "Review Boundary"}).json()
+        assessment_id = assessment["id"]
+        evidence = client.post(
+            f"/api/assessments/{assessment_id}/evidence",
+            data={"title": "Draft Evidence", "evidence_type": "document"},
+        ).json()
+
+        client.put(
+            f"/api/assessments/{assessment_id}/evidence/{evidence['id']}/review",
+            json={
+                "applied_state": "documented",
+                "base_trust": 5,
+                "scope_fit": 5,
+                "freshness_fit": 5,
+                "review_status": "raw",
+            },
+        )
+        draft_claim = client.post(
+            f"/api/assessments/{assessment_id}/claims",
+            json={
+                "gate_id": "HG-03",
+                "statement": "Nur ein Vorschlag, noch nicht bestätigt.",
+                "review_status": "draft",
+                "capability_level": 4,
+                "evidence_ids": [evidence["id"]],
+            },
+        )
+        assert draft_claim.status_code == 201
+        gate = next(
+            item for item in client.get(f"/api/assessments/{assessment_id}/gates").json()
+            if item["gate_id"] == "HG-03"
+        )
+        assert gate["capability_level"] is None
+        assert gate["final_state"] == "UNVERIFIED"
+
+
+def test_claim_rejects_unknown_evidence_and_question_ids():
+    reset_db()
+    with client:
+        assessment = client.post("/api/assessments", json={"name": "Invalid Links"}).json()
+        bad_evidence = client.post(
+            f"/api/assessments/{assessment['id']}/claims",
+            json={
+                "gate_id": "HG-01",
+                "statement": "x",
+                "evidence_ids": ["does-not-exist"],
+            },
+        )
+        assert bad_evidence.status_code == 422
+
+        bad_question = client.post(
+            f"/api/assessments/{assessment['id']}/claims",
+            json={
+                "gate_id": "HG-01",
+                "statement": "x",
+                "question_ids": ["NOT-A-QUESTION"],
+            },
+        )
+        assert bad_question.status_code == 422
