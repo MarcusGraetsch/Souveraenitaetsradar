@@ -4,7 +4,9 @@
 
 Der Souveränitätsradar hat einen cloud-agnostischen Methodenkern und eine lokal installierbare Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI.
 
-MVP-01A, Guided Workflow, Evidence Intake und das providerneutrale Hard-Gate-Mapping sind auf `main`. NEXT-112 ist implementiert und nach grüner CI bereit zum Merge: Evidence Review → Human-reviewed Claim → deterministische Hard-Gate-Bewertung ist jetzt durchgängig in Backend und UI vorhanden.
+MVP-01A, Guided Workflow, Evidence Intake, providerneutrales Hard-Gate-Mapping und NEXT-112 sind auf `main`. PR #17 wurde nach grüner CI als Squash-Merge `85caf27f091ed728585c1db969eb325695f7e1db` integriert.
+
+Aktueller Fokus ist **NEXT-114 / Issue #18: vollständiger synthetischer Consultant-Durchlauf**. Vor weiteren Produktfeatures wird der gesamte Workflow inklusive Installation, Evidence Review, Claims, Hard Gates, LLM-Negativkontrolle sowie Stop/Start/Uninstall reproduzierbar validiert.
 
 ## Consultant-Workflow
 
@@ -22,7 +24,7 @@ Assessment
   -> Ergebnis
 ```
 
-## NEXT-112 – verbindliche Regeln
+## Verbindliche Gate-Regeln
 
 - Roh-Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
 - Nur `reviewed`/`approved` Claims wirken.
@@ -54,7 +56,7 @@ Fachliche Source-of-Truth: `data/method/r4_hard_gates.csv` und `data/method/evid
 
 ## Produktstatus
 
-Implementiert:
+Implementiert auf `main`:
 
 - React/Vite Consultant UI
 - FastAPI + PostgreSQL
@@ -69,7 +71,43 @@ Implementiert:
 - acht Hard-Gate-Karten mit Reasons und Evidence Requests
 - Ergebnisübersicht
 
-PR #17 enthält die NEXT-112-Produktintegration. Eine vollständige CI auf dem Feature-Stand war grün für Core/API Tests, Frontend Build und Docker Compose Smoke. Nach finalem State-Commit CI nochmals prüfen und dann squash-mergen.
+## NEXT-114 – laufende Validierung
+
+Branch: `feature/next-114-synthetic-walkthrough`
+Issue: #18
+
+Neue Validierungsartefakte:
+
+- `tools/validation/synthetic_consultant_walkthrough.py`
+- `docs/validation/NEXT_114_SYNTHETIC_WALKTHROUGH.md`
+- `project/agent-log/2026-09-03_next-114-synthetic-walkthrough.md`
+- CI-Job `consultant-walkthrough`
+
+Der synthetische Fall ist ein providerneutraler KI-Agent mit sensiblen Fachdaten. **Alle Merkmale sind Testannahmen, keine Providerfakten.** Die Gate Requirements werden im Test bewusst überschrieben, damit die deterministische Regelkette isoliert geprüft werden kann:
+
+- HG-01 → PASS
+- HG-03 → FAIL
+- HG-04 → UNVERIFIED
+- übrige Gates → N/A im isolierten Test
+
+Zusätzlich wird ein draft Capability-4-Claim für HG-03 als Negativkontrolle erzeugt. Er darf den reviewed Capability-1-Claim nicht überstimmen.
+
+Die LLM Bridge wird ebenfalls als Negativkontrolle getestet: nach Import eines synthetischen Vorschlags müssen Claim-Anzahl und Gate-Ergebnisse unverändert sein.
+
+CI validiert:
+
+```text
+Clean Checkout
+  -> install.sh
+  -> synthetischer Consultant-Durchlauf
+  -> JSON Report
+  -> stop.sh
+  -> start.sh
+  -> test.sh
+  -> uninstall.sh mit DELETE
+  -> Prüfung .runtime/.env/Container-Reste
+  -> Report als Actions Artifact
+```
 
 ## Regeln für andere Agenten
 
@@ -80,26 +118,13 @@ PR #17 enthält die NEXT-112-Produktintegration. Eine vollständige CI auf dem F
 - Raw Kundenevidence nie committen.
 - LLM-Proposals niemals automatisch als reviewed Claim/Answer übernehmen.
 - Fehlende Evidence niemals automatisch als FAIL interpretieren.
-- Requirement-Defaults niemals als regulatorische Vorgabe darstellen.
+- Requirement-Defaults und synthetische Overrides niemals als regulatorische Vorgabe darstellen.
+- Synthetische Providermerkmale niemals zu realen Providerfakten umdeuten.
 - Unklare Applicability nie still ausblenden.
 - `./uninstall.sh` muss alle erzeugten Runtime-Daten löschen können.
 - substantielle Änderungen via Issue/Branch/PR/CI/Agent-Log.
+- NEXT-114 nicht durch Abschwächen der Expected States grün rechnen. Echte Findings als separate Issues dokumentieren.
 
-## Nächster Schritt – NEXT-114 / Issue #18
+## Nächster Schritt nach NEXT-114
 
-**Kein weiterer Feature-Ausbau zuerst.** Einen vollständigen synthetischen Consultant-Durchlauf auf sauberer Installation durchführen:
-
-1. Clone / Install / Test
-2. synthetisches Assessment + Relevanzprofil
-3. Guided Questions
-4. synthetische Customer-mediated Evidence
-5. Evidence Review
-6. optional LLM Bridge
-7. Human-reviewed Claims
-8. Gate Requirements prüfen
-9. alle acht Hard Gates bewerten
-10. gezielt mindestens PASS, FAIL und UNVERIFIED zeigen
-11. UX-/Methodikprobleme als Issues erfassen
-12. Stop/Start und destruktive Deinstallation testen
-
-Erst danach NEXT-113 (Backup/Export/Consultant Report) priorisieren.
+Wenn der vollständige Walkthrough grün ist und keine Blocker offen bleiben, NEXT-114 schließen und mergen. Danach voraussichtlich NEXT-113 (Backup/Export/Consultant Report) priorisieren. Ein realer Provider-/Kundenpilot folgt erst auf einer validierten operativen Basis.
