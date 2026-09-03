@@ -1,4 +1,19 @@
-import type { Answer, Assessment, Evidence, LlmImport, Question, RelevanceProfile } from './types'
+import type {
+  Answer,
+  Assessment,
+  Claim,
+  ClaimReviewStatus,
+  Evidence,
+  EvidenceReview,
+  EvidenceReviewStatus,
+  GateDefinition,
+  GateEvaluation,
+  GateRequirement,
+  LlmImport,
+  Question,
+  RelevanceProfile,
+  AppliedState,
+} from './types'
 
 async function request<T>(path:string,init?:RequestInit):Promise<T>{
   const response=await fetch(path,init)
@@ -39,6 +54,56 @@ export const api={
   evidence:(id:string)=>request<Evidence[]>(`/api/assessments/${id}/evidence`),
   addEvidence:(id:string,form:FormData)=>
     request<Evidence>(`/api/assessments/${id}/evidence`,{method:'POST',body:form}),
+  evidenceReviews:(id:string)=>request<EvidenceReview[]>(`/api/assessments/${id}/evidence-reviews`),
+  saveEvidenceReview:(assessmentId:string,evidenceId:string,payload:{
+    applied_state:AppliedState
+    base_trust:number
+    scope_fit:number
+    freshness_fit:number
+    review_status:EvidenceReviewStatus
+  })=>request<EvidenceReview>(`/api/assessments/${assessmentId}/evidence/${evidenceId}/review`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+  }),
+  hardGates:()=>request<GateDefinition[]>('/api/method/hard-gates'),
+  gateRequirements:(id:string)=>request<GateRequirement[]>(`/api/assessments/${id}/gate-requirements`),
+  saveGateRequirement:(assessmentId:string,gateId:string,requirementLevel:number)=>
+    request<GateRequirement>(`/api/assessments/${assessmentId}/gate-requirements/${gateId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({requirement_level:requirementLevel}),
+    }),
+  claims:(id:string)=>request<Claim[]>(`/api/assessments/${id}/claims`),
+  createClaim:(assessmentId:string,payload:{
+    gate_id:string
+    statement:string
+    review_status:ClaimReviewStatus
+    capability_level:number|null
+    evidence_ids:string[]
+    question_ids:string[]
+    notes:string
+  })=>request<Claim>(`/api/assessments/${assessmentId}/claims`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+  }),
+  updateClaim:(assessmentId:string,claimId:string,payload:{
+    gate_id:string
+    statement:string
+    review_status:ClaimReviewStatus
+    capability_level:number|null
+    evidence_ids:string[]
+    question_ids:string[]
+    notes:string
+  })=>request<Claim>(`/api/assessments/${assessmentId}/claims/${claimId}`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+  }),
+  deleteClaim:(assessmentId:string,claimId:string)=>
+    request<void>(`/api/assessments/${assessmentId}/claims/${claimId}`,{method:'DELETE'}),
+  gates:(id:string)=>request<GateEvaluation[]>(`/api/assessments/${id}/gates`),
   prompt:(id:string)=>request<{prompt:string}>(`/api/assessments/${id}/llm-bridge/prompt`),
   importLlm:(id:string,raw:string)=>
     request<LlmImport>(`/api/assessments/${id}/llm-bridge/import`,{
