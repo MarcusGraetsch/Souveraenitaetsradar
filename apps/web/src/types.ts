@@ -82,6 +82,84 @@ export type Evidence={
   created_at:string
 }
 
+export type AppliedState='asserted'|'available'|'documented'|'observed'|'configured'|'tested'|'attested'
+export type EvidenceReviewStatus='raw'|'normalized'|'reviewed'|'approved'|'rejected'
+
+export type EvidenceReview={
+  evidence_id:string
+  assessment_id:string
+  applied_state:AppliedState
+  base_trust:number
+  scope_fit:number
+  freshness_fit:number
+  review_status:EvidenceReviewStatus
+  effective_trust:number
+  updated_at:string
+}
+
+export type ClaimReviewStatus='draft'|'reviewed'|'approved'|'rejected'
+export type Claim={
+  id:string
+  assessment_id:string
+  gate_id:string
+  statement:string
+  review_status:ClaimReviewStatus
+  capability_level:number|null
+  evidence_ids:string[]
+  question_ids:string[]
+  notes:string
+  created_at:string
+  updated_at:string
+}
+
+export type GateRequirement={
+  assessment_id:string
+  gate_id:string
+  requirement_level:number
+  source:string
+  updated_at:string|null
+}
+
+export type EvidenceRequest={
+  request_id:string
+  gate_id:string
+  claim_area:string
+  acceptable_evidence:string
+  required_for:string
+  follow_up:string
+  preferred_applied_state:string
+  typical_min_trust:string
+  provenance:string
+}
+
+export type GateDefinition={
+  gate_id:string
+  name:string
+  subject:string
+  requirement_templates:Record<string,number>
+  source_ids:string[]
+  provenance:string
+  evidence_requests:EvidenceRequest[]
+}
+
+export type GateFinalState='PASS'|'FAIL'|'UNVERIFIED'|'N/A'
+export type GateEvaluation={
+  gate_id:string
+  name:string
+  subject:string
+  requirement_level:number
+  requirement_source:string
+  capability_level:number|null
+  effective_trust:number|null
+  technical_state:GateFinalState
+  evidence_state:'VERIFIED'|'UNVERIFIED'|'N/A'
+  final_state:GateFinalState
+  claim_ids:string[]
+  evidence_ids:string[]
+  reasons:string[]
+  evidence_requests:EvidenceRequest[]
+}
+
 export type LlmProposal={
   question_id:string
   proposed_answer:string

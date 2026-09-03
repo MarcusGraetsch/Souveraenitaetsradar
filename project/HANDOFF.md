@@ -2,126 +2,104 @@
 
 ## Kurzfassung
 
-Der Souveränitätsradar hat zwei klar getrennte Ebenen: **Methodenkern** (cloud-agnostische Assessment-Methode) und **Produkt** (lokal installierbare Consultant-Webanwendung). Die Excel-Arbeitsmappe v1.0 bleibt Methoden-/Entwicklungsreferenz, ist aber nicht mehr die primäre Benutzeroberfläche.
+Der Souveränitätsradar hat einen cloud-agnostischen Methodenkern und eine lokal installierbare Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI.
 
-MVP-01A ist auf `main` implementiert und per CI inklusive Docker-Compose-Smoke-Test validiert. Der aktuelle Development-Fokus ist **NEXT-111 / Guided Workflow**.
+MVP-01A, Guided Workflow, Evidence Intake und das providerneutrale Hard-Gate-Mapping sind auf `main`. NEXT-112 ist implementiert und nach grüner CI bereit zum Merge: Evidence Review → Human-reviewed Claim → deterministische Hard-Gate-Bewertung ist jetzt durchgängig in Backend und UI vorhanden.
 
-## Aktuelle Produktarchitektur
-
-MVP-01 verwendet:
-
-- React + TypeScript + Vite
-- FastAPI
-- PostgreSQL
-- lokalen Dokument-Speicher `.runtime/`
-- Docker Compose
-- Copy/Paste **LLM Bridge** ohne API-Keys
-
-Nicht im MVP: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
-
-Consultant-Workflow:
+## Consultant-Workflow
 
 ```text
 Assessment
   -> Scope / Kritikalität / CIA
   -> Relevanzprofil
   -> Guided Questions
-  -> Evidence
-  -> LLM Bridge
-  -> Human Review
-  -> Rule Engine / Hard Gates / Risks
-  -> Management Ergebnis
+  -> Evidence erfassen
+  -> Evidence Review / Trust
+  -> optional LLM Bridge
+  -> Human-reviewed Claims
+  -> Gate Requirements prüfen/überschreiben
+  -> Hard Gates PASS / FAIL / UNVERIFIED / N/A
+  -> Ergebnis
 ```
 
-## Guided Workflow / NEXT-111
+## NEXT-112 – verbindliche Regeln
 
-Die 128 Methodenfragen sind **kein statischer Fragebogen**. Der Radar erzeugt einen Fragenpfad aus Assessment-Scope und einem separaten Relevanzprofil.
+- Roh-Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
+- Nur `reviewed`/`approved` Claims wirken.
+- Capability-Claims nutzen das interne Radar-Level 0–4.
+- Jeder Capability-Claim benötigt reviewed/approved Evidence für eine verifizierte Aussage.
+- Mehrere Claims werden konservativ aggregiert: schwächste bestätigte Capability begrenzt das Gate.
+- Pro Claim kann der stärkste passende Nachweis tragen; Gate-Trust wird durch den schwächsten belegten Capability-Claim begrenzt.
+- Fehlende/unzureichende Evidence bleibt `UNVERIFIED`.
+- Requirement 0 ergibt `N/A`.
+- Technische Unterschreitung ergibt `FAIL`, auch bei starker Evidence.
+- Die Aggregation ist interne Operationalisierung `INT-03`, keine externe Normformel.
 
-Das Relevanzprofil enthält generische Scope-Fakten, zum Beispiel:
+## Gate Requirements
 
-- Service-Modell / Cloud-Bezug
-- Datenverarbeitung und Persistenz
-- Verschlüsselung und Schlüsselmodell
-- KI / agentische KI
-- Exit-/Portabilitätsrelevanz
-- Backup/Restore
-- Multi-Provider / Unterauftragnehmer
-- IAM und Logging/Monitoring
-- C5/C3A-Relevanz
+MVP-Default nach Kritikalität:
 
-Applicability wird deterministisch im Core ausgewertet:
+- low → Basis
+- medium → Standard
+- high → Elevated
+- critical → Critical
 
-- `applicable`
-- `not_applicable`
-- `needs_review`
+Das ist eine interne Startkonfiguration. Jeder Gate-Wert ist 0–4 editierbar und wird als `consultant-override` gespeichert. Niemals als gesetzliche oder normative Vorgabe darstellen.
 
-**Wichtig:** Fehlender Kontext oder eine noch nicht operationalisierte natürliche Anwendbarkeitsregel führt zu `needs_review`. Die Frage bleibt sichtbar. Die Anwendung darf eine Frage nur aus dem Standardpfad entfernen, wenn sie sicher `not_applicable` ist.
+## Acht Hard Gates
 
-Die UI bietet deshalb `Relevante Fragen` und `Alle Fragen`. Jede Frage zeigt den Applicability-Zustand und die Begründung.
+HG-01 Jurisdiktion & Effective Control; HG-02 Datenresidenz & Verarbeitung; HG-03 Schlüsselhoheit; HG-04 Exit & Portabilität; HG-05 Operational Autonomy; HG-06 Identity & Trust Anchors; HG-07 Supply Chain Critical Dependencies; HG-08 Security Minimum.
 
-Die LLM Bridge erhält nur offene `applicable`- und `needs_review`-Fragen. Das LLM entscheidet nicht über Applicability.
+Fachliche Source-of-Truth: `data/method/r4_hard_gates.csv` und `data/method/evidence_request_catalog.csv`.
 
-## Fachlicher Kern
+## Produktstatus
 
-Bewertet wird ein Workload in einer konkreten Provider-/Service-/Architektur-/Vertragskonstellation, nicht ein Provider pauschal.
+Implementiert:
 
-Getrennte Bewertungsachsen:
+- React/Vite Consultant UI
+- FastAPI + PostgreSQL
+- lokaler Dokument-Speicher
+- Install/Start/Stop/Test/Uninstall-Lifecycle
+- Relevanzprofil + Guided Questions
+- lokale Evidence-Erfassung
+- Copy/Paste LLM Bridge
+- Evidence Review mit Applied State und Trust-Dimensionen
+- Claim CRUD mit Evidence-/Question-Links und Human Review
+- Gate Requirement Defaults + Consultant Override
+- acht Hard-Gate-Karten mit Reasons und Evidence Requests
+- Ergebnisübersicht
 
-- Provider / Service Capability
-- Applied Capability
-- Workload Sovereignty Risk
-- klassisches Informationssicherheits-/Betriebsrisiko
-- Evidence Confidence
+PR #17 enthält die NEXT-112-Produktintegration. Eine vollständige CI auf dem Feature-Stand war grün für Core/API Tests, Frontend Build und Docker Compose Smoke. Nach finalem State-Commit CI nochmals prüfen und dann squash-mergen.
 
-Hard Gates:
-
-1. Jurisdiktion & Effective Control
-2. Datenresidenz & Verarbeitung
-3. Schlüsselhoheit
-4. Exit & Portabilität
-5. Operational Autonomy
-6. Identity & Trust Anchors
-7. Supply Chain Critical Dependencies
-8. Security Minimum
-
-Fehlende Evidence bleibt `UNVERIFIED`; LLM-Vorschläge sind keine Entscheidungen.
-
-## Verworfene / verschobene Ansätze
-
-- Ein durch uns betriebener Cloud-Account-Collector ist nicht Zielarchitektur.
-- Kunden-Root-/Owner-/Cloud-Credentials sind keine Voraussetzung.
-- LLM-API-Integration ist für MVP-01 bewusst verschoben.
-- Excel ist nicht mehr die operative Consultant-UI.
-- Provider-spezifische Risikoregeln gehören nicht in den Core.
-
-## Development-Status
-
-- `NEXT-110` / Issue #11: MVP-01A Webapp-Skeleton – abgeschlossen auf `main`.
-- `NEXT-111` / Issue #13: Guided Workflow und Question Applicability – aktueller Change.
-- `NEXT-112`: Evidence -> Claim -> Hard Gate – nächster P0-Produkt-/Methodenschritt.
-- `NEXT-113`: Backup/Export/Consultant Report.
-- `NEXT-114`: vollständiger synthetischer Consultant-Durchlauf auf sauberer VM.
-
-Die Methodentasks `NEXT-101` bis `NEXT-108` bleiben relevant. `NEXT-109` (CLI als primäre MVP-Oberfläche) ist zurückgestellt; CLI kann später als Test-/Automationsinterface bestehen.
-
-## Regeln für den nächsten Agenten
+## Regeln für andere Agenten
 
 - `AGENTS.md` zuerst lesen.
-- Keine Cloud-Credentials anfordern.
-- Keine LLM API im MVP-01 ohne neue Decision einführen.
-- Keine Provider-spezifische Logik in den Rule-Core einbauen.
+- Keine Kunden-Cloud-Credentials anfordern.
+- Keine LLM API im MVP ohne neue Decision.
+- Keine Provider-spezifische Logik in Gate-/Rule-Core.
 - Raw Kundenevidence nie committen.
-- Keine LLM-Proposals automatisch als Answers übernehmen.
+- LLM-Proposals niemals automatisch als reviewed Claim/Answer übernehmen.
+- Fehlende Evidence niemals automatisch als FAIL interpretieren.
+- Requirement-Defaults niemals als regulatorische Vorgabe darstellen.
 - Unklare Applicability nie still ausblenden.
 - `./uninstall.sh` muss alle erzeugten Runtime-Daten löschen können.
-- substantielle Änderungen über Issue/Branch/PR/CI/Agent-Log führen.
+- substantielle Änderungen via Issue/Branch/PR/CI/Agent-Log.
 
-## Nächster Handoff nach NEXT-111
+## Nächster Schritt – NEXT-114 / Issue #18
 
-Nach grünem Merge von NEXT-111:
+**Kein weiterer Feature-Ausbau zuerst.** Einen vollständigen synthetischen Consultant-Durchlauf auf sauberer Installation durchführen:
 
-1. `NEXT-112` starten.
-2. Evidence-Objekte und Human-reviewed Claims mit den acht Hard Gates verbinden.
-3. `UNVERIFIED` bei fehlender Evidence beibehalten.
-4. Service Capability und Applied Capability nicht vermischen.
-5. Danach den ersten vollständigen synthetischen Beraterdurchlauf durchführen.
+1. Clone / Install / Test
+2. synthetisches Assessment + Relevanzprofil
+3. Guided Questions
+4. synthetische Customer-mediated Evidence
+5. Evidence Review
+6. optional LLM Bridge
+7. Human-reviewed Claims
+8. Gate Requirements prüfen
+9. alle acht Hard Gates bewerten
+10. gezielt mindestens PASS, FAIL und UNVERIFIED zeigen
+11. UX-/Methodikprobleme als Issues erfassen
+12. Stop/Start und destruktive Deinstallation testen
+
+Erst danach NEXT-113 (Backup/Export/Consultant Report) priorisieren.

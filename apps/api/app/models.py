@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -36,6 +36,9 @@ class Assessment(Base):
     answers: Mapped[list[Answer]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     evidence: Mapped[list[Evidence]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     llm_imports: Mapped[list[LlmImport]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
+    claims: Mapped[list[AssessmentClaim]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
+    gate_requirements: Mapped[list[GateRequirement]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
+    evidence_reviews: Mapped[list[EvidenceReview]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
 
 
 class AssessmentProfile(Base):
@@ -83,6 +86,51 @@ class Evidence(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     assessment: Mapped[Assessment] = relationship(back_populates="evidence")
+
+
+class EvidenceReview(Base):
+    __tablename__ = "evidence_reviews"
+
+    evidence_id: Mapped[str] = mapped_column(ForeignKey("evidence.id", ondelete="CASCADE"), primary_key=True)
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), index=True)
+    applied_state: Mapped[str] = mapped_column(String(32), default="asserted")
+    base_trust: Mapped[int] = mapped_column(Integer, default=0)
+    scope_fit: Mapped[int] = mapped_column(Integer, default=0)
+    freshness_fit: Mapped[int] = mapped_column(Integer, default=0)
+    review_status: Mapped[str] = mapped_column(String(32), default="raw")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="evidence_reviews")
+
+
+class AssessmentClaim(Base):
+    __tablename__ = "assessment_claims"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), index=True)
+    gate_id: Mapped[str] = mapped_column(String(16), index=True)
+    statement: Mapped[str] = mapped_column(Text)
+    review_status: Mapped[str] = mapped_column(String(32), default="draft")
+    capability_level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    evidence_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    question_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    notes: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="claims")
+
+
+class GateRequirement(Base):
+    __tablename__ = "gate_requirements"
+
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), primary_key=True)
+    gate_id: Mapped[str] = mapped_column(String(16), primary_key=True)
+    requirement_level: Mapped[int] = mapped_column(Integer)
+    source: Mapped[str] = mapped_column(String(64), default="criticality-template")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="gate_requirements")
 
 
 class LlmImport(Base):
