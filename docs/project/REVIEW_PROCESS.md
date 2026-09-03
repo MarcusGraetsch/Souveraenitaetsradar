@@ -1,53 +1,43 @@
 # Review Process
 
-## Klassen
+## Review classes
 
-### A – Dokumentation / geringe Auswirkung
+### A – documentation / low impact
+Self-review acceptable.
 
-Beispiele: Tippfehler, Linkfix. Self-review möglich.
+### B – method / schema / deterministic rule
+Requires method or technical review:
+- provenance/source
+- scenario/regression impact
+- unit/boundary tests
+- no hidden threshold changes
+- provider neutrality
 
-### B – Methodik / Datenmodell / Rule Change
+### C – evidence ingestion / parser / sensitive data path
+Requires technical + security review:
+- no credentials required
+- no network access by default
+- redaction/sensitivity handling
+- malformed/untrusted files
+- path traversal / oversized file concerns
+- provenance preservation
 
-Erfordert fachlichen Review. Prüfpunkte:
+### D – legal/compliance claim
+Requires primary source and, for legal conclusions, appropriate human review. Provider self-statements are marked as such.
 
-- Quelle/Fundstelle
-- Provenienzklasse
-- Auswirkungen auf bestehende Szenarien
-- Unit-/Boundary-Tests
-- keine stillen Schwellenänderungen
+### E – provider adapter
+Requires architecture review:
+- translation only
+- no provider-specific rules in core
+- missing fields -> unknown, not fail
+- fixtures and mapping tests
 
-### C – Security-/Evidence-Collector
+## Merge readiness
 
-Erfordert technischen + Security Review. Insbesondere:
+- scope clear
+- validator/tests green
+- provenance complete
+- no `BLOCKER`
+- handoff/state updated if needed
 
-- read-only Garantie
-- keine Payload-/Secret-Erhebung
-- Permission Scope
-- Fehlerbehandlung
-- Chain of Custody
-
-### D – Legal-/Compliance-Behauptung
-
-Erfordert Primärquelle und bei rechtlicher Bewertung ggf. qualifizierten Human Review. Provider-Selbstauskunft ist als solche zu kennzeichnen.
-
-## PR Review
-
-Ein PR ist mergefähig, wenn:
-
-- Scope klar ist
-- Tests grün sind
-- Quellen/Provenienz vollständig sind
-- keine offenen Blocker vorhanden sind
-- Handoff/State bei Bedarf aktualisiert wurde
-
-## Review-Kommentar-Klassen
-
-- `BLOCKER` – Merge nicht zulässig
-- `MAJOR` – vor Merge beheben oder explizit entscheiden
-- `MINOR` – sollte behoben werden
-- `QUESTION` – Klärung
-- `NIT` – optional
-
-## Unabhängigkeit
-
-Für grundlegende Methodik oder Security-sensitive Collector-Änderungen soll Reviewer nicht identisch mit dem primären Implementierer sein. Agenten-Self-Review muss explizit als Self-Review markiert werden.
+Comment classes: `BLOCKER`, `MAJOR`, `MINOR`, `QUESTION`, `NIT`.

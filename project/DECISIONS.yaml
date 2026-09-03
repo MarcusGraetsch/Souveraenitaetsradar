@@ -1,4 +1,4 @@
-version: 1
+version: 2
 updated: "2026-09-03"
 decisions:
   - id: DEC-001
@@ -50,13 +50,44 @@ decisions:
     sources: [SRC-08, SRC-12, SRC-20, INT-01]
 
   - id: DEC-009
-    status: accepted
-    title: R6 Evidence Collector bleibt read-only und payload-frei
-    rationale: Konfigurations-Evidence soll ohne Produktionsänderung und ohne Fachdatenzugriff erhoben werden.
-    sources: [SRC-47, SRC-48, SRC-49, SRC-50, SRC-51, SRC-52, SRC-53, SRC-54, INT-01]
+    status: superseded
+    superseded_by: DEC-011
+    title: Direkt betriebener Read-only Cloud Collector als R6-Standard
+    rationale: Im Experiment technisch plausibel, im realen Beratungsmodell jedoch häufig unrealistisch wegen Credentials, Zugriff, Haftung und Provider-Spezifik.
+    source: INT-01
 
   - id: DEC-010
     status: accepted
-    title: Raw kunden-/accountbezogene Evidence wird standardmäßig nicht committed
-    rationale: IAM-, ARN-, Netzwerk- und Vertragsinformationen können sensitiv sein.
+    title: Raw kundenbezogene Evidence wird standardmäßig nicht committed
+    rationale: Architektur-, IAM-, Netzwerk-, Vertrags- und Konfigurationsinformationen können sensitiv sein.
     source: INT-01
+
+  - id: DEC-011
+    status: accepted
+    title: Customer-mediated Evidence ist der Standard-Erhebungsweg
+    rationale: Der Kunde behält Kontrolle über Accounts und sensible Daten; Beratung benötigt keine Root-/Owner-/Cloud-Credentials.
+    source: INT-02
+
+  - id: DEC-012
+    status: accepted
+    title: Methodenkern ist cloud-agnostisch
+    rationale: AWS, Azure, GCP, OpenStack, Kubernetes, Sovereign Cloud und SaaS müssen durch dasselbe generische Risiko-/Capability-Modell bewertet werden.
+    source: INT-02
+
+  - id: DEC-013
+    status: accepted
+    title: Provider Adapter enthalten keine Risikomethode
+    rationale: Adapter übersetzen Providerbegriffe/Exporte in generische Facts und Capabilities; Gates und Schwellen bleiben zentral.
+    source: INT-02
+
+  - id: DEC-014
+    status: accepted
+    title: Evidence Pack ist primäre technische Übergabeschnittstelle
+    rationale: Dateien/Exporte/Verträge/Tests lassen sich versionieren, redigieren, lokal prüfen und providerunabhängig verarbeiten.
+    source: INT-02
+
+  - id: DEC-015
+    status: accepted
+    title: Kundenseitig ausgeführte Exporte sind optional, nicht zwingend
+    rationale: Tiefe technische Evidence kann durch Kundenexporte verbessert werden; Methodik muss auch mit Dokumenten, Interviews und Tests funktionieren.
+    source: INT-02

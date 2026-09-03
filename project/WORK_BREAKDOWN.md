@@ -1,41 +1,34 @@
 # Work Breakdown Structure
 
 ## WP1 Methodik
-
 Taxonomie, Fragen, Gates, Schwellen, Szenarien, Risikoakzeptanz.
 
 ## WP2 Quellen & Provenienz
-
 Source Register, Fundstellen, Versionierung, Crosswalks, Legal-/Compliance-Review.
 
-## WP3 Datenmodell
+## WP3 Generisches Datenmodell
+Workload, Provider, Service, Contract, Legal Entity, Location, Data Class, Key Control, Identity, Dependency, Evidence, Claim, Control, Risk Scenario.
 
-Workload, Provider, Service, Contract, Legal Entity, Region, Data Class, Key, Identity, Dependency, Evidence, Claim, Control, Risk Scenario.
+## WP4 Evidence Acquisition
+Customer Evidence Pack, Dokumente, Exporte, Interviews, Screenshare-Observation, Tests, Assurance. **Keine Credential-Pflicht.**
 
-## WP4 Evidence Collection
+## WP5 Provider Adapter
+AWS/Azure/GCP/OpenStack/K8s/SaaS-Begriffe und kundenseitige Exporte auf generische Facts mappen. Keine Risk Rules im Adapter.
 
-Provider-Dokumente, Verträge, technische APIs, Assurance Reports, Evidence Trust/Scope/Freshness.
+## WP6 Rule Engine
+Hard Gates, Capability State, Structural Risk, Evidence Confidence, Decision State, Unit Tests.
 
-## WP5 Rule Engine
+## WP7 KI-Unterstützung
+Dokumentextraktion, Claim-Erkennung, Evidenzzuordnung, Konflikte, Follow-ups, Erklärungen. Keine automatische Risikoakzeptanz.
 
-Hard Gates, Capability State, Structural Risk, Decision State, Unit Tests.
+## WP8 UX / Beratungsprozess
+Kickoff, Scope, Evidence Request, Assessment, Berater-Review, Managementbericht, Maßnahmenplan.
 
-## WP6 KI-Unterstützung
-
-Dokumentextraktion, Claim-Erkennung, Evidenzzuordnung, Widerspruchserkennung, Follow-up-Fragen, Erklärungen. Keine automatische Risikoakzeptanz.
-
-## WP7 UX / Beratungsprozess
-
-Interview, Assessment Run, Berater-Review, Managementbericht, Radarvisualisierung, Maßnahmenplan.
-
-## WP8 Software & Plattform
-
+## WP9 Software & Plattform
 CLI/API, Persistenz, Schemas, CI, Versionierung, Security, Packaging.
 
-## WP9 Validierung
+## WP10 Validierung
+Synthetische Szenarien, Evidence-Packs, Inter-Rater-Tests, Kundenpilot.
 
-Synthetische Szenarien, echte Evidence Pilots, Inter-Rater-Tests, Kundenpilot.
-
-## WP10 Governance
-
-Issues, PRs, ADRs, Releases, Source-Version-Updates, Change-/Drift-Prozess.
+## WP11 Governance / Multi-Agent PM
+Issues, PRs, ADRs, Agent Logs, Handoffs, Releases, Change-/Drift-Prozess.

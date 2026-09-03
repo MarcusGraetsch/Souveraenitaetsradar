@@ -1,13 +1,16 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "title":"Project State",
-  "type":"object",
-  "required":["project","current_truth","next_milestone"],
-  "properties":{
-    "project":{"type":"object"},
-    "current_truth":{"type":"array","items":{"type":"string"}},
-    "primary_artifacts":{"type":"object"},
-    "blockers":{"type":"array","items":{"type":"object"}},
-    "next_milestone":{"type":"object"}
-  }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project State",
+  "type": "object",
+  "required": ["project", "current_truth", "next_milestone"],
+  "properties": {
+    "project": {"type": "object", "additionalProperties": true},
+    "current_truth": {"type": "array", "items": {"type": "string"}},
+    "primary_artifacts": {"type": "object", "additionalProperties": true},
+    "quality_gates": {"type": "object", "additionalProperties": true},
+    "blockers": {"type": "array", "items": {"type": "object"}},
+    "open_method_questions": {"type": "array", "items": {"type": "object"}},
+    "next_milestone": {"type": "object", "additionalProperties": true}
+  },
+  "additionalProperties": true
 }

@@ -1,6 +1,6 @@
-# AGENTS.md – verbindliche Arbeitsanweisung
+# AGENTS.md – verbindliche, modellneutrale Arbeitsanweisung
 
-Diese Datei ist die **kanonische, modellneutrale Arbeitsanweisung** für alle KI-Agenten und automatisierten Entwickler, die an diesem Repository arbeiten.
+Diese Datei ist die **kanonische Arbeitsanweisung** für alle KI-Agenten, Coding-Agenten und automatisierten Reviewer in diesem Repository.
 
 ## 1. Startsequenz – immer zuerst
 
@@ -11,143 +11,178 @@ Vor Planung oder Änderung in dieser Reihenfolge lesen:
 3. `project/HANDOFF.md`
 4. `project/NEXT_ACTIONS.yaml`
 5. `project/DECISIONS.yaml`
-6. die für die Aufgabe relevanten Dateien unter `docs/`, `data/`, `config/` und `schemas/`
-7. offene Issues/PRs, sofern Zugriff auf GitHub besteht
+6. relevante Dateien unter `docs/`, `data/`, `config/`, `schemas/`
+7. offene Issues und PRs, sofern GitHub-Zugriff vorhanden ist
 
-Nicht aus älteren Chatverläufen oder Modellgedächtnis rekonstruieren, wenn das Repository eine aktuelle Aussage enthält.
+Repo-State schlägt Chatgedächtnis. Nicht aus älteren Chats rekonstruieren, wenn das Repository eine aktuelle Aussage enthält.
 
 ## 2. Source of Truth
 
 Priorität bei Konflikten:
 
-1. Primärquellen / regulatorische Originaldokumente, soweit im Source Register referenziert und tatsächlich geprüft
+1. tatsächlich geprüfte externe Primärquellen / regulatorische Originaldokumente
 2. akzeptierte ADRs und `project/DECISIONS.yaml`
-3. aktuelles Methodenmodell / maschinenlesbare Exporte unter `data/method/`
+3. aktuelle maschinenlesbare Methodik unter `data/method/` und `config/`
 4. `project/PROJECT_STATE.yaml`
-5. sonstige Dokumentation
+5. Methodendokumentation
 6. Agenten-Session-Logs
 
-Bei einem Widerspruch **nicht still korrigieren**. Konflikt dokumentieren und Review verlangen.
+Widersprüche nicht still auflösen: Konflikt dokumentieren und Review auslösen.
 
-## 3. Rollen für Agenten
+## 3. Projektarchitektur – nicht verhandelbare Grundsätze
 
-Ein Agent soll pro Task mindestens eine Rolle explizit einnehmen:
-
-- `researcher` – Quellenrecherche, Fundstellen, Crosswalks
-- `methodologist` – Risiko-/Souveränitätsmethodik
-- `architect` – Daten-, Tool- und Integrationsarchitektur
-- `developer` – Implementierung und Tests
-- `reviewer` – unabhängige Prüfung; verändert den zu prüfenden Kern möglichst nicht gleichzeitig
-- `evidence-analyst` – Evidence Extraction/Normalization
-- `project-coordinator` – Issues, Handoffs, Status, Roadmap
-
-Wenn ein Agent Implementierer **und** Reviewer desselben Changes wäre, ist das als Self-Review zu kennzeichnen. Für risikoreiche Änderungen ist ein zweiter unabhängiger Review vorzusehen.
-
-## 4. Planen vs. Umsetzen
-
-Vor substantiellen Änderungen:
-
-- Ziel und Scope nennen.
-- Betroffene Dateien nennen.
-- Quellen-/Provenienzbedarf bestimmen.
-- Risiken und offene Entscheidungen nennen.
-- Tests/Review festlegen.
-
-Danach darf umgesetzt werden, sofern die Aufgabe dies erlaubt.
-
-Keine großflächigen Umbauten ohne nachvollziehbaren Plan oder Issue.
-
-## 5. Provenienzpflicht
-
-Jede neue fachliche Regel, Frage, Risikokategorie, Formel oder Schwelle muss einer Klasse zugeordnet werden:
-
-- `external-direct` – direkte externe Vorgabe/Begriff
-- `external-derived` – quellennah abgeleitet
-- `internal-method` – eigenes Methodendesign
-- `project-assumption` – Projekt-/Testszenario
-- `evidence-observation` – Beobachtung aus konkreter Evidence
-
-Dabei Source-ID/Fundstelle referenzieren. Interne Schwellen müssen `INT-01` oder eine spätere interne Decision-ID tragen.
-
-**Verboten:** eigene Regeln so formulieren, als stünden sie in einer Norm.
-
-## 6. Evidence-Regeln
-
-- `available` ist nicht `configured`.
-- `configured` ist nicht `tested`.
-- `tested` ist nicht `attested`.
+- **cloud-agnostischer Methodenkern**: keine AWS-/Azure-/GCP-spezifische Regel darf den Kern dominieren.
+- **kein Credential-/Root-Zugang als Voraussetzung**: Standard ist Customer-mediated Evidence.
+- **Provider Adapter sind Übersetzer**, nicht Risk Engines.
+- **Security und Souveränität getrennt** bewerten.
+- **Provider Capability ≠ Applied Capability**.
+- **Evidence Confidence ≠ Risikohöhe**.
+- **Gate first, score second**.
 - fehlende Information = `UNVERIFIED`, nicht automatisch `FAIL`.
-- Provider-Dokumentation belegt primär Provider-/Service-Capability.
-- Applied Capability benötigt kunden-/ressourcenspezifische Evidence.
-- Evidence muss mindestens Source, Scope, Zeit/Version und Trust/Confidence tragen.
+- Risikoakzeptanz und Legal-Schlussfolgerungen bleiben menschliche Entscheidungen.
 
-R6-Technik-Evidence ist read-only zu erheben. Keine Fachdaten, Prompts, Log-Events oder S3-Objekte ohne expliziten Scope und Freigabe.
+## 4. Agentenrollen
 
-## 7. Entwicklung
+Ein Agent nennt pro Task mindestens eine Rolle:
 
-- Deterministische Regeln gehören in Code/Config, nicht nur in Prompts.
-- Jede neue Regel erhält Unit Tests, einschließlich Grenzwerte.
-- Öffentliche Schnittstellen typisieren und dokumentieren.
-- Keine Secrets, Tokens, Kundendaten oder Account-spezifischen sensitiven Evidence-Dumps committen.
-- Raw Evidence grundsätzlich nicht ins Repo, sofern sie kunden-/accountbezogene Interna enthält.
-- Keine produktiven Write-/Invoke-Operationen in Evidence Collectors ohne gesonderte Architekturentscheidung.
+- `researcher` – Quellen, Fundstellen, Versionen
+- `methodologist` – Risiko-/Souveränitätsmethodik
+- `architect` – Domain-, Evidence-, Tool-/Integrationsarchitektur
+- `developer` – Code, Schema, Tests
+- `reviewer` – unabhängige Prüfung
+- `evidence-analyst` – Evidence Intake, Claims, Scope/Trust
+- `project-coordinator` – Issues, Handoffs, State/Roadmap
 
-## 8. Git-Workflow
+Implementierer und Reviewer desselben substantiellen Changes sollen nach Möglichkeit getrennt sein. Self-Review muss als solcher markiert werden.
 
-Standard:
+## 5. Planungsprotokoll
 
-- `main` soll reviewbar und stabil bleiben.
-- Branches: `feature/...`, `fix/...`, `research/...`, `method/...`, `docs/...`, `bootstrap/...`.
-- Substantielle Änderungen über PR.
-- PR muss Ziel, Änderungen, Quellen/Provenienz, Tests, offene Risiken und Handoff enthalten.
-- Kein Merge mit offenen `BLOCKER`-Reviewpunkten.
+Vor substantiellen Änderungen dokumentieren:
 
-## 9. Review-Schwerpunkte
+- Ziel / Problem
+- Scope und Nicht-Scope
+- Rolle
+- betroffene Dateien
+- Quellen-/Provenienzbedarf
+- Daten-/Security-Risiko
+- Akzeptanzkriterien
+- Tests und Reviewklasse
 
-Reviewer prüfen mindestens:
+Danach umsetzen. Große Umbauten ohne Issue/Plan vermeiden.
 
-1. Fachliche Richtigkeit und Quellenbezug
-2. Keine unzulässige Verallgemeinerung
-3. Provenienz korrekt gekennzeichnet
-4. Security vs. Souveränität nicht vermischt
-5. Evidence Confidence separat behandelt
-6. Hard Gates nicht durch Score kompensiert
-7. Code-/Formeltests vorhanden
-8. Datenschutz/Secrets/Evidence-Sensitivität
-9. Rückwärtskompatibilität von Datenmodellen
-10. Dokumentation/Handoff aktualisiert
+## 6. Provenienzpflicht
 
-## 10. Abschluss eines Agenten-Tasks
+Jede neue fachliche Regel, Frage, Risikokategorie, Formel oder Schwelle erhält eine Provenienzklasse:
+
+- `external-direct`
+- `external-derived`
+- `internal-method`
+- `project-assumption`
+- `evidence-observation`
+
+Source-ID/Fundstelle referenzieren. Interne Schwellen tragen `INT-01`/`INT-02` oder eine spätere interne Decision-ID. Eigene Regeln niemals als Normtext ausgeben.
+
+## 7. Evidence-Regeln
+
+Evidence-Zustände:
+
+`asserted -> documented -> observed/configured -> tested -> attested`
+
+Provider-/Service-Fähigkeit kann zusätzlich `available` sein.
+
+Pflichtprinzipien:
+
+- Provider-Dokumentation belegt primär `available`/`documented` Service Capability.
+- Applied Capability benötigt kundenspezifische Evidence.
+- Customer Evidence wird bevorzugt als **Evidence Pack** übergeben.
+- keine Cloud-Credentials, Tokens oder Root-/Owner-Zugänge als Standardanforderung.
+- vom Kunden erzeugte Exporte sind erlaubt und bevorzugt, sofern redigiert/scope-klar.
+- Evidence enthält mindestens Quelle, Scope, Zeit/Version, Trust, Scope Fit, Applied State.
+- Raw Kundenevidence nicht in Git committen.
+
+## 8. Provider-Agnostik
+
+Der Methodenkern arbeitet mit generischen Objekten und Capabilities. Beispiele:
+
+- `KeyControlCapability` statt nur AWS KMS / Azure Key Vault / GCP Cloud KMS
+- `IdentityTrustAnchor` statt providergebundener IAM-Begriffe
+- `DataLocationConstraint` statt einzelner Region-API
+- `ExitPortabilityCapability`
+- `OperationalAutonomyCapability`
+- `ProviderDependency` / `CommonCauseGroup`
+
+Provider Adapter dürfen:
+
+- öffentliche Providerbegriffe auf generische Felder mappen
+- vom Kunden bereitgestellte Exporte parsen
+- Folgefragen erzeugen
+
+Provider Adapter dürfen **nicht**:
+
+- eigene Hard-Gate-Schwellen erfinden
+- automatisch Kundenaccounts scannen
+- Credentials verlangen
+- Risikoakzeptanz treffen
+
+## 9. Softwareentwicklung
+
+- deterministische Regeln in Code/Config, nicht nur Prompts
+- neue Regeln mit Unit-/Boundary-Tests
+- Schemas rückwärtskompatibel oder mit Migration
+- keine Secrets/Kundendaten
+- Evidence-Pack-Parser arbeitet lokal und dateibasiert
+- Parser dürfen keine externen Systeme kontaktieren, außer ausdrücklich als separater Research-/Adapter-Task
+
+## 10. Git- und Review-Workflow
+
+- `main` stabil und handoff-fähig halten
+- Branches: `feature/`, `fix/`, `research/`, `method/`, `docs/`, `chore/`
+- substantielle Änderungen per PR
+- PR enthält: Ziel, Änderungen, Quellen/Provenienz, Tests, Risiken, Handoff-Auswirkung
+- kein Merge mit `BLOCKER`
+
+Reviewklassen stehen in `docs/project/REVIEW_PROCESS.md`.
+
+## 11. Multi-Agent-Koordination
+
+- ein Issue = eine primäre Outcome-Verantwortung
+- Agent schreibt vor Start kurz in Issue/Branch, welchen Scope er übernimmt
+- parallele Agenten vermeiden dieselben State-/Methoden-Dateien
+- `PROJECT_STATE.yaml` ist kein Chatlog; nur Gesamtzustand
+- Details in `project/agent-log/`
+- Handoff muss explizit sagen: erledigt, offen, Entscheidungen, nächste Dateien/Tests
+
+## 12. Abschluss eines Tasks
 
 Vor Ende:
 
-- Tests/Validierung ausführen.
-- Änderungen zusammenfassen.
-- Offene Punkte nennen.
-- `project/agent-log/YYYY-MM-DD_<kurzthema>.md` anlegen oder aktualisieren.
-- Falls nötig `project/HANDOFF.md`, `PROJECT_STATE.yaml` und `NEXT_ACTIONS.yaml` aktualisieren.
-- Keine erledigten Punkte als offen stehen lassen und keine offenen Punkte still als erledigt markieren.
+1. Tests/Validator ausführen.
+2. Provenienz prüfen.
+3. offene Punkte benennen.
+4. Session-Log schreiben/aktualisieren.
+5. Handoff/State/NEXT_ACTIONS nur bei echter Zustandsänderung aktualisieren.
+6. PR-Review-ready machen.
 
-## 11. Sicherheits-Stopps
+## 13. Sicherheits-Stopps
 
 Sofort stoppen/eskalieren bei:
 
 - Secret-/Credential-Fund
-- produktivem Write-/Delete-/Invoke-Risiko ohne Freigabe
+- Anforderung nach Kunden-Root-/Owner-Zugang als Standardlösung
 - unklarer Lizenzlage bei Volltextübernahme
 - regulatorischer Behauptung ohne belastbare Quelle
-- automatischer Risikoakzeptanz ohne menschliche Entscheidung
-- Kundendaten in Repo/Issue/PR
+- automatischer Risikoakzeptanz
+- Kundendaten in GitHub/Issues/PRs
 
-## 12. Kommunikationsstandard
+## 14. Kommunikationsstandard
 
-Berichte knapp, prüfbar und differenziert:
+Kennzeichne Aussagen als:
 
 - **Fact** – belegt
 - **Observation** – aus Evidence beobachtet
 - **Assumption** – Annahme
 - **Inference** – methodische Ableitung
 - **Decision** – akzeptierte Projektentscheidung
-- **Open** – noch zu klären
+- **Open** – offen
 
-Der nächste Agent soll ohne vorherigen Chat verstehen können, warum der aktuelle Stand so ist.
+Der nächste Agent muss ohne Chatkontext verstehen können, warum der Stand so ist.

@@ -1,0 +1,13 @@
+Collector-ID;AWS CLI / Operation;Radar QIDs;Gate/Faktor;R5 Gap;Historical status
+COL-001;aws sts get-caller-identity;LJ-01/SC-16;HG-01;GAP-01;retired
+COL-002;aws bedrock list-foundation-models;DK-06/DK-07;F-09;GAP-02;retired
+COL-003;aws bedrock get-foundation-model;DK-06/DK-07;F-09;GAP-02;retired
+COL-004;aws bedrock list-inference-profiles;DK-02/DK-13;HG-02/F-06;GAP-02;retired
+COL-005;aws bedrock get-inference-profile;DK-02/DK-13;HG-02/F-06;GAP-02;retired
+COL-006;aws bedrock get-model-invocation-logging-configuration;DK-11/SE-01;HG-08/F-05;GAP-07;retired
+COL-007;aws bedrock list/get-guardrails;SE-04;HG-08;GAP-08;retired
+COL-009;aws bedrock-agent get-agent;OA-08/TE-01;HG-04/HG-06/HG-08;GAP-04/GAP-10;retired
+COL-012;aws iam read APIs;OA-08/SE-04;HG-06/HG-08;GAP-04;retired
+COL-014;aws kms read APIs;DK-03/DK-04/DK-14;HG-03/F-07;GAP-05;retired
+COL-015;aws ec2 describe-vpc-endpoints;OA-08/SE-04;HG-06/HG-08;GAP-06;retired
+COL-016;aws cloudtrail read APIs;DK-11/SE-01;HG-08/F-05;GAP-07;retired

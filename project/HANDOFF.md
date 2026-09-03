@@ -1,16 +1,16 @@
 # Project Handoff
 
-## Wo stehen wir?
+## Kurzfassung
 
-Der Souveränitätsradar ist von einer BSI-200-3-Abgleichstabelle zu einem Methoden- und Toolprojekt gewachsen.
+Der Souveränitätsradar ist kein AWS-Collector-Projekt. Der aktuelle Kern ist eine **cloud-agnostische Assessment-Methode mit kundenvermittelter Evidence**.
 
-R1–R4 entwickelten Taxonomie, Fragen, Provenienz, Szenariotests und Bewertungslogik. R5 führte erstmals reale öffentliche Provider-Evidence am Beispiel eines Bedrock-KI-Agenten ein. R6 baut darauf einen read-only technischen Evidence-Collector auf.
+Am 03.09.2026 wurde die R6-Richtung korrigiert: Ein durch uns gesteuerter Read-only-Collector in Kundenaccounts wäre im Beratungsalltag häufig unrealistisch und erzeugt Credential-, Haftungs- und Security-Probleme. Dieser Ansatz ist als Standard verworfen.
 
 ## Fachlicher Kern
 
-Die Methode bewertet nicht „den Anbieter“ abstrakt, sondern einen **Workload in einer konkreten Provider-/Service-/Architektur-/Vertragskonstellation**.
+Bewertet wird ein **Workload in einer konkreten Provider-/Service-/Architektur-/Vertragskonstellation**, nicht ein Provider pauschal.
 
-Wichtige getrennte Ausgaben:
+Getrennte Ausgaben:
 
 - Security Capability
 - Sovereignty Capability
@@ -18,39 +18,71 @@ Wichtige getrennte Ausgaben:
 - klassisches Informationssicherheits-/Betriebsrisiko
 - Evidence Confidence
 
-Wichtige Hard Gates:
+Hard Gates:
 
-- Jurisdiktion & Effective Control
-- Datenresidenz & Verarbeitung
-- Schlüsselhoheit
-- Exit & Portabilität
-- Operational Autonomy
-- Identity & Trust Anchors
-- Supply Chain Critical Dependencies
-- Security Minimum
+1. Jurisdiktion & Effective Control
+2. Datenresidenz & Verarbeitung
+3. Schlüsselhoheit
+4. Exit & Portabilität
+5. Operational Autonomy
+6. Identity & Trust Anchors
+7. Supply Chain Critical Dependencies
+8. Security Minimum
 
-## Was ist bereits implementiert?
+## Aktueller Evidence-Prozess
 
-- Methodenmodell v0.9 als Excel-Workbook
-- CSV-Exporte der wichtigsten Methodentabellen
-- erste Python-Regelengine unter `src/sovradar/`
-- JSON-Schemas für Evidence/Assessment
-- R6 read-only AWS Bedrock Evidence Collector
-- R6 Normalizer
-- GitHub-Review-/Agenten-/PM-Struktur
+```text
+Customer / Provider / Auditor
+   │
+   ├─ Vertrag / DPA / SLA
+   ├─ Architektur / CMDB / Dependency Export
+   ├─ IaC / redigierter Konfig-Export
+   ├─ kundenseitiger Provider-Export
+   ├─ Assurance Report / Zertifikat
+   ├─ Screenshot / Screenshare Observation
+   └─ Testprotokoll
+          │
+          ▼
+Customer Evidence Pack
+          │
+          ▼
+Validation + Normalization + Claim/Evidence Mapping
+          │
+          ▼
+Generic Domain Graph / Rule Engine
+          │
+          ▼
+PASS / FAIL / UNVERIFIED + Risks + Confidence
+          │
+          ▼
+AI-assisted Explanation + Human Review
+```
 
-## Was darf ein neuer Agent NICHT tun?
+## Bereits vorhanden
 
-- keine Methodenschwelle als externe Normvorgabe ausgeben
-- keine öffentliche Provider-Dokumentation als kundenkonfigurierte Applied Capability behandeln
-- kein fehlendes Evidence als technisches FAIL erfinden
-- keine Raw Kundenevidence committen
-- keine Evidence-Collector-Write-/Invoke-Operation ohne neue Architekturentscheidung einführen
+- Methodenmodell v1.0 als Workbook
+- 128 Fragen in acht Domänen
+- Risiko-Taxonomie inkl. G z.S1–G z.S12
+- R4 Hard Gates/Factor Rules
+- Source-/Provenienzregister
+- erste deterministische Python-Regeln
+- Evidence-Pack-Schema und lokaler Validator
+- Multi-Agent-/Review-/PM-Struktur
+- historische R5-Bedrock-Evidence als Provider-Beispiel
 
-## Nächster operative Schritt
+## Verworfener Ansatz
 
-`NEXT-001`: Collector in einem autorisierten AWS-Bedrock-Account ausführen. Danach `NEXT-002`: normalized Evidence in die Gate Engine übernehmen.
+Der v0.9 AWS-Bedrock-Collector ist **nicht** der nächste Schritt und **nicht** die Zielarchitektur. Historie siehe `docs/history/R6_AWS_COLLECTOR_APPROACH_RETIRED.md`.
 
-## Review-Bedarf
+## Nächste Arbeit
 
-Die Bootstrap-Struktur selbst soll per PR reviewed werden. Danach sollten Methodik- und Codeänderungen getrennte PRs erhalten, damit fachlicher Review und Software-Review unabhängig möglich bleiben.
+Beginne mit `NEXT-101`, `NEXT-102` oder `NEXT-103`. Ein guter erster Development-Task ist der lokale Evidence-Pack-Loader und die Verbindung `Evidence -> Claim -> Gate`.
+
+## Regeln für den nächsten Agenten
+
+- Keine Cloud-Credentials anfordern.
+- Keine Provider-spezifische Logik in `src/sovradar/rules.py` einbauen.
+- Provider Adapter nur als Übersetzungsschicht.
+- Kein Evidence Gap als FAIL ausgeben.
+- Alle neuen Methodenregeln mit Provenienz versehen.
+- Issue/PR/Handoff/Agent-Log pflegen.

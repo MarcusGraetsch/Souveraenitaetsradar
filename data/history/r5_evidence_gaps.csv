@@ -1,0 +1,13 @@
+Gap-ID;Priorität;Benötigte Evidence;Owner/Rolle;Warum;Gate/QIDs;Gewünschter Trust;Erhebungsmethode;Kann KI vorprüfen?;Source/Herleitung;Status
+GAP-01;P0;Konkrete Vertragspartei + Vertrag/DPA/Service Terms;Legal/Procurement;Jurisdiktion muss kundenspezifisch sein.;HG-01;4;Vertragsdokument;ja, Extraktion;SRC-25/SRC-27/SRC-28;historisch offen
+GAP-02;P0;Ausgewähltes Foundation Model + Region/Inference Profile;Cloud/AI Architect;Residency/Retention modellabhängig.;HG-02;3;Architektur/Export;ja;SRC-31/SRC-32/SRC-33;historisch offen
+GAP-03;P0;Abuse Detection/ZDR Status;Security/Privacy;Retention kann variieren.;HG-02;3;Provider-/Kunden-Evidence;ja;SRC-31/SRC-28;historisch offen
+GAP-04;P0;Agent IAM/Action-Group-Berechtigungen;Cloud Security;Blast Radius kundenspezifisch.;HG-06/HG-08;3;redigierter Config/IaC Export;ja;SRC-39;historisch offen
+GAP-05;P0;KMS Key Ownership/Policy/Origin;Cloud Security;CMK Capability reicht nicht.;HG-03;3;redigierter Key-Design/Export;ja;SRC-35/SRC-36;historisch offen
+GAP-06;P1;Private connectivity/region restrictions;Network/Cloud Platform;Konfigurationsabhängig.;HG-02/HG-06/HG-08;3;Architektur/Export;ja;SRC-34/SRC-33;historisch offen
+GAP-07;P1;Audit-/Invocation-Logging-Konfiguration/Retention;Security Operations;Observability vs Persistenz.;HG-08;3;redigierter Export/Policy;ja;SRC-37/SRC-38;historisch offen
+GAP-08;P1;Guardrail + Tool Authorization Tests;AI Security;Guardrails decken Tool-Pfade nicht vollständig.;HG-08/KI;3;Config/Testset;ja;SRC-40/SRC-41/SRC-42;historisch offen
+GAP-09;P1;Aktueller C5-Bericht/Scope/Exceptions;GRC/ISMS;Scope-Seite reicht nicht.;HG-08;5;Assurance Report;teilweise;SRC-43/SRC-44/SRC-46/SRC-05;historisch offen
+GAP-10;P0;Exit-/Portability-Artefakte und Test;Architecture/Product Owner;zentral für G z.S4/G z.S9.;HG-04;3;PoC/Migrationstest;ja;SRC-08/SRC-12/INT-01;historisch offen
+GAP-11;P1;Autonomieanforderung + Fallback Exercise;Business Owner/BCM;ohne Requirement keine Deckung.;HG-05;3;Workshop/Exercise;ja;SRC-03/SRC-04/SRC-20/INT-01;historisch offen
+GAP-12;P1;Dependency/Common-Cause-Graph;Enterprise Architect;Konzentration ist Portfoliofrage.;F-04/HG-07;3;CMDB/DataGerry/DORA-RoI-artig;ja;SRC-08/SRC-09/SRC-06/INT-01;historisch offen

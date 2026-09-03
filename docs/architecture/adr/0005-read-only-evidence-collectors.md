@@ -1,16 +1,7 @@
-# ADR 0005 – Evidence Collector read-only by design
+# ADR-0005 – Direct read-only evidence collectors
 
-**Status:** Accepted  
-**Datum:** 2026-09-03
+Status: **superseded** by ADR-0007 and ADR-0008
 
-## Entscheidung
+The v0.9 experiment explored consultant-operated read-only cloud collectors. Although technically possible, this is not the standard product architecture because it would often require customer credentials/access and overfit collection to provider APIs.
 
-Baseline-Collector nutzen nur List/Get/Describe und lesen keine Nutzdaten.
-
-## Begründung
-
-Evidence-Sammlung darf die untersuchte Umgebung nicht verändern.
-
-## Konsequenzen
-
-Änderungen an diesem Prinzip benötigen einen neuen ADR oder eine explizite Ablösung dieses ADRs.
+Historical value: it established useful concepts such as Provider Capability vs Applied Capability, chain of custody and conditional evidence.

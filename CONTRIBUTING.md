@@ -2,37 +2,27 @@
 
 ## Workflow
 
-1. Issue oder klarer Task.
-2. Branch von `main`.
-3. Änderungen klein und nachvollziehbar halten.
-4. Quellen-/Provenienzinformation ergänzen.
-5. Tests/Validierung ausführen.
-6. PR anhand des Templates erstellen.
-7. Reviewpunkte abarbeiten.
-8. Bevorzugt squash-merge nach Freigabe.
+1. Select/create an issue with acceptance criteria.
+2. Read `AGENTS.md` and project state.
+3. Create branch from `main`.
+4. Implement scoped change.
+5. Update provenance/tests/docs.
+6. Open PR using template.
+7. Resolve review findings.
+8. Prefer squash merge after approval.
 
-## Commit-Konvention
+## Commit prefixes
 
-Empfohlen:
+`method:`, `research:`, `feat:`, `fix:`, `test:`, `docs:`, `chore:`.
 
-- `method:` Methodik/Regelwerk
-- `research:` Quellen/Crosswalk
-- `feat:` Softwarefunktion
-- `fix:` Fehlerkorrektur
-- `test:` Tests
-- `docs:` Dokumentation
-- `chore:` Repo/CI/PM
+## Provider neutrality
 
-## Daten und Evidence
+New provider-specific parsing belongs under an adapter namespace. Core rules must not depend on provider brand/API names.
 
-Keine Secrets, personenbezogenen Kundendaten oder unredigierten account-spezifischen Raw-Evidence-Dumps committen. Für technische Evidence nur synthetische Fixtures oder explizit freigegebene, redigierte Beispiele verwenden.
+## Customer data
 
-## Änderungen an Regeln/Schwellen
+No secrets, customer evidence packs, contracts or unredacted exports in Git. Use synthetic fixtures.
 
-Jede Änderung an Scoring, Hard Gates, Trust-Leveln oder Default-Schwellen benötigt:
+## Rule changes
 
-- Decision/Issue-Referenz
-- Provenienzklasse
-- Begründung
-- Grenzwerttests
-- Hinweis, ob externe Vorgabe oder internes Default
+Scoring/Hard-Gate/Trust/default threshold changes require decision reference, provenance, regression/boundary tests and explicit statement whether external or internal.

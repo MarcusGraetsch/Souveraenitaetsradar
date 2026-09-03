@@ -1,37 +1,41 @@
 # AI Agent Architecture
 
-## Ziele
+## Objective
 
-Mehrere KI-Systeme sollen das Repository verstehen und ohne proprietären Chatkontext weiterarbeiten können.
+Multiple AI systems must be able to plan, implement, research and review without access to private prior chat history.
 
-## Kanonische Steuerung
+## Canonical context
 
-`AGENTS.md` ist die einzige kanonische Agentenpolicy. Modell-/Tool-spezifische Einstiegsdateien dürfen nur darauf verweisen.
+`AGENTS.md` + `project/*` are the shared state. Model-specific files only redirect there.
 
-## Agentenaufgaben
+## AI roles in the product
 
-Geeignet:
+Appropriate:
 
-- Quellen suchen und Fundstellen extrahieren
-- Dokumente strukturieren
-- Claims/Evidence vorschlagen
-- Widersprüche finden
-- Folgefragen generieren
-- Code/Tests implementieren
-- PRs reviewen
-- Handoffs/Status pflegen
+- extract clauses/claims from supplied documents
+- map claims to questions/gates
+- identify contradictions and missing evidence
+- normalize provider terminology through adapters
+- propose follow-up questions
+- draft explanations and reports
+- assist with code/tests/reviews
 
-Nicht autonom freigeben:
+Not autonomous:
 
-- Risikoakzeptanz
-- rechtliche Schlussentscheidung
-- produktive Security-Ausnahme
-- Änderung harter Management-Mindestanforderungen
+- risk acceptance
+- legal conclusion
+- security exception
+- hard-management-requirement changes
 
-## Shared Context
+## Evidence safety
 
-Agenten sollen Zustand aus Dateien lesen, nicht aus „wer vorher welches Modell war“. Jede Session schreibt Handoff/Log, wenn sie substantiell ist.
+AI receives only evidence the customer has approved for the assessment environment. The product architecture must not assume AI has direct access to cloud tenants/accounts.
 
-## Parallelität
+## Multi-agent repository work
 
-Parallel arbeitende Agenten sollen möglichst getrennte Branches/Issues nutzen. Änderungen an denselben Methodenkernen oder State-Dateien sind zu koordinieren.
+- planner: decomposes issue and acceptance criteria
+- implementer: changes code/docs/data
+- reviewer: independently checks source/provenance/tests
+- project-coordinator: updates state/handoff only when warranted
+
+Agent identity is less important than durable files, issue state and review evidence.

@@ -1,82 +1,73 @@
 # Method Overview
 
-## 1. Prozesskern
+## 1. Process core
 
-Der Radar orientiert sich für Risikoanalyse/-behandlung an BSI-200-3-/ISO-27005-artiger Logik: Scope, relevante Gefährdungen, Risikoanalyse, Behandlung und Akzeptanz. Souveränitätsspezifische Gefährdungen werden als zusätzliche, explizit interne Risikotypen geführt.
+The Radar uses BSI-200-3-/ISO-27005-like risk-process logic for scope, hazards, risk analysis, treatment and acceptance, supplemented by explicit sovereignty-specific risk types.
 
-## 2. Drei Ebenen
+## 2. Assessment target
+
+The target is a **workload in a concrete provider/service/architecture/contract context**, independent of cloud brand.
+
+## 3. Capability layers
 
 ### Provider / Service Capability
-
-Was bietet/garantiert der Dienst grundsätzlich?
+What a service offers or contractually promises.
 
 ### Applied Capability
+What the customer actually uses or proves through supplied evidence.
 
-Was nutzt der konkrete Kunde/Workload tatsächlich?
+Recommended state model:
 
-Zustände:
+`asserted -> documented -> observed -> configured -> tested -> attested`
 
-`available -> selected -> configured -> tested -> attested`
+`available` is a provider-side state and does not alone satisfy Applied Capability.
 
-### Workload Risk
-
-Welche Konsequenz hat die konkrete Abhängigkeit für den Geschäftsprozess?
-
-## 3. Bewertungsachsen
+## 4. Output axes
 
 - Sovereignty Capability
 - Workload Sovereignty Risk
 - Security/Operational Risk
 - Evidence Confidence
 
-Keine dieser Achsen darf eine andere still kompensieren.
+No axis silently compensates another.
 
-## 4. Hard Gates
+## 5. Hard Gates
 
-Siehe `data/method/r4_hard_gates.csv`.
+See `data/method/r4_hard_gates.csv`.
 
-1. Jurisdiktion & Effective Control
-2. Datenresidenz & Verarbeitung
-3. Schlüsselhoheit
-4. Exit & Portabilität
+1. Jurisdiction & Effective Control
+2. Data Residence & Processing
+3. Key Control
+4. Exit & Portability
 5. Operational Autonomy
 6. Identity & Trust Anchors
 7. Supply Chain Critical Dependencies
 8. Security Minimum
 
-## 5. Gate first, score second
+## 6. Evidence acquisition
 
-Wenn eine für den Workload nicht kompensierbare Mindestanforderung nicht erfüllt ist, darf ein hoher gewichteter Vergleichswert diesen Fail nicht wegmitteln.
+Default: Customer Evidence Pack. Evidence may be contractual, assurance, architecture, IaC/config export, customer-generated provider export, test evidence, interview, public-provider evidence or manual observation.
 
-## 6. Evidence
+## 7. Gate first, score second
 
-Evidence besitzt mindestens:
+A non-compensable minimum requirement cannot be averaged away by other strengths.
 
-- Quelle
-- Scope
-- Zeit/Version
-- Trust
-- Scope Fit
-- Applied State
+## 8. Structural risk
 
-Fehlende Evidence führt zu `UNVERIFIED`.
+Persistent dependencies such as lock-in or concentration are modelled as:
 
-## 7. Strukturelle Risiken
+`condition/exposure -> optional trigger -> consequence -> controls -> impact`.
 
-Lock-in, Konzentration oder Jurisdiktionsabhängigkeit sind nicht sinnvoll nur als seltenes Ereignis zu modellieren. Der Radar trennt:
+## 9. AI/Agent systems
 
-`strukturelle Exposition -> möglicher Trigger -> Auswirkung`.
-
-## 8. KI
-
-Für KI-/Agentensysteme werden mindestens getrennt betrachtet:
+At least:
 
 - Data Control
 - Model Portability
 - Agent/Tool/Policy Portability
-- Tool Authorization und Side Effects
-- Model-/Provider-/Terms-Drift
+- Tool Authorization / Side Effects
+- Model/Provider/Terms Drift
 
-## 9. Provenienz
+## 10. Provenance
 
-Alle Fragen, Regeln und Schwellen müssen externe Vorgabe, externe Ableitung, internes Methodendesign oder Projektannahme sichtbar machen.
+Every question/rule/threshold identifies whether it is external, externally derived, internal method design, project assumption or evidence observation.

@@ -1,0 +1,30 @@
+version: 1
+source: INT-02
+evidence_types:
+  contractual:
+    default_base_trust: 4
+    notes: signed contract/DPA/SLA; scope must match parties/service/version
+  assurance:
+    default_base_trust: 5
+    notes: independent report/certificate; audit period and scope required
+  architecture:
+    default_base_trust: 2
+    notes: customer architecture/CMDB/dependency documentation
+  iac_config:
+    default_base_trust: 3
+    notes: customer-provided redacted IaC/config export
+  provider_export:
+    default_base_trust: 3
+    notes: customer-generated provider inventory/config export
+  test_report:
+    default_base_trust: 4
+    notes: repeatable test/exercise report
+  interview:
+    default_base_trust: 1
+    notes: assertion/hypothesis pending corroboration
+  public_provider:
+    default_base_trust: 2
+    notes: establishes service capability, not customer applied state
+  manual_observation:
+    default_base_trust: 3
+    notes: structured observation during customer-controlled screenshare

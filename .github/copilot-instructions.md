@@ -1,1 +1,1 @@
-Use `AGENTS.md` as the canonical project instruction file. Before making changes, also read `project/PROJECT_STATE.yaml`, `project/HANDOFF.md`, and `project/NEXT_ACTIONS.yaml`. Follow provenance, evidence, review, and safety rules defined there.
+Read `AGENTS.md` first. The core is cloud-agnostic and customer-mediated; do not add provider credentials or provider-specific risk rules to the core. Read project state and next actions before implementing.

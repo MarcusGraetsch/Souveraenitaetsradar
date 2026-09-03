@@ -1,30 +1,42 @@
 # Domain Model
 
-Kernobjekte:
+## Core entities
 
-- Organization
-- Business Function
-- Workload
-- Provider
-- Legal Entity
-- Cloud/AI Service
-- Contract
-- Region / Processing Location
-- Subcontractor / Supply-Chain Node
-- Data Class
-- Identity Provider / Trust Anchor
-- Crypto Key / KMS
-- Model
-- Agent / Tool / Policy / Memory
-- Dependency
-- Control
-- Evidence
-- Claim
-- Question / Answer
-- Requirement
-- Capability
-- Gate Result
-- Risk Scenario
-- Treatment / Decision
+- `Assessment`
+- `Organization`
+- `BusinessFunction`
+- `Workload`
+- `Provider`
+- `Service`
+- `LegalEntity`
+- `Contract`
+- `Location`
+- `DataClass`
+- `IdentityTrustAnchor`
+- `KeyControlCapability`
+- `ModelOrAIService`
+- `Dependency`
+- `CommonCauseGroup`
+- `Evidence`
+- `Claim`
+- `ControlCapability`
+- `RiskScenario`
+- `GateRequirement`
+- `GateResult`
 
-Wichtige Relationen sind graphartig. Insbesondere Konzentration und Common-Cause-Risiko sollten nicht nur in einer flachen Workload-Tabelle modelliert werden.
+## Provider-neutral evidence relationship
+
+```text
+Evidence --supports/contradicts--> Claim
+Claim --describes--> GenericFact / Capability
+GenericFact --scoped-to--> Workload / Service / Contract / Dependency
+GateRequirement --evaluates--> Applied Capability
+```
+
+## Applied state
+
+Recommended ordered states:
+
+`asserted -> documented -> observed -> configured -> tested -> attested`
+
+Provider service documentation may additionally establish `available`, but `available` alone is not customer-specific Applied Capability.

@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sovradar"
-version = "0.1.0"
-description = "Deterministic core for the Souveränitätsradar method"
+version = "0.2.0"
+description = "Cloud-agnostic deterministic core for the Souveränitätsradar method"
 requires-python = ">=3.11"
+dependencies = ["jsonschema>=4,<5"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

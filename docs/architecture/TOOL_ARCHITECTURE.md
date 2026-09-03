@@ -1,29 +1,40 @@
-# Tool Architecture – Zielbild
+# Tool Architecture – Cloud-agnostic Target
 
 ```text
-Sources / Evidence
-  ├─ Standards & regulation
-  ├─ Provider docs / contracts
-  ├─ Technical collectors
-  ├─ CMDB / DataGerry / DORA-RoI-like inventory
-  └─ Human interviews / tests
-          │
-          ▼
-Evidence Ingestion & Normalization
-          │
-          ├─ provenance / version / hash
-          ├─ claim extraction
-          └─ scope / trust / freshness
-          │
-          ▼
-Domain Graph
+External / Customer-controlled sources
+  ├─ Contracts / DPA / SLA / Exit clauses
+  ├─ Architecture / CMDB / DataGerry / dependency exports
+  ├─ IaC / configuration exports / screenshots
+  ├─ Customer-generated provider inventory exports
+  ├─ Assurance reports / certificates
+  ├─ Public provider documentation
+  ├─ Interviews / workshops
+  └─ Exit / restore / failover / autonomy test reports
+             │
+             ▼
+      Customer Evidence Pack
+      ├─ manifest.json
+      ├─ evidence records
+      ├─ redacted attachments (outside Git)
+      └─ scope / provenance / timestamps
+             │
+             ▼
+Evidence Intake & Normalization
+  ├─ schema validation
+  ├─ evidence type / trust / scope / freshness
+  ├─ claim extraction / page or field locators
+  ├─ conflict detection
+  └─ provider adapter (optional translation only)
+             │
+             ▼
+Generic Domain Graph
   Workload ─ Provider ─ Service ─ Contract ─ Legal Entity
      │          │         │          │
-   Data       Region     Key       Subprovider
+   Data      Location   KeyControl  Subprovider
      │          │         │          │
-  Model ─ Agent/Tool ─ Identity ─ Dependency
-          │
-          ▼
+  Model ─ Agent/Tool ─ Identity ─ Dependency/CommonCause
+             │
+             ▼
 Deterministic Rule Engine
   ├─ applicability
   ├─ hard gates
@@ -31,20 +42,32 @@ Deterministic Rule Engine
   ├─ structural risk
   ├─ evidence confidence
   └─ decision state
-          │
-          ▼
+             │
+             ▼
 AI-assisted Analyst Layer
   ├─ document extraction
-  ├─ evidence matching
-  ├─ conflict detection
+  ├─ claim/evidence suggestions
+  ├─ conflict/gap detection
   ├─ follow-up questions
-  └─ explanation/draft reporting
-          │
-          ▼
+  └─ explanation/report drafting
+             │
+             ▼
 Human Review / Risk Acceptance
-          │
-          ▼
+             │
+             ▼
 Radar / Management Report / Measures
 ```
 
-KI sitzt **nicht** an der Stelle der deterministischen Gate-Entscheidung oder Risikoakzeptanz.
+## Key boundary
+
+The Radar does **not** need credentials to AWS, Azure, GCP or another provider. A customer may generate exports using their own approved tooling and submit them as evidence.
+
+## Provider adapters
+
+Adapters only translate evidence such as:
+
+- AWS KMS / Azure Key Vault / GCP Cloud KMS -> generic `KeyControlCapability`
+- AWS Config / Azure Resource Graph / GCP Asset Inventory -> generic Resource/Location/Dependency facts
+- provider-specific region names -> generic `Location` objects
+
+Hard gates and risk thresholds stay outside adapters.

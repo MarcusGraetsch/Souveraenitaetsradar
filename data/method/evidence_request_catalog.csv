@@ -1,0 +1,15 @@
+Request-ID;Gate-ID;Claim area;Acceptable evidence examples;Required for;Provider-neutral follow-up;Preferred applied state;Typical min trust;Provenance
+ER-001;HG-01;Contracting legal entity;"signed contract; order form; DPA; provider legal register";elevated/critical;Which legal entity contracts the service and which entity ultimately controls it?;documented;3;INT-02 + SRC-03/SRC-04
+ER-002;HG-01;Extraterritorial/legal exposure;"legal memo/TIA; contract; authority-access policy";context dependent;Which non-target jurisdictions can compel access/control?;documented;3-4;INT-02 + SRC-11
+ER-003;HG-02;Data storage/processing locations;"architecture; contract; provider export; screenshots; service config";when location matters;Where are primary, backup, support, failover and AI inference processed?;configured;3;INT-02 + SRC-03/SRC-04
+ER-004;HG-03;Key control;"key-management design; config export; key policy; test report";sensitive workloads;Who can technically use, disable, replace or recover keys?;configured/tested;3;INT-02 + SRC-04
+ER-005;HG-04;Data/config export;"export docs; sample export; API schema; IaC";all cloud services;Can data, metadata, config and policy be exported in usable form?;documented;2-3;INT-02 + SRC-12
+ER-006;HG-04;Exit test;migration/restore/cutover/rollback test report;elevated/critical;Has an alternative target been tested end-to-end?;tested;3-4;INT-02 + SRC-08/SRC-12
+ER-007;HG-05;Autonomy requirement/test;"BCM requirement; degraded-mode runbook; exercise report";where autonomy is required;How long must the workload run without critical external provider/support dependency?;tested;3;INT-02 + SRC-04/SRC-20
+ER-008;HG-06;Identity/trust anchors;"architecture; IdP/PKI/DNS/KMS docs; redacted policies; break-glass test";all;Which shared trust anchors can block multiple services?;configured/tested;3;INT-02
+ER-009;HG-07;Subproviders/dependencies;"subprocessor list; SBOM; CMDB; dependency map; contract";all;Which critical dependencies are not easily substitutable?;documented;2-3;INT-02 + SRC-06/SRC-08
+ER-010;HG-07;Concentration;"portfolio inventory; DORA-RoI-like export; CMDB";portfolio assessment;Which workloads share the same provider, IdP, DNS, network, KMS, model or subcontractor?;documented;3;INT-02 + SRC-08/SRC-09
+ER-011;HG-08;Security control implementation;"ISMS docs; config export; architecture; screenshots";all;Which required controls are actually configured?;configured;3;INT-02 + SRC-05/SRC-06
+ER-012;HG-08;Security effectiveness;"test/scan/IR/restore evidence; independent assurance";elevated/critical;Which controls were tested and with what exceptions?;tested/attested;4;INT-02 + SRC-05/SRC-07
+ER-013;KI;AI data/model behavior;"model terms; model card; architecture; AI config/export";AI workloads;What data is retained/trained/shared and how does model/provider/version change?;documented/configured;2-3;INT-02 + SRC-18/SRC-19
+ER-014;KI;Agent/tool authority;"tool schemas; RBAC/IAM policies; approval design; tests";agentic AI;Which tools have side effects and how are authorization/validation/approval enforced?;configured/tested;3;INT-02

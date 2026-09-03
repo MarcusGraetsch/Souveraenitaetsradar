@@ -1,37 +1,30 @@
-## Ziel
+## Ziel / Issue
 
-<!-- Was soll dieser PR erreichen? -->
+## Rolle des Implementierers
 
 ## Änderungen
 
-- 
-
 ## Provenienz / Quellen
 
-- [ ] externe Quelle/Fundstelle ergänzt, falls fachliche Aussage
-- [ ] interne Regeln/Schwellen als internes Methodendesign gekennzeichnet
-- [ ] keine Quellenwäsche
+- [ ] externe Aussagen haben Source-ID/Fundstelle
+- [ ] interne Regeln/Schwellen sind als intern gekennzeichnet
+- [ ] keine Provider-Selbstauskunft wird als Kunden-Applied-Capability ausgegeben
 
-## Tests / Validierung
+## Provider-Agnostik
 
-- [ ] `pytest`
-- [ ] `python tools/validate_repo.py`
-- [ ] zusätzliche fachliche/technische Tests dokumentiert
+- [ ] Core Rules enthalten keine providergebundene Semantik
+- [ ] provider-spezifische Änderungen liegen im Adapter/Research-Layer
+- [ ] keine Cloud-Credentials erforderlich
 
-## Risiko / Security / Datenschutz
+## Tests
 
-- [ ] keine Secrets/Kundendaten/ungeprüfte Raw Evidence
-- [ ] Evidence-Collector bleibt read-only, falls betroffen
-- [ ] Hard-Gate-/Scoring-Auswirkungen geprüft
+## Security / Kundendaten
 
-## Review
+- [ ] keine Secrets / Raw Kundenevidence
+- [ ] lokaler Evidence Intake ohne Netzwerkzugriff, sofern relevant
 
-Review-Klasse: <!-- A/B/C/D -->
+## Reviewklasse
 
-Offene Blocker:
+A / B / C / D / E
 
-- keine / ...
-
-## Handoff
-
-<!-- Was muss der nächste Mensch/Agent wissen? -->
+## Offene Risiken / Handoff

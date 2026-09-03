@@ -18,7 +18,5 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: python tools/validate_repo.py
       - run: python -m pytest -q
-      - name: Check shell syntax
-        run: bash -n tools/aws-bedrock-evidence/sovradar_aws_evidence_collect.sh
-      - name: Compile Python tools
-        run: python -m py_compile tools/aws-bedrock-evidence/r6_normalize_evidence.py src/sovradar/*.py
+      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py src/sovradar/*.py
+      - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example

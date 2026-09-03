@@ -1,78 +1,80 @@
 # Roadmap
 
-## R1 – BSI-200-3-Abgleich
+## R1 – BSI-200-3-Abgleich – abgeschlossen
 
-- vorhandene Risikokategorien gegen BSI 200-3 gemappt
+- vorhandene Kategorien gegen BSI 200-3 gemappt
 - fehlende elementare Gefährdungen ergänzt
-- Cloud-/KI-spezifische Risiken nicht fälschlich als BSI-Gefährdungen ausgegeben
+- Cloud-/KI-spezifische Risiken als eigene Radar-Risikotypen getrennt
 
-## R2 – Souveränitätsmethodik und Fragenmodell
+## R2 – Souveränitätsmethodik / Fragen – abgeschlossen
 
-- Souveränitätsrisiken G z.S1–G z.S12
-- 128 atomare Fragen in acht Domänen
-- Provenienzmodell und Source Register
-- Objekt-/Evidence-Modell
+- G z.S1–G z.S12
+- 128 atomare Fragen / acht Domänen
+- Provenienz- und Evidence-Modell
+- Objektmodell
 
-## R3 – Szenariokalibrierung
+## R3 – Szenariokalibrierung – abgeschlossen
 
-Sechs synthetische Szenarien, darunter:
+Sechs Szenarien. Kernergebnis: Security, Souveränität und Evidence müssen getrennt bleiben.
 
-- kritischer Public-Sector-PaaS
-- souveräner EU-/DE-SaaS
-- Managed generative KI
-- KI-Agent auf Managed Cloud
-- KI-Agent mit weitgehend selbst kontrollierter Plattform
-- Bürgerwebseite mit öffentlichen Daten
-
-Kernergebnis: Security und Souveränität müssen getrennt bleiben.
-
-## R4 – Bewertungslogik
+## R4 – Bewertungslogik – abgeschlossen / weiter zu kalibrieren
 
 - Hard Gates
 - Requirement-/Capability-Level
 - Evidence Gate
-- Exit-, Autonomie-, Konzentrations- und KI-Portabilitätsfaktoren
+- Exit-/Autonomie-/Konzentrations-/KI-Portabilitätsfaktoren
 - deterministische Decision States
 
-## R5 – Public Evidence Pilot
+## R5 – Public Evidence Pilot – abgeschlossen
 
-- reale Legal-/Provider-/Security-/Compliance-Evidence für Amazon Bedrock
-- Claim → Evidence → Gate/Risk Mapping
-- Effective Trust und Scope Fit
+Amazon Bedrock wurde als realer Provider-Evidence-Fall verwendet. Wichtigste Erkenntnisse:
+
 - Provider Capability ≠ Applied Capability
+- Claims können modell-/region-/vertragsabhängig sein
+- Featureanzahl ist keine Security-Metrik
+- Assurance braucht Scope/Version/Periode
 
-## R6 – Technical Evidence Pilot – aktuell
+R5 bleibt **Beispiel**, nicht Providerfokus.
 
-- read-only Collector
-- Chain of Custody
-- Normalizer
-- technische Gate-Automation
-- nächster Schritt: realer Account-Lauf
+## R6 – Customer-mediated, cloud-agnostic Evidence – aktuell
 
-## R7 – Evidence-/Compliance-Vertiefung
+### R6A
 
-Geplant:
+- Evidence Pack Schema
+- Evidence Request Catalog
+- lokaler Validator/Normalizer
+- generische Domain-Modelle
+- Gate -> Claim -> Evidence Mapping
+- synthetischer providerneutraler Pilot
 
-- C5:2026 Mapping
-- version-aware Assurance
-- DORA-/NIS2-/C3A-/EU-CSF-Crosswalk verfeinern
+### R6B
+
+- erster Provider Adapter als reine Übersetzungsschicht
+- zweiter Adapter eines anderen Provider-Typs zur Agnostik-Prüfung
+- Dokument-/Vertrags-/Assurance-Pipeline
+
+## R7 – Validierung und Compliance-Vertiefung
+
+- C5:2026 Detailmapping
+- Framework-Versionierung
 - Portfolio-/Dependency-Graph
-- Drift Detection über wiederholte Evidence Snapshots
+- Inter-Rater-Tests
+- Kundenpilot mit redigiertem Evidence Pack
 
 ## MVP
 
 - Assessment CLI/API
+- Evidence Pack Intake
 - Rule Engine
-- Evidence Store
-- Question/Follow-up Engine
-- KI-gestützte Evidence-Extraktion und Erklärungen
-- Berater-Review-/Freigabeprozess
-- Radar-/Managementausgabe
+- Question-/Follow-up Engine
+- AI-assisted Extraction/Conflict Detection/Explanation
+- Human Review Workflow
+- Radar-/Management Report
 
 ## Später
 
-- weitere Provider-Collector
-- DataGerry/CMDB-Import
-- DORA-RoI-artiger Dependency Import
-- Continuous Reassessment / Sovereignty Drift Monitoring
 - Web UI
+- DataGerry/CMDB-Import
+- DORA-RoI-artige Imports
+- Provider Adapter Library
+- Continuous Reassessment aus wiederholten kundenbereitgestellten Snapshots

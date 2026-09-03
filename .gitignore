@@ -1,21 +1,27 @@
-# Python
 __pycache__/
-*.py[cod]
 .pytest_cache/
 .venv/
-
-# Local evidence / sensitive assessment outputs
-r6_evidence/
-evidence/raw/
-evidence/private/
-*.secret.json
-*.credentials*
+venv/
+*.pyc
+.DS_Store
 .env
 .env.*
+*.pem
+*.key
+*.p12
+*.pfx
 
-# Office temp files
-~$*.xlsx
+# Customer evidence / secure assessment workspaces
+customer-evidence/
+evidence-packs/
+raw-evidence/
+secure-workspace/
 
-# IDE
-.vscode/
-.idea/
+# Common cloud credential files
+.aws/
+.azure/
+.config/gcloud/
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+!*.example.tfvars

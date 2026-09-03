@@ -1,78 +1,95 @@
 # Souveränitätsradar
 
-Der **Souveränitätsradar** ist ein Beratungs- und Softwareprojekt zur nachvollziehbaren Bewertung digitaler Souveränitätsrisiken von Cloud-, Plattform- und KI-Lösungen.
+Der **Souveränitätsradar** ist ein Beratungs- und Softwareprojekt zur nachvollziehbaren Bewertung digitaler Souveränitätsrisiken von Cloud-, Plattform-, SaaS- und KI-Lösungen.
 
-Das Projekt verbindet klassische Informationssicherheits-Risikoanalyse mit digitalen Souveränitätsdimensionen, regulatorischen Anforderungen, Evidenzbewertung und einer später KI-gestützten Assessment-Engine.
+Das Projekt verbindet klassische Informationssicherheits-Risikoanalyse mit digitalen Souveränitätsdimensionen, Compliance-/Governance-Anforderungen, Evidenzbewertung und einer später KI-gestützten Assessment-Engine.
 
-## Zielbild
+## Aktuelle Leitentscheidung
 
-Das Ergebnis soll nicht nur ein Fragebogen oder ein einzelner Score sein. Der Radar trennt bewusst:
+Der Radar ist **cloud-agnostisch** und benötigt **keinen direkten Zugang zu Kunden-Cloud-Accounts**. Der Standardprozess arbeitet mit einem **Customer Evidence Pack**:
 
-1. **Provider / Service Capability** – welche souveränitäts- und sicherheitsrelevanten Fähigkeiten ein Dienst grundsätzlich anbietet.
-2. **Applied Capability** – welche Fähigkeiten im konkreten Kunden- und Architekturkontext tatsächlich ausgewählt, konfiguriert, getestet oder auditiert sind.
-3. **Workload Sovereignty Risk** – welches Souveränitätsrisiko für den konkreten Geschäftsprozess verbleibt.
-4. **klassisches Informationssicherheits- und Betriebsrisiko** – damit „mehr Souveränität“ nicht automatisch als „mehr Sicherheit“ ausgegeben wird.
-5. **Evidence Confidence** – wie belastbar die Aussagen sind.
+- Verträge, DPA, SLA, Exit-Regelungen
+- Architektur- und Dependency-Dokumentation
+- CMDB-/DataGerry-/DORA-RoI-artige Exporte
+- IaC und redigierte Konfigurationsauszüge
+- vom Kunden erzeugte Provider-Exporte
+- Audit-/Assurance-Nachweise
+- Screenshare-/Workshop-Beobachtungen
+- Testprotokolle für Exit, Restore, Failover, Key Control und Autonomie
+- öffentliche Provider-Dokumentation als Nachweis der **Service Capability**, nicht der Kundenkonfiguration
 
-Die Methode arbeitet nach dem Grundsatz **Gate first, score second**: nicht kompensierbare Mindestanforderungen werden vor einem gewichteten Vergleich geprüft.
+AWS, Azure, GCP, OpenStack, Kubernetes, europäische Sovereign-Cloud-Angebote oder SaaS werden über dasselbe generische Domänen- und Regelmodell bewertet. Provider-spezifische Adapter übersetzen nur Begriffe und Evidence in das generische Modell; sie enthalten **keine eigene Risikomethode**.
+
+## Was der Radar getrennt ausweist
+
+1. **Provider / Service Capability** – was ein Dienst grundsätzlich anbietet oder zusichert.
+2. **Applied Capability** – was der Kunde tatsächlich ausgewählt, konfiguriert, dokumentiert, getestet oder auditiert hat.
+3. **Workload Sovereignty Risk** – verbleibende souveränitätsbezogene Risiken des konkreten Geschäftsprozesses.
+4. **klassisches Informationssicherheits- und Betriebsrisiko** – damit mehr Souveränität nicht automatisch als mehr Sicherheit gilt.
+5. **Evidence Confidence** – Belastbarkeit und Scope der verwendeten Nachweise.
+
+Die Methode arbeitet nach **Gate first, score second**: nicht kompensierbare Mindestanforderungen werden vor gewichteten Vergleichswerten geprüft.
 
 ## Aktueller Stand
 
-**Projektphase:** R6 – technischer Evidence-Pilot  
-**Methodenmodell:** v0.9  
-**Status:** Methodik R1–R5 konsolidiert; read-only AWS-Bedrock-Evidence-Collector und Normalizer vorbereitet; echter autorisierter Account-Lauf steht aus.
+- **Projektphase:** R6 – Customer-mediated Evidence Pilot
+- **Methodenmodell:** v1.0
+- **R1–R5:** konsolidiert
+- **R6:** AWS-Collector-Idee als Standardpfad verworfen; cloud-agnostische Evidence-Architektur implementiert
+- **nächster Meilenstein:** ein providerneutraler Evidence-Pack-Pilot mit synthetischen oder vom Kunden exportierten Nachweisen
 
-Siehe:
+### Einstieg
 
-- [`project/PROJECT_STATE.yaml`](project/PROJECT_STATE.yaml) – maschinenlesbarer aktueller Zustand
-- [`project/HANDOFF.md`](project/HANDOFF.md) – Einstieg für neue Menschen und Agenten
-- [`project/NEXT_ACTIONS.yaml`](project/NEXT_ACTIONS.yaml) – priorisierte nächsten Schritte
-- [`AGENTS.md`](AGENTS.md) – verbindliche Arbeitsregeln für KI-Agenten
-- [`docs/method/METHOD_OVERVIEW.md`](docs/method/METHOD_OVERVIEW.md) – fachliche Methodik
-- [`docs/project/REVIEW_PROCESS.md`](docs/project/REVIEW_PROCESS.md) – Review- und Merge-Prozess
-- [`data/method/`](data/method/) – maschinenlesbare Exporte des aktuellen Arbeitsmodells
-- [`artifacts/method/README.md`](artifacts/method/README.md) – Hinweis zum binären Methoden-Workbook
+- [`AGENTS.md`](AGENTS.md) – kanonische Arbeitsregeln für alle KI-Agenten
+- [`project/PROJECT_STATE.yaml`](project/PROJECT_STATE.yaml) – aktueller Zustand
+- [`project/HANDOFF.md`](project/HANDOFF.md) – Übergabe an neuen Menschen/Agenten
+- [`project/NEXT_ACTIONS.yaml`](project/NEXT_ACTIONS.yaml) – priorisiertes Backlog
+- [`project/DECISIONS.yaml`](project/DECISIONS.yaml) – akzeptierte Entscheidungen
+- [`docs/architecture/EVIDENCE_ACQUISITION_ARCHITECTURE.md`](docs/architecture/EVIDENCE_ACQUISITION_ARCHITECTURE.md)
+- [`docs/project/MULTI_AGENT_PROJECT_MANAGEMENT.md`](docs/project/MULTI_AGENT_PROJECT_MANAGEMENT.md)
+- [`data/method/`](data/method/) – maschinenlesbare Methodik
+- [`artifacts/method/METHOD_WORKBOOK_MANIFEST.md`](artifacts/method/METHOD_WORKBOOK_MANIFEST.md) – Manifest des erzeugten Methoden-Workbooks; kanonische Daten liegen unter `data/method/`
 
 ## Repository-Struktur
 
 ```text
 .
-├── AGENTS.md                    # kanonische Agentenregeln
-├── project/                     # Zustand, Roadmap, Handoffs, Entscheidungen
+├── AGENTS.md
+├── OPENAI.md / CLAUDE.md / GEMINI.md / CODEX.md
+├── project/                         # State, Roadmap, Handoff, Decisions, Agent Logs
 ├── docs/
-│   ├── method/                  # fachliche Methode
-│   ├── architecture/            # Zielarchitektur und ADRs
-│   ├── project/                 # Review, DoD, Release, PM-Regeln
-│   └── history/                 # Entwicklung R1–R6
-├── data/method/                 # maschinenlesbare Exporte aus dem Methodenmodell
-├── config/rules/                # versionierte interne Default-Regeln
-├── schemas/                     # JSON-Schemas für Tool-/API-Entwicklung
-├── src/sovradar/                # erster deterministischer Methodenkern
-├── tests/                       # Unit Tests für Regelengine
-├── tools/aws-bedrock-evidence/  # R6 read-only Evidence Collector
-├── artifacts/method/            # versioniertes Workbook
-└── .github/                     # PR/Issue Templates, CODEOWNERS, CI
+│   ├── method/                      # fachliche Methodik
+│   ├── architecture/                # Architektur + ADRs
+│   ├── project/                     # Projektmanagement, Review, DoD, Releases
+│   └── history/                     # R1–R6 Historie inkl. verworfener Ansätze
+├── data/
+│   ├── method/                      # aktuelle maschinenlesbare Methodik
+│   ├── templates/                   # providerneutrale Evidence-Pack-Templates
+│   └── history/                     # historische Pilotdaten
+├── config/                          # versionierte Regeln und Evidence-Typen
+├── schemas/                         # JSON Schemas
+├── src/sovradar/                    # deterministischer Methodenkern
+├── tests/                           # Unit-/Schema-/Intake-Tests
+├── tools/evidence-pack/             # lokaler, credential-freier Evidence-Pack-Workflow
+├── artifacts/method/                # aktuelles Methoden-Workbook
+└── .github/                         # CI, Templates, CODEOWNERS
 ```
 
-## Arbeitsprinzipien
+## Sicherheits- und Beratungsprinzip
 
-- **Provenienzpflicht:** externe Quellen, interne Ableitungen und Projektannahmen werden getrennt ausgewiesen.
-- **Keine Quellenwäsche:** eine interne Formel wird nicht als Normvorgabe dargestellt.
-- **Deterministische Entscheidung vor generativer Erklärung:** Regeln, Gates und Evidence States sollen maschinenlesbar und testbar sein.
-- **KI mit Human Review:** Agenten dürfen recherchieren, extrahieren, planen, entwickeln und Reviews vorbereiten; fachliche Risikoakzeptanz und produktive Freigabe bleiben menschliche Entscheidungen.
-- **Keine stillen Annahmen:** fehlende Evidenz wird `UNVERIFIED`, nicht automatisch `PASS` oder `FAIL`.
-- **Review vor Merge:** substanzielle Änderungen laufen über Branch + Pull Request.
+Das Projekt soll **nicht** voraussetzen, dass Kunden uns Root-, Owner- oder sonstige Cloud-Credentials geben. Falls ein Kunde freiwillig technische Exporte erzeugt, geschieht dies unter seiner Kontrolle. Unsere Software verarbeitet bereitgestellte Evidence lokal oder in einer explizit freigegebenen Projektumgebung.
+
+Raw Kundenevidence gehört standardmäßig **nicht** in dieses Repository.
 
 ## Schnellstart für Agenten
 
 1. `AGENTS.md` vollständig lesen.
-2. `project/PROJECT_STATE.yaml` lesen.
-3. `project/HANDOFF.md` lesen.
-4. `project/NEXT_ACTIONS.yaml` prüfen.
-5. Relevante ADRs und Methodendokumente lesen.
-6. Vor Änderungen bestehende Issues/PRs prüfen.
-7. Nach Arbeit einen Session-Log unter `project/agent-log/` anlegen/aktualisieren und `project/PROJECT_STATE.yaml` nur ändern, wenn sich der Gesamtzustand tatsächlich geändert hat.
+2. `project/PROJECT_STATE.yaml`, `project/HANDOFF.md`, `project/NEXT_ACTIONS.yaml`, `project/DECISIONS.yaml` lesen.
+3. Offene Issues/PRs prüfen.
+4. Für substanzielle Arbeit einen Plan und eine Rolle nennen.
+5. Änderungen auf Branch + PR durchführen, Tests/Provenienz aktualisieren.
+6. Session-Log und Handoff/State nur bei tatsächlicher Zustandsänderung aktualisieren.
 
-## Lizenz / externe Quellen
+## Externe Quellen
 
-Externe Standards, regulatorische Dokumente und Provider-Inhalte werden nicht ungeprüft in das Repository kopiert. Das Repository speichert soweit möglich **Referenzen, Fundstellen, Ableitungen und eigene Arbeitsartefakte**. Bei lizenz- oder urheberrechtlich eingeschränkten Quellen ist der Originaltext außerhalb des Repositories zu beziehen.
+Normen, regulatorische Dokumente und Provider-Inhalte werden nicht ungeprüft oder lizenzwidrig kopiert. Das Repository speichert Referenzen, Fundstellen, Ableitungen und eigene Arbeitsartefakte. Die Herkunft fachlicher Regeln ist über `data/method/source_register.csv` und die Provenienzfelder nachvollziehbar.
