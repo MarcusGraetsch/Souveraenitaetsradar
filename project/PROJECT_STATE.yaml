@@ -2,8 +2,8 @@ project:
   name: Souveraenitaetsradar
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
-  current_phase: MVP-VALIDATION
-  current_phase_name: synthetic-consultant-walkthrough
+  current_phase: MVP-01C
+  current_phase_name: progressive-guided-workflow
   method_version: "1.0"
   product_version: "0.3.0-dev"
   updated: "2026-09-03"
@@ -34,10 +34,12 @@ current_truth:
   - "Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
   - Gate-Requirements werden aus internen Kritikalitäts-Templates vorbelegt und bleiben pro Gate als Consultant-Override editierbar.
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
-  - NEXT-114 ist aktiv und validiert den vollständigen Consultant-Ablauf gegen eine laufende Installation.
-  - Der synthetische NEXT-114-Fall ist providerneutral und markiert alle technischen/vertraglichen Merkmale ausdrücklich als Testannahmen.
-  - Der Validierungslauf soll gezielt PASS, FAIL und UNVERIFIED erzeugen und zusätzlich beweisen, dass ein LLM-Import keine Claims oder Gate-Ergebnisse automatisch ändert.
-  - Der Lifecycle-Test nutzt einen Clean-Checkout, install.sh, stop/start/test und uninstall.sh inklusive Prüfung der lokalen Datenlöschung.
+  - "NEXT-114 ist erfolgreich validiert: GitHub Actions Run 33789278423 war für python, frontend, compose-smoke und consultant-walkthrough vollständig grün."
+  - "NEXT-114 reproduzierte im laufenden Produkt HG-01 PASS, HG-03 FAIL und HG-04 UNVERIFIED; der LLM-Import änderte weder Claim-Anzahl noch Gate States."
+  - "NEXT-114 validierte Clean Checkout, install.sh, stop.sh, start.sh, test.sh und vollständige Deinstallation; Artifact-ID 9906680972 enthält den maschinenlesbaren Report."
+  - Der synthetische NEXT-114-Fall ist providerneutral; alle technischen/vertraglichen Merkmale sind ausdrücklich Testannahmen und keine Providerfakten.
+  - "Wichtigstes NEXT-114-Finding: beim breit gescopten KI-Agenten lagen 124 von 128 Fragen im Standardpfad, davon 83 applicable und 41 needs_review."
+  - NEXT-115 / Issue #20 ist deshalb der nächste P0-Schritt und soll den Workflow deterministisch in Screening, Klärung und Deep Dive stufen, ohne needs_review zu verstecken.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
 primary_artifacts:
@@ -52,6 +54,7 @@ primary_artifacts:
   evidence_intake: src/sovradar/intake.py
   synthetic_walkthrough: tools/validation/synthetic_consultant_walkthrough.py
   validation_runbook: docs/validation/NEXT_114_SYNTHETIC_WALKTHROUGH.md
+  validation_result: docs/validation/NEXT_114_RESULT_2026-09-03.md
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
   question_bank: data/method/question_bank/
   risk_taxonomy: data/method/risk_taxonomy.csv
@@ -74,6 +77,7 @@ quality_gates:
   llm_proposal_may_change_gate_without_human_review: false
   gate_requirement_defaults_are_regulatory_requirements: false
   synthetic_provider_assumptions_may_be_presented_as_provider_facts: false
+  llm_may_decide_question_applicability: false
 
 blockers: []
 
@@ -88,16 +92,18 @@ open_method_questions:
     text: Noch nicht deterministisch operationalisierte natürliche Anwendbarkeitsregeln bleiben needs_review und müssen schrittweise strukturiert werden.
   - id: OMQ-005
     text: Die interne Aggregation mehrerer Capability-Claims pro Gate muss im späteren Inter-Rater-/Kundenpilot kalibriert werden.
+  - id: OMQ-006
+    text: Der progressive Fragenworkflow muss priorisieren, ohne komplexe Workloads durch stilles Wegfiltern methodisch zu verengen.
 
 next_milestone:
-  id: NEXT-114
-  name: synthetic-consultant-walkthrough
-  github_issue: 18
-  branch: feature/next-114-synthetic-walkthrough
+  id: NEXT-115
+  name: progressive-guided-workflow
+  github_issue: 20
+  baseline: "NEXT-114: komplexer KI-Agent 124/128 im Standardpfad; 83 applicable, 41 needs_review."
   exit_criteria:
-    - Clean clone/install/test workflow wird praktisch durchlaufen.
-    - Ein synthetisches Assessment wird ohne Excel-Bedienung von Scope bis Hard Gates abgeschlossen.
-    - Mindestens ein PASS, ein FAIL und ein UNVERIFIED werden gezielt demonstriert.
-    - LLM Bridge wird ohne automatische Entscheidungsübernahme getestet.
-    - UX- und Methodikprobleme werden als eigene Issues dokumentiert.
-    - Stop/Start und vollständige Deinstallation werden validiert.
+    - Der Consultant sieht zuerst eine priorisierte Screening-/Arbeitsqueue statt fast aller Fragen gleichzeitig.
+    - needs_review bleibt in einer sichtbaren Klärungsqueue.
+    - Deep-Dive-Fragen werden deterministisch durch Scope, Answers, Evidence Gaps oder Gate State aktiviert.
+    - Alle Fragen bleiben jederzeit inspizierbar.
+    - LLM entscheidet nicht über Applicability oder Workflow-Stufe.
+    - Ein einfacher Workload bleibt deutlich kürzer als der komplexe KI-Agent-Fall.
