@@ -2,99 +2,104 @@
 
 ## Kurzfassung
 
-Der Souveränitätsradar besteht aus zwei getrennten Ebenen: **Methodenkern** (cloud-agnostische Assessment-Methode) und **Produkt** (lokal installierbare Consultant-Webanwendung). Die Excel-Arbeitsmappe v1.0 ist Methoden-/Entwicklungsreferenz, nicht operative Benutzeroberfläche.
+Der Souveränitätsradar hat einen cloud-agnostischen Methodenkern und eine lokal installierbare Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI.
 
-MVP-01A und NEXT-111 Guided Workflow sind auf `main`. Die NEXT-112-Core-Foundation **Evidence → Claim → Hard Gate** ist ebenfalls auf `main`. Aktueller Development-Fokus ist die Persistenz/API/UI der acht Hard Gates.
+MVP-01A, Guided Workflow, Evidence Intake und das providerneutrale Hard-Gate-Mapping sind auf `main`. NEXT-112 ist implementiert und nach grüner CI bereit zum Merge: Evidence Review → Human-reviewed Claim → deterministische Hard-Gate-Bewertung ist jetzt durchgängig in Backend und UI vorhanden.
 
-## Produktarchitektur
-
-MVP-01 verwendet React/TypeScript/Vite, FastAPI, PostgreSQL, lokalen Dokument-Speicher `.runtime/`, Docker Compose und eine Copy/Paste **LLM Bridge** ohne API-Keys. Nicht im MVP: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
-
-Consultant-Workflow:
+## Consultant-Workflow
 
 ```text
 Assessment
   -> Scope / Kritikalität / CIA
   -> Relevanzprofil
   -> Guided Questions
-  -> Evidence erfassen und reviewen
+  -> Evidence erfassen
+  -> Evidence Review / Trust
   -> optional LLM Bridge
   -> Human-reviewed Claims
+  -> Gate Requirements prüfen/überschreiben
   -> Hard Gates PASS / FAIL / UNVERIFIED / N/A
-  -> Risks / Management Ergebnis
+  -> Ergebnis
 ```
 
-## Evidence → Claim → Hard Gate
+## NEXT-112 – verbindliche Regeln
 
-Roh-Evidence oder LLM-Proposals wirken **nie direkt** auf einen Gate-Zustand.
-
-Ein Gate wird ausschließlich aus human-bestätigten Claims und geprüfter Evidence deterministisch ausgewertet:
-
-- `Claim.review_status` muss `reviewed` oder `approved` sein.
+- Roh-Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
+- Nur `reviewed`/`approved` Claims wirken.
 - Capability-Claims nutzen das interne Radar-Level 0–4.
-- Jeder Capability-Claim benötigt reviewed/approved Evidence, damit Evidence Trust ableitbar ist.
-- Mehrere bestätigte Capability-Claims werden konservativ aggregiert: die schwächste Capability begrenzt das Gate.
-- Pro Claim kann der stärkste passende Nachweis tragen; der Gate-Trust wird durch den schwächsten belegten Capability-Claim begrenzt.
-- Fehlende oder nicht ausreichend geprüfte Evidence bleibt `UNVERIFIED`.
+- Jeder Capability-Claim benötigt reviewed/approved Evidence für eine verifizierte Aussage.
+- Mehrere Claims werden konservativ aggregiert: schwächste bestätigte Capability begrenzt das Gate.
+- Pro Claim kann der stärkste passende Nachweis tragen; Gate-Trust wird durch den schwächsten belegten Capability-Claim begrenzt.
+- Fehlende/unzureichende Evidence bleibt `UNVERIFIED`.
 - Requirement 0 ergibt `N/A`.
-- Technisches Requirement unterschritten ergibt `FAIL`, auch bei starker Evidence.
-
-Diese Aggregation ist interne Operationalisierung (`INT-03`), keine externe Normformel.
+- Technische Unterschreitung ergibt `FAIL`, auch bei starker Evidence.
+- Die Aggregation ist interne Operationalisierung `INT-03`, keine externe Normformel.
 
 ## Gate Requirements
 
-Die R4-Templates werden im MVP nach Kritikalität vorbelegt:
+MVP-Default nach Kritikalität:
 
 - low → Basis
 - medium → Standard
 - high → Elevated
 - critical → Critical
 
-Das ist **nur eine interne Startkonfiguration**. Der Berater kann jedes Gate auf Basis von Rechtslage, Schutzbedarf, Policy und Risikoappetit auf 0–4 überschreiben. Overrides werden als `consultant-override` gespeichert.
+Das ist eine interne Startkonfiguration. Jeder Gate-Wert ist 0–4 editierbar und wird als `consultant-override` gespeichert. Niemals als gesetzliche oder normative Vorgabe darstellen.
 
 ## Acht Hard Gates
 
-1. HG-01 Jurisdiktion & Effective Control
-2. HG-02 Datenresidenz & Verarbeitung
-3. HG-03 Schlüsselhoheit
-4. HG-04 Exit & Portabilität
-5. HG-05 Operational Autonomy
-6. HG-06 Identity & Trust Anchors
-7. HG-07 Supply Chain Critical Dependencies
-8. HG-08 Security Minimum
+HG-01 Jurisdiktion & Effective Control; HG-02 Datenresidenz & Verarbeitung; HG-03 Schlüsselhoheit; HG-04 Exit & Portabilität; HG-05 Operational Autonomy; HG-06 Identity & Trust Anchors; HG-07 Supply Chain Critical Dependencies; HG-08 Security Minimum.
 
-Die fachliche Source-of-Truth bleibt `data/method/r4_hard_gates.csv`; akzeptable Evidence/Follow-ups stehen in `data/method/evidence_request_catalog.csv`.
+Fachliche Source-of-Truth: `data/method/r4_hard_gates.csv` und `data/method/evidence_request_catalog.csv`.
 
-## Aktueller Branch
+## Produktstatus
 
-`feature/next-112-gate-api-ui`
+Implementiert:
 
-Bereits umgesetzt:
+- React/Vite Consultant UI
+- FastAPI + PostgreSQL
+- lokaler Dokument-Speicher
+- Install/Start/Stop/Test/Uninstall-Lifecycle
+- Relevanzprofil + Guided Questions
+- lokale Evidence-Erfassung
+- Copy/Paste LLM Bridge
+- Evidence Review mit Applied State und Trust-Dimensionen
+- Claim CRUD mit Evidence-/Question-Links und Human Review
+- Gate Requirement Defaults + Consultant Override
+- acht Hard-Gate-Karten mit Reasons und Evidence Requests
+- Ergebnisübersicht
 
-- PostgreSQL-Persistenz für `EvidenceReview`, `AssessmentClaim`, `GateRequirement`
-- Evidence Review mit Applied State, Base Trust, Scope Fit, Freshness Fit und Review Status
-- Claim CRUD mit Gate-/Evidence-/Question-Links und Human Review State
-- Gate-Requirement Defaults + Consultant Override
-- API für alle acht Gate-Auswertungen inklusive Reasons und Evidence Requests
-- Consultant-UI: Evidence Review, Hard-Gate-Karten, Requirement-Override, Claim-Erfassung und Ergebnisübersicht
-- API-Tests für PASS/FAIL/UNVERIFIED, Human-Review-Grenzen und ungültige Links
-
-Noch vor Merge zu erledigen: CI prüfen, etwaige Fehler korrigieren, Projektstate/Agent-Log finalisieren, Self-Review und Merge.
+PR #17 enthält die NEXT-112-Produktintegration. Eine vollständige CI auf dem Feature-Stand war grün für Core/API Tests, Frontend Build und Docker Compose Smoke. Nach finalem State-Commit CI nochmals prüfen und dann squash-mergen.
 
 ## Regeln für andere Agenten
 
 - `AGENTS.md` zuerst lesen.
-- Keine Cloud-Credentials anfordern.
-- Keine LLM API im MVP-01 ohne neue Decision einführen.
-- Keine Provider-spezifische Logik in Gate-/Rule-Core einbauen.
+- Keine Kunden-Cloud-Credentials anfordern.
+- Keine LLM API im MVP ohne neue Decision.
+- Keine Provider-spezifische Logik in Gate-/Rule-Core.
 - Raw Kundenevidence nie committen.
-- LLM-Proposals niemals automatisch als reviewed Claim oder Answer übernehmen.
+- LLM-Proposals niemals automatisch als reviewed Claim/Answer übernehmen.
 - Fehlende Evidence niemals automatisch als FAIL interpretieren.
 - Requirement-Defaults niemals als regulatorische Vorgabe darstellen.
 - Unklare Applicability nie still ausblenden.
 - `./uninstall.sh` muss alle erzeugten Runtime-Daten löschen können.
-- substantielle Änderungen über Issue/Branch/PR/CI/Agent-Log führen.
+- substantielle Änderungen via Issue/Branch/PR/CI/Agent-Log.
 
-## Danach
+## Nächster Schritt – NEXT-114 / Issue #18
 
-Nach NEXT-112 sollte zuerst ein vollständiger synthetischer Consultant-Durchlauf auf einer sauberen Installation erfolgen, bevor weitere methodische oder technische Komplexität ergänzt wird. Damit prüfen wir, ob der reale Beratungsworkflow verständlich und vollständig ist.
+**Kein weiterer Feature-Ausbau zuerst.** Einen vollständigen synthetischen Consultant-Durchlauf auf sauberer Installation durchführen:
+
+1. Clone / Install / Test
+2. synthetisches Assessment + Relevanzprofil
+3. Guided Questions
+4. synthetische Customer-mediated Evidence
+5. Evidence Review
+6. optional LLM Bridge
+7. Human-reviewed Claims
+8. Gate Requirements prüfen
+9. alle acht Hard Gates bewerten
+10. gezielt mindestens PASS, FAIL und UNVERIFIED zeigen
+11. UX-/Methodikprobleme als Issues erfassen
+12. Stop/Start und destruktive Deinstallation testen
+
+Erst danach NEXT-113 (Backup/Export/Consultant Report) priorisieren.
