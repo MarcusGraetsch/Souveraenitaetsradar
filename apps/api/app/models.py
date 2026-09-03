@@ -30,9 +30,26 @@ class Assessment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
+    profile: Mapped[AssessmentProfile | None] = relationship(
+        back_populates="assessment", cascade="all, delete-orphan", uselist=False
+    )
     answers: Mapped[list[Answer]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     evidence: Mapped[list[Evidence]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     llm_imports: Mapped[list[LlmImport]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
+
+
+class AssessmentProfile(Base):
+    __tablename__ = "assessment_profiles"
+
+    assessment_id: Mapped[str] = mapped_column(
+        ForeignKey("assessments.id", ondelete="CASCADE"), primary_key=True
+    )
+    profile_json: Mapped[str] = mapped_column(Text, default="{}")
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+    assessment: Mapped[Assessment] = relationship(back_populates="profile")
 
 
 class Answer(Base):
