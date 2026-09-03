@@ -1,4 +1,4 @@
-version: 5
+version: 6
 updated: "2026-09-03"
 decisions:
   - id: DEC-001
@@ -116,4 +116,9 @@ decisions:
     status: accepted
     title: Hard-Gate-Aggregation ist konservativ und evidenzbegrenzt
     rationale: Pro Gate begrenzt die schwächste bestätigte Capability-Aussage das Applied-Capability-Level; jeder Capability-Claim benötigt reviewed/approved Evidence. Fehlende oder unzureichende Evidence führt zu UNVERIFIED. Diese Aggregation ist interne Operationalisierung und keine externe Normformel.
+    source: INT-03
+  - id: DEC-024
+    status: accepted
+    title: Gate-Requirement-Templates werden nach Kritikalität vorbelegt und bleiben editierbar
+    rationale: Für den MVP wird low→Basis, medium→Standard, high→Elevated und critical→Critical als interne Startkonfiguration verwendet. Der Berater muss jedes Gate auf Basis von Rechtslage, Schutzbedarf, Policy und Risikoappetit anpassen können; ein Override wird explizit als Consultant-Override gespeichert.
     source: INT-03
