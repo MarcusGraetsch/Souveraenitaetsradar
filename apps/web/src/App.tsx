@@ -2,214 +2,115 @@ import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { api } from './api'
 import type {
   Answer,
+  AppliedState,
   Assessment,
+  Claim,
+  ClaimReviewStatus,
   Evidence,
+  EvidenceReview,
+  EvidenceReviewStatus,
+  GateEvaluation,
   LlmImport,
   Question,
   RelevanceProfile,
 } from './types'
 
-const tabs = ['Übersicht', 'Relevanzprofil', 'Fragen', 'Evidence', 'LLM Bridge', 'Ergebnis'] as const
+const tabs = ['Übersicht','Relevanzprofil','Fragen','Evidence','LLM Bridge','Hard Gates','Ergebnis'] as const
 type Tab = typeof tabs[number]
 
 export function App(){
-  const [assessments,setAssessments]=useState<Assessment[]>([])
-  const [selected,setSelected]=useState<Assessment|null>(null)
-  const [tab,setTab]=useState<Tab>('Übersicht')
-  const [error,setError]=useState('')
-
-  const refresh=async()=>{
-    try{
-      setAssessments(await api.assessments())
-      setError('')
-    }catch(e){
-      setError(String(e))
-    }
-  }
+  const[assessments,setAssessments]=useState<Assessment[]>([])
+  const[selected,setSelected]=useState<Assessment|null>(null)
+  const[tab,setTab]=useState<Tab>('Übersicht')
+  const[error,setError]=useState('')
+  const refresh=async()=>{try{setAssessments(await api.assessments());setError('')}catch(e){setError(String(e))}}
   useEffect(()=>{void refresh()},[])
-
-  if(!selected){
-    return <Dashboard assessments={assessments} refresh={refresh} select={setSelected} error={error}/>
-  }
-
-  return <div className="app-shell">
-    <aside className="sidebar">
-      <div className="brand">Souveränitäts-Radar</div>
-      <button className="back" onClick={()=>setSelected(null)}>← Assessments</button>
-      <div className="assessment-title">{selected.name}</div>
-      <div className="muted">{selected.customer||'Kein Kunde'}</div>
-      <nav>
-        {tabs.map(item=>
-          <button key={item} className={tab===item?'active':''} onClick={()=>setTab(item)}>
-            {item}
-          </button>
-        )}
-      </nav>
-    </aside>
-    <main className="content">
-      {tab==='Übersicht'&&<Overview assessment={selected}/>} 
-      {tab==='Relevanzprofil'&&<RelevanceProfileTab assessment={selected}/>} 
-      {tab==='Fragen'&&<Questions assessment={selected}/>} 
-      {tab==='Evidence'&&<EvidenceTab assessment={selected}/>} 
-      {tab==='LLM Bridge'&&<LlmBridge assessment={selected}/>} 
-      {tab==='Ergebnis'&&<Result assessment={selected}/>} 
-    </main>
-  </div>
+  if(!selected)return <Dashboard assessments={assessments} refresh={refresh} select={setSelected} error={error}/>
+  return <div className="app-shell"><aside className="sidebar"><div className="brand">Souveränitäts-Radar</div><button className="back" onClick={()=>setSelected(null)}>← Assessments</button><div className="assessment-title">{selected.name}</div><div className="muted">{selected.customer||'Kein Kunde'}</div><nav>{tabs.map(item=><button key={item} className={tab===item?'active':''} onClick={()=>setTab(item)}>{item}</button>)}</nav></aside><main className="content">{tab==='Übersicht'&&<Overview assessment={selected}/>} {tab==='Relevanzprofil'&&<RelevanceProfileTab assessment={selected}/>} {tab==='Fragen'&&<Questions assessment={selected}/>} {tab==='Evidence'&&<EvidenceTab assessment={selected}/>} {tab==='LLM Bridge'&&<LlmBridge assessment={selected}/>} {tab==='Hard Gates'&&<HardGates assessment={selected}/>} {tab==='Ergebnis'&&<Result assessment={selected}/>}</main></div>
 }
 
 function Dashboard({assessments,refresh,select,error}:{assessments:Assessment[];refresh:()=>Promise<void>;select:(a:Assessment)=>void;error:string}){
-  const [showForm,setShowForm]=useState(false)
-  return <main className="dashboard">
-    <div className="hero">
-      <div>
-        <h1>Souveränitäts-Radar</h1>
-        <p>Cloud-agnostisches Beratungswerkzeug für nachvollziehbare Souveränitäts-Assessments.</p>
-      </div>
-      <button className="primary" onClick={()=>setShowForm(!showForm)}>+ Neues Assessment</button>
-    </div>
-    {error&&<div className="error">{error}</div>}
-    {showForm&&<AssessmentForm onCreated={async()=>{setShowForm(false);await refresh()}}/>}
-    <section className="panel">
-      <h2>Assessments</h2>
-      {assessments.length===0
-        ? <p className="muted">Noch kein Assessment angelegt.</p>
-        : <div className="cards">{assessments.map(a=><button className="assessment-card" key={a.id} onClick={()=>select(a)}><strong>{a.name}</strong><span>{a.customer||'—'}</span><span>{a.workload_type} · {a.criticality}</span><span className="status">{a.status}</span></button>)}</div>}
-    </section>
-  </main>
+  const[showForm,setShowForm]=useState(false)
+  return <main className="dashboard"><div className="hero"><div><h1>Souveränitäts-Radar</h1><p>Cloud-agnostisches Beratungswerkzeug für nachvollziehbare Souveränitäts-Assessments.</p></div><button className="primary" onClick={()=>setShowForm(!showForm)}>+ Neues Assessment</button></div>{error&&<div className="error">{error}</div>}{showForm&&<AssessmentForm onCreated={async()=>{setShowForm(false);await refresh()}}/>}<section className="panel"><h2>Assessments</h2>{assessments.length===0?<p className="muted">Noch kein Assessment angelegt.</p>:<div className="cards">{assessments.map(a=><button className="assessment-card" key={a.id} onClick={()=>select(a)}><strong>{a.name}</strong><span>{a.customer||'—'}</span><span>{a.workload_type} · {a.criticality}</span><span className="status">{a.status}</span></button>)}</div>}</section></main>
 }
 
 function AssessmentForm({onCreated}:{onCreated:()=>Promise<void>}){
-  const [form,setForm]=useState({name:'',customer:'',description:'',workload_type:'saas',criticality:'medium',confidentiality:'medium',integrity:'medium',availability:'medium',control_region:'EU/EWR',regulatory_context:''})
+  const[form,setForm]=useState({name:'',customer:'',description:'',workload_type:'saas',criticality:'medium',confidentiality:'medium',integrity:'medium',availability:'medium',control_region:'EU/EWR',regulatory_context:''})
   const submit=async(e:FormEvent)=>{e.preventDefault();await api.createAssessment(form);await onCreated()}
-  return <form className="panel form-grid" onSubmit={submit}>
-    <h2>Neues Assessment</h2>
-    <label>Name<input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label>
-    <label>Kunde<input value={form.customer} onChange={e=>setForm({...form,customer:e.target.value})}/></label>
-    <label className="wide">Beschreibung<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label>
-    <label>Workload<select value={form.workload_type} onChange={e=>setForm({...form,workload_type:e.target.value})}><option value="application">Anwendung</option><option value="saas">SaaS</option><option value="cloud-platform">Cloud-Plattform</option><option value="ai-system">KI-System</option><option value="ai-agent">KI-Agent</option><option value="infrastructure">Infrastruktur</option><option value="other">Sonstiges</option></select></label>
-    <SelectLabel label="Kritikalität" value={form.criticality} onChange={v=>setForm({...form,criticality:v})}/>
-    <SelectLabel label="Vertraulichkeit" value={form.confidentiality} onChange={v=>setForm({...form,confidentiality:v})}/>
-    <SelectLabel label="Integrität" value={form.integrity} onChange={v=>setForm({...form,integrity:v})}/>
-    <SelectLabel label="Verfügbarkeit" value={form.availability} onChange={v=>setForm({...form,availability:v})}/>
-    <label>Ziel-Kontrollraum<input value={form.control_region} onChange={e=>setForm({...form,control_region:e.target.value})}/></label>
-    <label className="wide">Regulatorischer Kontext<input placeholder="z. B. NIS2, DSGVO" value={form.regulatory_context} onChange={e=>setForm({...form,regulatory_context:e.target.value})}/></label>
-    <div className="wide"><button className="primary" type="submit">Assessment anlegen</button></div>
-  </form>
+  return <form className="panel form-grid" onSubmit={submit}><h2>Neues Assessment</h2><label>Name<input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label><label>Kunde<input value={form.customer} onChange={e=>setForm({...form,customer:e.target.value})}/></label><label className="wide">Beschreibung<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label><label>Workload<select value={form.workload_type} onChange={e=>setForm({...form,workload_type:e.target.value})}><option value="application">Anwendung</option><option value="saas">SaaS</option><option value="cloud-platform">Cloud-Plattform</option><option value="ai-system">KI-System</option><option value="ai-agent">KI-Agent</option><option value="infrastructure">Infrastruktur</option><option value="other">Sonstiges</option></select></label><SelectLabel label="Kritikalität" value={form.criticality} onChange={v=>setForm({...form,criticality:v})}/><SelectLabel label="Vertraulichkeit" value={form.confidentiality} onChange={v=>setForm({...form,confidentiality:v})}/><SelectLabel label="Integrität" value={form.integrity} onChange={v=>setForm({...form,integrity:v})}/><SelectLabel label="Verfügbarkeit" value={form.availability} onChange={v=>setForm({...form,availability:v})}/><label>Ziel-Kontrollraum<input value={form.control_region} onChange={e=>setForm({...form,control_region:e.target.value})}/></label><label className="wide">Regulatorischer Kontext<input placeholder="z. B. NIS2, DSGVO" value={form.regulatory_context} onChange={e=>setForm({...form,regulatory_context:e.target.value})}/></label><div className="wide"><button className="primary" type="submit">Assessment anlegen</button></div></form>
 }
 
-function SelectLabel({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void}){
-  return <label>{label}<select value={value} onChange={e=>onChange(e.target.value)}><option value="low">niedrig</option><option value="medium">mittel</option><option value="high">hoch</option><option value="critical">kritisch</option></select></label>
-}
+function SelectLabel({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void}){return <label>{label}<select value={value} onChange={e=>onChange(e.target.value)}><option value="low">niedrig</option><option value="medium">mittel</option><option value="high">hoch</option><option value="critical">kritisch</option></select></label>}
+function Metric({label,value}:{label:string;value:string}){return <div className="metric"><span>{label}</span><strong>{value}</strong></div>}
+function Overview({assessment}:{assessment:Assessment}){return <><h1>{assessment.name}</h1><p className="lead">Assessment-Scope</p><div className="metric-grid"><Metric label="Kunde" value={assessment.customer||'—'}/><Metric label="Workload" value={assessment.workload_type}/><Metric label="Kritikalität" value={assessment.criticality}/><Metric label="Kontrollraum" value={assessment.control_region}/></div><section className="panel"><h2>Schutzbedarf</h2><p>C: <b>{assessment.confidentiality}</b> · I: <b>{assessment.integrity}</b> · A: <b>{assessment.availability}</b></p><p>{assessment.description||'Noch keine Beschreibung.'}</p><p className="muted">{assessment.regulatory_context||'Kein regulatorischer Kontext erfasst.'}</p></section><section className="notice"><b>Workflow:</b> Relevanzprofil → Fragen → Evidence prüfen → optional LLM Bridge → human-bestätigte Claims → Hard Gates.</section></>}
 
-function Metric({label,value}:{label:string;value:string}){
-  return <div className="metric"><span>{label}</span><strong>{value}</strong></div>
-}
-
-function Overview({assessment}:{assessment:Assessment}){
-  return <><h1>{assessment.name}</h1><p className="lead">Assessment-Scope</p><div className="metric-grid"><Metric label="Kunde" value={assessment.customer||'—'}/><Metric label="Workload" value={assessment.workload_type}/><Metric label="Kritikalität" value={assessment.criticality}/><Metric label="Kontrollraum" value={assessment.control_region}/></div><section className="panel"><h2>Schutzbedarf</h2><p>C: <b>{assessment.confidentiality}</b> · I: <b>{assessment.integrity}</b> · A: <b>{assessment.availability}</b></p><p>{assessment.description||'Noch keine Beschreibung.'}</p><p className="muted">{assessment.regulatory_context||'Kein regulatorischer Kontext erfasst.'}</p></section><section className="notice"><b>Empfohlener nächster Schritt:</b> Relevanzprofil prüfen. Daraus erzeugt der Radar einen konservativen Fragenpfad. Unklare Bedingungen bleiben sichtbar und werden nicht automatisch weggefiltert.</section></>
-}
-
-function TriStateSelect({label,value,onChange,help}:{label:string;value:boolean|null;onChange:(value:boolean|null)=>void;help?:string}){
-  const encoded=value===null?'unknown':value?'yes':'no'
-  return <label>{label}<select value={encoded} onChange={e=>onChange(e.target.value==='unknown'?null:e.target.value==='yes')}><option value="unknown">noch unklar</option><option value="yes">ja</option><option value="no">nein</option></select>{help&&<small className="muted">{help}</small>}</label>
-}
+function TriStateSelect({label,value,onChange}:{label:string;value:boolean|null;onChange:(value:boolean|null)=>void}){const encoded=value===null?'unknown':value?'yes':'no';return <label>{label}<select value={encoded} onChange={e=>onChange(e.target.value==='unknown'?null:e.target.value==='yes')}><option value="unknown">noch unklar</option><option value="yes">ja</option><option value="no">nein</option></select></label>}
 
 function RelevanceProfileTab({assessment}:{assessment:Assessment}){
-  const [profile,setProfile]=useState<RelevanceProfile|null>(null)
-  const [message,setMessage]=useState('')
+  const[profile,setProfile]=useState<RelevanceProfile|null>(null);const[message,setMessage]=useState('')
   useEffect(()=>{void api.profile(assessment.id).then(setProfile)},[assessment.id])
   if(!profile)return <p>Lade Relevanzprofil…</p>
   const setBool=(field:keyof RelevanceProfile,value:boolean|null)=>setProfile({...profile,[field]:value})
   const save=async()=>{const saved=await api.saveProfile(assessment.id,profile);setProfile(saved);setMessage('Relevanzprofil gespeichert ✓');setTimeout(()=>setMessage(''),1500)}
-  return <>
-    <h1>Relevanzprofil</h1>
-    <p className="lead">Diese wenigen Scope-Fakten steuern den Fragenpfad. „Noch unklar“ führt bewusst zu <b>Prüfen</b>, nicht zum unsichtbaren Wegfiltern.</p>
-    <section className="panel form-grid">
-      <h2>Technischer / vertraglicher Scope</h2>
-      <label>Service-Modell<select value={profile.service_model} onChange={e=>setProfile({...profile,service_model:e.target.value as RelevanceProfile['service_model']})}><option value="unknown">noch unklar</option><option value="saas">SaaS</option><option value="paas">PaaS</option><option value="iaas">IaaS</option><option value="managed-service">Managed Service</option><option value="on-prem">On-Prem / selbst betrieben</option><option value="other">Sonstiges</option></select></label>
-      <TriStateSelect label="Cloud-Service?" value={profile.cloud_service} onChange={v=>setBool('cloud_service',v)}/>
-      <TriStateSelect label="Vertrag / Leistungsbeziehung im Scope?" value={profile.contract_in_scope} onChange={v=>setBool('contract_in_scope',v)}/>
-      <TriStateSelect label="Datenverarbeitung?" value={profile.data_processing} onChange={v=>setBool('data_processing',v)}/>
-      <TriStateSelect label="Persistente Daten / Speicherung?" value={profile.persistent_data} onChange={v=>setBool('persistent_data',v)}/>
-      <TriStateSelect label="Verschlüsselung relevant/eingesetzt?" value={profile.encryption_used} onChange={v=>setBool('encryption_used',v)}/>
-      <label>Schlüsselmodell<select value={profile.key_model} onChange={e=>setProfile({...profile,key_model:e.target.value as RelevanceProfile['key_model']})}><option value="unknown">noch unklar</option><option value="customer">kundenseitig kontrolliert</option><option value="provider">providerseitig</option><option value="external">externer Key-Service</option><option value="mixed">gemischt</option><option value="none">keine Schlüssel im Scope</option></select></label>
-      <TriStateSelect label="Internet-exponiert?" value={profile.internet_exposed} onChange={v=>setBool('internet_exposed',v)}/>
-    </section>
-    <section className="panel form-grid">
-      <h2>KI, Betrieb und Abhängigkeiten</h2>
-      <TriStateSelect label="KI wird eingesetzt?" value={profile.ai_used} onChange={v=>setBool('ai_used',v)}/>
-      <TriStateSelect label="Generative / agentische KI?" value={profile.agentic_ai} onChange={v=>setBool('agentic_ai',v)}/>
-      <TriStateSelect label="Exit / Portabilität relevant?" value={profile.exit_relevant} onChange={v=>setBool('exit_relevant',v)}/>
-      <TriStateSelect label="Backup / Restore relevant?" value={profile.backup_relevant} onChange={v=>setBool('backup_relevant',v)}/>
-      <TriStateSelect label="Mehrere Provider / Multi-Provider?" value={profile.multi_provider} onChange={v=>setBool('multi_provider',v)}/>
-      <TriStateSelect label="Unterauftragnehmer / Subprocessor?" value={profile.subcontractors_used} onChange={v=>setBool('subcontractors_used',v)}/>
-      <TriStateSelect label="IAM / Identitätsanker relevant?" value={profile.iam_relevant} onChange={v=>setBool('iam_relevant',v)}/>
-      <TriStateSelect label="Logging / Monitoring relevant?" value={profile.logging_relevant} onChange={v=>setBool('logging_relevant',v)}/>
-      <TriStateSelect label="C5 im Assessment relevant?" value={profile.c5_relevant} onChange={v=>setBool('c5_relevant',v)}/>
-      <TriStateSelect label="C3A im Assessment relevant?" value={profile.c3a_relevant} onChange={v=>setBool('c3a_relevant',v)}/>
-    </section>
-    <button className="primary" onClick={save}>Relevanzprofil speichern</button>{message&&<span className="save-message">{message}</span>}
-  </>
+  return <><h1>Relevanzprofil</h1><p className="lead">Scope-Fakten steuern den Fragenpfad. „Noch unklar“ bleibt sichtbar und wird nicht still ausgefiltert.</p><section className="panel form-grid"><h2>Technischer / vertraglicher Scope</h2><label>Service-Modell<select value={profile.service_model} onChange={e=>setProfile({...profile,service_model:e.target.value as RelevanceProfile['service_model']})}><option value="unknown">noch unklar</option><option value="saas">SaaS</option><option value="paas">PaaS</option><option value="iaas">IaaS</option><option value="managed-service">Managed Service</option><option value="on-prem">On-Prem / selbst betrieben</option><option value="other">Sonstiges</option></select></label><TriStateSelect label="Cloud-Service?" value={profile.cloud_service} onChange={v=>setBool('cloud_service',v)}/><TriStateSelect label="Vertrag im Scope?" value={profile.contract_in_scope} onChange={v=>setBool('contract_in_scope',v)}/><TriStateSelect label="Datenverarbeitung?" value={profile.data_processing} onChange={v=>setBool('data_processing',v)}/><TriStateSelect label="Persistente Daten?" value={profile.persistent_data} onChange={v=>setBool('persistent_data',v)}/><TriStateSelect label="Verschlüsselung relevant?" value={profile.encryption_used} onChange={v=>setBool('encryption_used',v)}/><label>Schlüsselmodell<select value={profile.key_model} onChange={e=>setProfile({...profile,key_model:e.target.value as RelevanceProfile['key_model']})}><option value="unknown">noch unklar</option><option value="customer">kundenseitig</option><option value="provider">providerseitig</option><option value="external">extern</option><option value="mixed">gemischt</option><option value="none">keine Schlüssel im Scope</option></select></label><TriStateSelect label="Internet-exponiert?" value={profile.internet_exposed} onChange={v=>setBool('internet_exposed',v)}/></section><section className="panel form-grid"><h2>KI, Betrieb und Abhängigkeiten</h2><TriStateSelect label="KI wird eingesetzt?" value={profile.ai_used} onChange={v=>setBool('ai_used',v)}/><TriStateSelect label="Generative / agentische KI?" value={profile.agentic_ai} onChange={v=>setBool('agentic_ai',v)}/><TriStateSelect label="Exit / Portabilität relevant?" value={profile.exit_relevant} onChange={v=>setBool('exit_relevant',v)}/><TriStateSelect label="Backup / Restore relevant?" value={profile.backup_relevant} onChange={v=>setBool('backup_relevant',v)}/><TriStateSelect label="Multi-Provider?" value={profile.multi_provider} onChange={v=>setBool('multi_provider',v)}/><TriStateSelect label="Unterauftragnehmer?" value={profile.subcontractors_used} onChange={v=>setBool('subcontractors_used',v)}/><TriStateSelect label="IAM relevant?" value={profile.iam_relevant} onChange={v=>setBool('iam_relevant',v)}/><TriStateSelect label="Logging relevant?" value={profile.logging_relevant} onChange={v=>setBool('logging_relevant',v)}/><TriStateSelect label="C5 relevant?" value={profile.c5_relevant} onChange={v=>setBool('c5_relevant',v)}/><TriStateSelect label="C3A relevant?" value={profile.c3a_relevant} onChange={v=>setBool('c3a_relevant',v)}/></section><button className="primary" onClick={save}>Relevanzprofil speichern</button>{message&&<span className="save-message">{message}</span>}</>
 }
 
 function Questions({assessment}:{assessment:Assessment}){
-  const [questions,setQuestions]=useState<Question[]>([])
-  const [answers,setAnswers]=useState<Answer[]>([])
-  const [domain,setDomain]=useState('')
-  const [view,setView]=useState<'relevant'|'all'>('relevant')
+  const[questions,setQuestions]=useState<Question[]>([]);const[answers,setAnswers]=useState<Answer[]>([]);const[domain,setDomain]=useState('');const[view,setView]=useState<'relevant'|'all'>('relevant')
   useEffect(()=>{void Promise.all([api.assessmentQuestions(assessment.id,view),api.answers(assessment.id)]).then(([q,a])=>{setQuestions(q);setAnswers(a)})},[assessment.id,view])
-  const domains=useMemo(()=>Array.from(new Set(questions.map(q=>q.domain))),[questions])
-  const visible=domain?questions.filter(q=>q.domain===domain):questions
-  const answerMap=useMemo(()=>new Map(answers.map(a=>[a.question_id,a])),[answers])
-  const needsReview=questions.filter(q=>q.applicability_status==='needs_review').length
-  const applicable=questions.filter(q=>q.applicability_status==='applicable').length
-  const answered=questions.filter(q=>answerMap.get(q.id)?.answer_value).length
+  const domains=useMemo(()=>Array.from(new Set(questions.map(q=>q.domain))),[questions]);const visible=domain?questions.filter(q=>q.domain===domain):questions;const answerMap=useMemo(()=>new Map(answers.map(a=>[a.question_id,a])),[answers]);const needsReview=questions.filter(q=>q.applicability_status==='needs_review').length;const applicable=questions.filter(q=>q.applicability_status==='applicable').length;const answered=questions.filter(q=>answerMap.get(q.id)?.answer_value).length
   const save=async(q:Question,value:string,comment:string)=>{const saved=await api.saveAnswer(assessment.id,q.id,{answer_value:value,comment,evidence_ids:answerMap.get(q.id)?.evidence_ids||[],review_state:'draft'});setAnswers(prev=>[...prev.filter(a=>a.question_id!==q.id),saved])}
-  return <><h1>Fragen</h1><p className="lead">Der Standardpfad zeigt anwendbare und noch zu prüfende Fragen. Sicher nicht anwendbare Fragen werden nur in „Alle Fragen“ sichtbar.</p><div className="metric-grid"><Metric label="Aktiver Pfad" value={String(questions.length)}/><Metric label="Anwendbar" value={String(applicable)}/><Metric label="Zu prüfen" value={String(needsReview)}/><Metric label="Beantwortet" value={`${answered}/${questions.length}`}/></div><div className="toolbar toolbar-wrap"><div className="segmented"><button className={view==='relevant'?'active':''} onClick={()=>setView('relevant')}>Relevante Fragen</button><button className={view==='all'?'active':''} onClick={()=>setView('all')}>Alle Fragen</button></div><select value={domain} onChange={e=>setDomain(e.target.value)}><option value="">Alle Domänen</option>{domains.map(d=><option key={d}>{d}</option>)}</select></div><div className="question-list">{visible.map(q=><QuestionCard key={q.id} q={q} answer={answerMap.get(q.id)} onSave={save}/>)}</div></>
+  return <><h1>Fragen</h1><p className="lead">Standardmäßig nur anwendbare oder noch zu prüfende Fragen. Die komplette Methodenbank bleibt einsehbar.</p><div className="metric-grid"><Metric label="Aktiver Pfad" value={String(questions.length)}/><Metric label="Anwendbar" value={String(applicable)}/><Metric label="Zu prüfen" value={String(needsReview)}/><Metric label="Beantwortet" value={`${answered}/${questions.length}`}/></div><div className="toolbar toolbar-wrap"><div className="segmented"><button className={view==='relevant'?'active':''} onClick={()=>setView('relevant')}>Relevante Fragen</button><button className={view==='all'?'active':''} onClick={()=>setView('all')}>Alle Fragen</button></div><select value={domain} onChange={e=>setDomain(e.target.value)}><option value="">Alle Domänen</option>{domains.map(d=><option key={d}>{d}</option>)}</select></div><div className="question-list">{visible.map(q=><QuestionCard key={q.id} q={q} answer={answerMap.get(q.id)} onSave={save}/>)}</div></>
 }
 
 function QuestionCard({q,answer,onSave}:{q:Question;answer?:Answer;onSave:(q:Question,v:string,c:string)=>Promise<void>}){
-  const [value,setValue]=useState(answer?.answer_value||'')
-  const [comment,setComment]=useState(answer?.comment||'')
-  const [saved,setSaved]=useState(false)
-  useEffect(()=>{setValue(answer?.answer_value||'');setComment(answer?.comment||'')},[answer?.answer_value,answer?.comment])
-  const status=q.applicability_status||'needs_review'
-  const label=status==='applicable'?'anwendbar':status==='not_applicable'?'nicht anwendbar':'prüfen'
-  return <article className={`question-card ${status==='not_applicable'?'excluded':''}`}><div className="question-meta"><span className="qid">{q.id} · {q.domain}</span><span className={`applicability-badge ${status}`}>{label}</span></div><h3>{q.question}</h3><p className="applicability-reason"><b>Anwendbarkeit:</b> {q.applicability_reason||q.applicability||'nicht spezifiziert'}</p><p className="muted">Methodenregel: {q.applicability||'—'} · Erwartete Evidence: {q.expected_evidence||'—'} · Min Trust: {q.min_trust||'—'}</p><select value={value} onChange={e=>setValue(e.target.value)}><option value="">— offen —</option><option value="fulfilled">erfüllt</option><option value="partial">teilweise</option><option value="not-fulfilled">nicht erfüllt</option><option value="unknown">unbekannt</option><option value="not-applicable">nicht anwendbar</option></select><textarea placeholder="Kommentar / Begründung" value={comment} onChange={e=>setComment(e.target.value)}/><button onClick={async()=>{await onSave(q,value,comment);setSaved(true);setTimeout(()=>setSaved(false),1200)}}>{saved?'Gespeichert ✓':'Speichern'}</button></article>
+  const[value,setValue]=useState(answer?.answer_value||'');const[comment,setComment]=useState(answer?.comment||'');const[saved,setSaved]=useState(false);useEffect(()=>{setValue(answer?.answer_value||'');setComment(answer?.comment||'')},[answer?.answer_value,answer?.comment]);const status=q.applicability_status||'needs_review';const label=status==='applicable'?'anwendbar':status==='not_applicable'?'nicht anwendbar':'zu prüfen'
+  return <article className={`question-card applicability-${status}`}><div className="row-between"><div className="qid">{q.id} · {q.domain}</div><span className={`badge badge-${status}`}>{label}</span></div><h3>{q.question}</h3><p className="muted">{q.applicability_reason||q.applicability} · Evidence: {q.expected_evidence||'—'} · Min Trust: {q.min_trust||'—'}</p><select value={value} onChange={e=>setValue(e.target.value)}><option value="">— offen —</option><option value="fulfilled">erfüllt</option><option value="partial">teilweise</option><option value="not-fulfilled">nicht erfüllt</option><option value="unknown">unbekannt</option><option value="not-applicable">nicht anwendbar</option></select><textarea placeholder="Kommentar / Begründung" value={comment} onChange={e=>setComment(e.target.value)}/><button onClick={async()=>{await onSave(q,value,comment);setSaved(true);setTimeout(()=>setSaved(false),1200)}}>{saved?'Gespeichert ✓':'Speichern'}</button></article>
 }
 
 function EvidenceTab({assessment}:{assessment:Assessment}){
-  const [items,setItems]=useState<Evidence[]>([])
-  const [form,setForm]=useState({title:'',evidence_type:'document',description:'',source:'',source_date:'',content_excerpt:''})
-  const [file,setFile]=useState<File|null>(null)
-  const load=()=>api.evidence(assessment.id).then(setItems)
+  const[items,setItems]=useState<Evidence[]>([]);const[reviews,setReviews]=useState<EvidenceReview[]>([]);const[form,setForm]=useState({title:'',evidence_type:'document',description:'',source:'',source_date:'',content_excerpt:''});const[file,setFile]=useState<File|null>(null)
+  const load=async()=>{const[e,r]=await Promise.all([api.evidence(assessment.id),api.evidenceReviews(assessment.id)]);setItems(e);setReviews(r)}
   useEffect(()=>{void load()},[assessment.id])
   const submit=async(e:FormEvent)=>{e.preventDefault();const fd=new FormData();Object.entries(form).forEach(([k,v])=>fd.set(k,v));if(file)fd.set('file',file);await api.addEvidence(assessment.id,fd);setForm({title:'',evidence_type:'document',description:'',source:'',source_date:'',content_excerpt:''});setFile(null);await load()}
-  return <><h1>Evidence</h1><p className="lead">Dateien bleiben lokal. Die Anwendung analysiert im MVP keine Dokumentinhalte automatisch.</p><form className="panel form-grid" onSubmit={submit}><h2>Evidence hinzufügen</h2><label>Titel<input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label><label>Typ<select value={form.evidence_type} onChange={e=>setForm({...form,evidence_type:e.target.value})}><option value="contract">Vertrag</option><option value="architecture">Architektur</option><option value="provider-doc">Provider-Dokumentation</option><option value="assurance">Audit/Assurance</option><option value="customer-statement">Kundenangabe</option><option value="technical-export">Technischer Export</option><option value="test">Testnachweis</option><option value="other">Sonstiges</option></select></label><label>Quelle<input value={form.source} onChange={e=>setForm({...form,source:e.target.value})}/></label><label>Stand<input value={form.source_date} onChange={e=>setForm({...form,source_date:e.target.value})}/></label><label className="wide">Beschreibung<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label><label className="wide">Freigegebener Textauszug für LLM Bridge<textarea value={form.content_excerpt} onChange={e=>setForm({...form,content_excerpt:e.target.value})}/></label><label className="wide">Optionale Datei<input type="file" onChange={e=>setFile(e.target.files?.[0]||null)}/></label><div className="wide"><button className="primary">Evidence speichern</button></div></form><div className="cards">{items.map(i=><div className="panel" key={i.id}><div className="qid">{i.id}</div><h3>{i.title}</h3><p>{i.description}</p><p className="muted">{i.evidence_type} · {i.source||'keine Quelle'} · {i.file_name||'keine Datei'}</p></div>)}</div></>
+  const reviewMap=useMemo(()=>new Map(reviews.map(r=>[r.evidence_id,r])),[reviews])
+  return <><h1>Evidence</h1><p className="lead">Evidence wird lokal erfasst. Erst nach Berater-Review und Trust-Bewertung kann sie einen Hard Gate stützen.</p><form className="panel form-grid" onSubmit={submit}><h2>Evidence hinzufügen</h2><label>Titel<input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label><label>Typ<select value={form.evidence_type} onChange={e=>setForm({...form,evidence_type:e.target.value})}><option value="contract">Vertrag</option><option value="architecture">Architektur</option><option value="provider-doc">Provider-Dokumentation</option><option value="assurance">Audit/Assurance</option><option value="customer-statement">Kundenangabe</option><option value="technical-export">Technischer Export</option><option value="test">Testnachweis</option><option value="other">Sonstiges</option></select></label><label>Quelle<input value={form.source} onChange={e=>setForm({...form,source:e.target.value})}/></label><label>Stand<input value={form.source_date} onChange={e=>setForm({...form,source_date:e.target.value})}/></label><label className="wide">Beschreibung<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label><label className="wide">Freigegebener Textauszug für LLM Bridge<textarea value={form.content_excerpt} onChange={e=>setForm({...form,content_excerpt:e.target.value})}/></label><label className="wide">Optionale Datei<input type="file" onChange={e=>setFile(e.target.files?.[0]||null)}/></label><div className="wide"><button className="primary">Evidence speichern</button></div></form><div className="evidence-list">{items.map(item=><EvidenceReviewCard key={item.id} assessmentId={assessment.id} evidence={item} review={reviewMap.get(item.id)} onSaved={load}/>)}</div></>
 }
 
+function EvidenceReviewCard({assessmentId,evidence,review,onSaved}:{assessmentId:string;evidence:Evidence;review?:EvidenceReview;onSaved:()=>Promise<void>}){
+  const[applied,setApplied]=useState<AppliedState>(review?.applied_state||'asserted');const[status,setStatus]=useState<EvidenceReviewStatus>(review?.review_status||'raw');const[base,setBase]=useState(review?.base_trust||0);const[scope,setScope]=useState(review?.scope_fit||0);const[fresh,setFresh]=useState(review?.freshness_fit||0);const[msg,setMsg]=useState('')
+  useEffect(()=>{setApplied(review?.applied_state||'asserted');setStatus(review?.review_status||'raw');setBase(review?.base_trust||0);setScope(review?.scope_fit||0);setFresh(review?.freshness_fit||0)},[review])
+  const save=async()=>{await api.saveEvidenceReview(assessmentId,evidence.id,{applied_state:applied,base_trust:base,scope_fit:scope,freshness_fit:fresh,review_status:status});setMsg('Review gespeichert ✓');await onSaved();setTimeout(()=>setMsg(''),1200)}
+  return <section className="panel"><div className="row-between"><div><div className="qid">{evidence.id}</div><h3>{evidence.title}</h3></div><span className={`badge badge-${status==='reviewed'||status==='approved'?'applicable':'needs_review'}`}>{status}</span></div><p>{evidence.description||'—'}</p><p className="muted">{evidence.evidence_type} · {evidence.source||'keine Quelle'} · {evidence.file_name||'keine Datei'}</p><div className="review-grid"><label>Applied State<select value={applied} onChange={e=>setApplied(e.target.value as AppliedState)}><option value="asserted">asserted</option><option value="available">available</option><option value="documented">documented</option><option value="observed">observed</option><option value="configured">configured</option><option value="tested">tested</option><option value="attested">attested</option></select></label><label>Review Status<select value={status} onChange={e=>setStatus(e.target.value as EvidenceReviewStatus)}><option value="raw">raw</option><option value="normalized">normalized</option><option value="reviewed">reviewed</option><option value="approved">approved</option><option value="rejected">rejected</option></select></label><TrustSelect label="Base Trust" value={base} onChange={setBase}/><TrustSelect label="Scope Fit" value={scope} onChange={setScope}/><TrustSelect label="Freshness Fit" value={fresh} onChange={setFresh}/><div className="metric compact"><span>Effective Trust</span><strong>{Math.min(base,scope,fresh)}</strong></div></div><button onClick={save}>Evidence Review speichern</button>{msg&&<span className="save-message">{msg}</span>}</section>
+}
+function TrustSelect({label,value,onChange}:{label:string;value:number;onChange:(v:number)=>void}){return <label>{label}<select value={value} onChange={e=>onChange(Number(e.target.value))}>{[0,1,2,3,4,5].map(v=><option key={v} value={v}>{v}</option>)}</select></label>}
+
 function LlmBridge({assessment}:{assessment:Assessment}){
-  const [prompt,setPrompt]=useState('')
-  const [raw,setRaw]=useState('')
-  const [imports,setImports]=useState<LlmImport[]>([])
-  const [message,setMessage]=useState('')
-  const loadImports=()=>api.llmImports(assessment.id).then(setImports)
-  useEffect(()=>{void loadImports()},[assessment.id])
-  const generate=async()=>setPrompt((await api.prompt(assessment.id)).prompt)
-  const copy=async()=>{await navigator.clipboard.writeText(prompt);setMessage('Prompt kopiert ✓')}
-  const importResult=async()=>{try{await api.importLlm(assessment.id,raw);setMessage('LLM-Ergebnis validiert und als Vorschlag gespeichert ✓');setRaw('');await loadImports()}catch(e){setMessage(`Import abgelehnt: ${String(e)}`)}}
-  return <><h1>LLM Bridge</h1><p className="lead">Keine API-Verbindung. Der Prompt enthält nur relevante/zu prüfende offene Fragen aus dem Guided Workflow.</p><div className="two-col"><section className="panel"><h2>1. Prompt Package</h2><button className="primary" onClick={generate}>Prompt erzeugen</button>{prompt&&<><textarea className="codebox" readOnly value={prompt}/><button onClick={copy}>In Zwischenablage kopieren</button></>}</section><section className="panel"><h2>2. LLM JSON importieren</h2><textarea className="codebox" placeholder='{"assessment_id":"...","proposals":[]}' value={raw} onChange={e=>setRaw(e.target.value)}/><button className="primary" disabled={!raw.trim()} onClick={importResult}>Validieren & als Vorschlag speichern</button>{message&&<p>{message}</p>}</section></div><h2>Importierte Vorschläge</h2>{imports.length===0?<p className="muted">Noch keine LLM-Vorschläge importiert.</p>:imports.map(item=><section className="panel" key={item.id}><div className="qid">{item.created_at} · {item.validation_status}</div>{item.proposals.map((p,idx)=><div className="proposal" key={idx}><b>{p.question_id}: {p.proposed_answer}</b><p>{p.rationale}</p><small>Confidence {Math.round(p.confidence*100)}% · Evidence {p.evidence_ids.join(', ')||'keine'}</small></div>)}{item.evidence_gaps.map((g,idx)=><p key={idx}><b>Gap {g.question_id}:</b> {g.missing}</p>)}{item.warnings.map((w,idx)=><p className="warning" key={idx}>⚠ {w}</p>)}</section>)}</>
+  const[prompt,setPrompt]=useState('');const[raw,setRaw]=useState('');const[imports,setImports]=useState<LlmImport[]>([]);const[message,setMessage]=useState('');const loadImports=()=>api.llmImports(assessment.id).then(setImports);useEffect(()=>{void loadImports()},[assessment.id]);const generate=async()=>setPrompt((await api.prompt(assessment.id)).prompt);const copy=async()=>{await navigator.clipboard.writeText(prompt);setMessage('Prompt kopiert ✓')};const importResult=async()=>{try{await api.importLlm(assessment.id,raw);setMessage('LLM-Ergebnis validiert und als Vorschlag gespeichert ✓');setRaw('');await loadImports()}catch(e){setMessage(`Import abgelehnt: ${String(e)}`)}}
+  return <><h1>LLM Bridge</h1><p className="lead">Keine API-Verbindung. LLM-Ergebnisse bleiben Vorschläge und ändern weder Claims noch Hard Gates automatisch.</p><div className="two-col"><section className="panel"><h2>1. Prompt Package</h2><button className="primary" onClick={generate}>Prompt erzeugen</button>{prompt&&<><textarea className="codebox" readOnly value={prompt}/><button onClick={copy}>In Zwischenablage kopieren</button></>}</section><section className="panel"><h2>2. LLM JSON importieren</h2><textarea className="codebox" placeholder='{"assessment_id":"...","proposals":[]}' value={raw} onChange={e=>setRaw(e.target.value)}/><button className="primary" disabled={!raw.trim()} onClick={importResult}>Validieren & als Vorschlag speichern</button>{message&&<p>{message}</p>}</section></div><h2>Importierte Vorschläge</h2>{imports.length===0?<p className="muted">Noch keine LLM-Vorschläge importiert.</p>:imports.map(item=><section className="panel" key={item.id}><div className="qid">{item.created_at} · {item.validation_status}</div>{item.proposals.map((p,idx)=><div className="proposal" key={idx}><b>{p.question_id}: {p.proposed_answer}</b><p>{p.rationale}</p><small>Confidence {Math.round(p.confidence*100)}% · Evidence {p.evidence_ids.join(', ')||'keine'}</small></div>)}{item.evidence_gaps.map((g,idx)=><p key={idx}><b>Gap {g.question_id}:</b> {g.missing}</p>)}{item.warnings.map((w,idx)=><p className="warning" key={idx}>⚠ {w}</p>)}</section>)}</>
+}
+
+function HardGates({assessment}:{assessment:Assessment}){
+  const[gates,setGates]=useState<GateEvaluation[]>([]);const[claims,setClaims]=useState<Claim[]>([]);const[evidence,setEvidence]=useState<Evidence[]>([]);const[questions,setQuestions]=useState<Question[]>([]);const[selectedGate,setSelectedGate]=useState('HG-01');const[message,setMessage]=useState('')
+  const load=async()=>{const[g,c,e,q]=await Promise.all([api.gates(assessment.id),api.claims(assessment.id),api.evidence(assessment.id),api.assessmentQuestions(assessment.id,'all')]);setGates(g);setClaims(c);setEvidence(e);setQuestions(q);if(g.length&&!g.some(item=>item.gate_id===selectedGate))setSelectedGate(g[0].gate_id)}
+  useEffect(()=>{void load()},[assessment.id])
+  const selected=gates.find(g=>g.gate_id===selectedGate);const gateClaims=claims.filter(c=>c.gate_id===selectedGate)
+  const saveRequirement=async(level:number)=>{await api.saveGateRequirement(assessment.id,selectedGate,level);setMessage('Requirement als Consultant-Override gespeichert ✓');await load();setTimeout(()=>setMessage(''),1500)}
+  return <><h1>Hard Gates</h1><p className="lead">Nicht kompensierbare Mindestanforderungen. Nur human-bestätigte Claims mit geprüfter Evidence wirken auf die Bewertung.</p><div className="gate-grid">{gates.map(g=><button key={g.gate_id} className={`gate-tile ${selectedGate===g.gate_id?'selected':''}`} onClick={()=>setSelectedGate(g.gate_id)}><div className="row-between"><b>{g.gate_id}</b><StateBadge state={g.final_state}/></div><span>{g.name}</span><small>Req {g.requirement_level} · Cap {g.capability_level??'?' } · Trust {g.effective_trust??'?'}</small></button>)}</div>{selected&&<><section className="panel"><div className="row-between"><div><div className="qid">{selected.gate_id}</div><h2>{selected.name}</h2></div><StateBadge state={selected.final_state}/></div><p>{selected.subject}</p><div className="metric-grid"><Metric label="Requirement" value={String(selected.requirement_level)}/><Metric label="Applied Capability" value={selected.capability_level===null?'UNVERIFIED':String(selected.capability_level)}/><Metric label="Evidence Trust" value={selected.effective_trust===null?'UNVERIFIED':String(selected.effective_trust)}/><Metric label="Status" value={selected.final_state}/></div><label className="inline-control">Requirement 0–4<select value={selected.requirement_level} onChange={e=>void saveRequirement(Number(e.target.value))}>{[0,1,2,3,4].map(v=><option key={v} value={v}>{v}</option>)}</select><small className="muted">{selected.requirement_source}. Override ist eine Beratereinstellung, keine Normvorgabe.</small></label>{message&&<p>{message}</p>}<h3>Deterministische Begründung</h3><ul>{selected.reasons.map((r,i)=><li key={i}>{r}</li>)}</ul><h3>Benötigte / akzeptable Evidence</h3>{selected.evidence_requests.map(req=><div className="evidence-request" key={req.request_id}><b>{req.request_id} · {req.claim_area}</b><p>{req.follow_up}</p><small>{req.acceptable_evidence} · typ. Min Trust {req.typical_min_trust}</small></div>)}</section><ClaimEditor assessment={assessment} gate={selected} claims={gateClaims} evidence={evidence} questions={questions} reload={load}/></>}</>
+}
+
+function StateBadge({state}:{state:string}){return <span className={`state-badge state-${state.toLowerCase().replace('/','-')}`}>{state}</span>}
+
+function ClaimEditor({assessment,gate,claims,evidence,questions,reload}:{assessment:Assessment;gate:GateEvaluation;claims:Claim[];evidence:Evidence[];questions:Question[];reload:()=>Promise<void>}){
+  const[statement,setStatement]=useState('');const[capability,setCapability]=useState('');const[reviewStatus,setReviewStatus]=useState<ClaimReviewStatus>('draft');const[selectedEvidence,setSelectedEvidence]=useState<string[]>([]);const[questionText,setQuestionText]=useState('');const[notes,setNotes]=useState('');const[msg,setMsg]=useState('')
+  useEffect(()=>{setStatement('');setCapability('');setReviewStatus('draft');setSelectedEvidence([]);setQuestionText('');setNotes('')},[gate.gate_id])
+  const submit=async(e:FormEvent)=>{e.preventDefault();const qids=questionText.split(',').map(v=>v.trim()).filter(Boolean);try{await api.createClaim(assessment.id,{gate_id:gate.gate_id,statement,review_status:reviewStatus,capability_level:capability===''?null:Number(capability),evidence_ids:selectedEvidence,question_ids:qids,notes});setStatement('');setCapability('');setReviewStatus('draft');setSelectedEvidence([]);setQuestionText('');setNotes('');setMsg('Claim gespeichert ✓');await reload();setTimeout(()=>setMsg(''),1200)}catch(err){setMsg(String(err))}}
+  const toggleEvidence=(id:string)=>setSelectedEvidence(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id])
+  const markReviewed=async(claim:Claim)=>{await api.updateClaim(assessment.id,claim.id,{gate_id:claim.gate_id,statement:claim.statement,review_status:'reviewed',capability_level:claim.capability_level,evidence_ids:claim.evidence_ids,question_ids:claim.question_ids,notes:claim.notes});await reload()}
+  return <section className="panel"><h2>Claims / Human Review</h2><p className="muted">Ein Claim ist eine vom Berater verantwortete Aussage. LLM-Vorschläge müssen zuerst fachlich geprüft werden; es gibt hier bewusst keinen Auto-Import.</p><form className="claim-form" onSubmit={submit}><label>Aussage<textarea required value={statement} onChange={e=>setStatement(e.target.value)} placeholder="z. B. Exit wurde mit dokumentiertem Zielsystem end-to-end getestet."/></label><div className="form-grid"><label>Capability Level<select value={capability} onChange={e=>setCapability(e.target.value)}><option value="">nur Fakt / noch keine Capability</option>{[0,1,2,3,4].map(v=><option key={v} value={v}>{v}</option>)}</select></label><label>Review Status<select value={reviewStatus} onChange={e=>setReviewStatus(e.target.value as ClaimReviewStatus)}><option value="draft">draft</option><option value="reviewed">reviewed</option><option value="approved">approved</option><option value="rejected">rejected</option></select></label><label className="wide">Question IDs (optional, Komma-getrennt)<input value={questionText} onChange={e=>setQuestionText(e.target.value)} placeholder={questions.slice(0,3).map(q=>q.id).join(', ')}/></label><label className="wide">Notiz<textarea value={notes} onChange={e=>setNotes(e.target.value)}/></label></div><fieldset><legend>Stützende Evidence</legend>{evidence.length===0?<p className="muted">Noch keine Evidence vorhanden.</p>:evidence.map(ev=><label className="check-row" key={ev.id}><input type="checkbox" checked={selectedEvidence.includes(ev.id)} onChange={()=>toggleEvidence(ev.id)}/><span><b>{ev.title}</b><small>{ev.id}</small></span></label>)}</fieldset><button className="primary" type="submit">Claim speichern</button>{msg&&<span className="save-message">{msg}</span>}</form><h3>Claims für {gate.gate_id}</h3>{claims.length===0?<p className="muted">Noch keine Claims.</p>:claims.map(c=><div className="claim-card" key={c.id}><div className="row-between"><b>Capability {c.capability_level??'—'}</b><span className={`badge badge-${c.review_status==='reviewed'||c.review_status==='approved'?'applicable':'needs_review'}`}>{c.review_status}</span></div><p>{c.statement}</p><small>Evidence: {c.evidence_ids.join(', ')||'keine'} · Fragen: {c.question_ids.join(', ')||'keine'}</small><div className="action-row">{c.review_status==='draft'&&<button onClick={()=>void markReviewed(c)}>Als geprüft markieren</button>}<button className="danger-button" onClick={async()=>{await api.deleteClaim(assessment.id,c.id);await reload()}}>Löschen</button></div></div>)}</section>
 }
 
 function Result({assessment}:{assessment:Assessment}){
-  const [answers,setAnswers]=useState<Answer[]>([])
-  const [imports,setImports]=useState<LlmImport[]>([])
-  const [questions,setQuestions]=useState<Question[]>([])
-  useEffect(()=>{void Promise.all([api.answers(assessment.id),api.llmImports(assessment.id),api.assessmentQuestions(assessment.id,'relevant')]).then(([a,i,q])=>{setAnswers(a);setImports(i);setQuestions(q)})},[assessment.id])
-  const activeIds=new Set(questions.map(q=>q.id))
-  const answered=answers.filter(a=>a.answer_value&&activeIds.has(a.question_id)).length
-  const proposals=imports.reduce((n,i)=>n+i.proposals.length,0)
-  const gaps=imports.reduce((n,i)=>n+i.evidence_gaps.length,0)
-  const review=questions.filter(q=>q.applicability_status==='needs_review').length
-  return <><h1>Ergebnis</h1><p className="lead">MVP-Statusübersicht. Hard-Gate-/Risikoauswertung folgt in NEXT-112.</p><div className="metric-grid"><Metric label="Aktive Fragen" value={String(questions.length)}/><Metric label="Beantwortet" value={`${answered}/${questions.length}`}/><Metric label="Applicability offen" value={String(review)}/><Metric label="LLM-Vorschläge" value={String(proposals)}/><Metric label="Evidence Gaps" value={String(gaps)}/><Metric label="Entscheidungsstatus" value="UNVERIFIED"/></div><section className="notice"><b>Governance:</b> LLM-Vorschläge sind keine automatisch übernommenen Antworten. Risikoakzeptanz, Legal-Schlussfolgerungen und finale Freigaben bleiben menschliche Entscheidungen.</section></>
+  const[answers,setAnswers]=useState<Answer[]>([]);const[imports,setImports]=useState<LlmImport[]>([]);const[gates,setGates]=useState<GateEvaluation[]>([]);useEffect(()=>{void Promise.all([api.answers(assessment.id),api.llmImports(assessment.id),api.gates(assessment.id)]).then(([a,i,g])=>{setAnswers(a);setImports(i);setGates(g)})},[assessment.id]);const answered=answers.filter(a=>a.answer_value).length;const proposals=imports.reduce((n,i)=>n+i.proposals.length,0);const counts=(state:string)=>gates.filter(g=>g.final_state===state).length;const decision=counts('FAIL')>0?'BLOCK':counts('UNVERIFIED')>0?'EVIDENCE HOLD':'GATES PASS'
+  return <><h1>Ergebnis</h1><p className="lead">Aktuelle deterministische Gate-Zusammenfassung. Risiko- und Management-Report folgen in den nächsten Produktstufen.</p><div className="metric-grid"><Metric label="Antworten" value={String(answered)}/><Metric label="LLM-Vorschläge" value={String(proposals)}/><Metric label="Gate PASS" value={String(counts('PASS'))}/><Metric label="Gate FAIL" value={String(counts('FAIL'))}/><Metric label="UNVERIFIED" value={String(counts('UNVERIFIED'))}/><Metric label="Arbeitsstatus" value={decision}/></div><div className="gate-grid">{gates.map(g=><div className="gate-tile static" key={g.gate_id}><div className="row-between"><b>{g.gate_id}</b><StateBadge state={g.final_state}/></div><span>{g.name}</span></div>)}</div><section className="notice"><b>Governance:</b> Ein Gate-Ergebnis ist keine automatisierte Risikoakzeptanz. Legal-Schlussfolgerungen, Ausnahmen und finale Freigaben bleiben menschliche Entscheidungen.</section></>
 }
