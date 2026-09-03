@@ -1,4 +1,4 @@
-version: 6
+version: 7
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -9,11 +9,6 @@ priorities:
     status: completed
     github_issue: 11
     outputs: [React/Vite Web UI, FastAPI Backend, PostgreSQL persistence, local evidence storage, Docker Compose, lifecycle scripts, Copy/Paste LLM Bridge]
-    done_when:
-      - Clean clone installs with ./install.sh.
-      - Assessment CRUD, answers, evidence upload and LLM Bridge work end-to-end.
-      - CI validates Python, frontend build and compose smoke test.
-      - uninstall removes all generated runtime data after explicit confirmation.
   - id: NEXT-111
     priority: P0
     phase: MVP-01B
@@ -31,26 +26,32 @@ priorities:
     status: in_progress
     github_issue: 15
     depends_on: [NEXT-102, NEXT-103, NEXT-110, NEXT-111]
-    outputs: [typed gate catalog, claim model, evidence-to-gate mapping, deterministic gate evaluation, API/UI gate cards]
+    outputs: [typed gate catalog, claim model, evidence-to-gate mapping, deterministic gate evaluation, Evidence Review, Claim CRUD, API/UI gate cards]
     done_when:
       - all eight hard gates are represented.
       - missing evidence remains UNVERIFIED.
       - LLM proposals never bypass human review.
       - every gate result is traceable to claims, evidence and deterministic rules.
+      - CI validates Core/API, frontend build and compose smoke.
+  - id: NEXT-114
+    priority: P0
+    phase: MVP-VALIDATION
+    title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
+    owner_role: evidence-analyst
+    status: planned
+    depends_on: [NEXT-110, NEXT-111, NEXT-112]
+    done_when:
+      - clean installation/start/test workflow is documented.
+      - one synthetic assessment is completed from scope through Evidence Review and Hard Gates.
+      - LLM Bridge is exercised without automatic decision adoption.
+      - UX blockers and method gaps become separate issues.
   - id: NEXT-113
     priority: P1
     phase: MVP-01C
     title: Assessment Backup, Export und Consultant Report implementieren
     owner_role: developer
     status: planned
-    depends_on: [NEXT-110]
-  - id: NEXT-114
-    priority: P1
-    phase: MVP-VALIDATION
-    title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
-    owner_role: evidence-analyst
-    status: planned
-    depends_on: [NEXT-110, NEXT-111]
+    depends_on: [NEXT-112, NEXT-114]
   - id: NEXT-101
     priority: P0
     phase: R6A
@@ -66,21 +67,14 @@ priorities:
     status: completed
     github_issue: 3
     outputs: [EvidenceRecord, evidence-pack schemas, local pack loader, schema validation, path traversal protection, unit tests]
-    done_when:
-      - synthetisches Pack wird geladen.
-      - invalides Pack wird deterministisch abgewiesen.
-      - keine Netz-/Cloudverbindung nötig ist.
   - id: NEXT-103
     priority: P0
     phase: R6A
     title: Hard-Gate Mapping auf Evidence Request Catalog implementieren
     owner_role: methodologist
-    status: in_progress
+    status: completed
     github_issue: 4
-    done_when:
-      - alle acht Hard Gates abgedeckt sind.
-      - Providerbegriffe nicht im Kernmapping vorkommen.
-      - Mapping ist typisiert und durch Tests validiert.
+    outputs: [typed hard gate catalog, typed evidence requests, all-gate mapping validation, deterministic UNVERIFIED behavior, unit tests]
   - id: NEXT-104
     priority: P1
     phase: R6B
