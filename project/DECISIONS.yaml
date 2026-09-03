@@ -1,4 +1,4 @@
-version: 7
+version: 8
 updated: "2026-09-03"
 decisions:
   - id: DEC-001
@@ -131,4 +131,24 @@ decisions:
     status: accepted
     title: needs_review erhält eine explizite Klärungsqueue
     rationale: Ungeklärte Anwendbarkeit soll die unmittelbare Arbeitsqueue strukturieren, aber nie unsichtbar werden. Deshalb werden alle needs_review-Fragen sichtbar als clarification geführt und bleiben zusätzlich in der vollständigen Audit-Ansicht erhalten.
+    source: INT-03
+  - id: DEC-027
+    status: accepted
+    title: Structured Export, Consultant Report und Raw-Evidence-Backup sind getrennte Artefakte
+    rationale: Ein auditierbarer Assessment-Export benötigt strukturierte Entscheidungsdaten, während Raw Evidence deutlich sensitiver sein kann. Der Standardexport und der Consultant Report enthalten deshalb keine Raw-Evidence-Dateien; ein vollständiges Evidence-Backup erfordert explizites Opt-in.
+    source: INT-03
+  - id: DEC-028
+    status: accepted
+    title: Restore erzeugt ein neues Assessment und Gate-Ergebnisse werden neu berechnet
+    rationale: Ein Restore darf keine bestehende Bewertung überschreiben oder historische Gate-Zustände blind übernehmen. Referenzen werden auf neue IDs gemappt und die deterministische Rule Engine berechnet die Gates erneut; semantischer Drift wird explizit ausgewiesen.
+    source: INT-03
+  - id: DEC-029
+    status: accepted
+    title: Consultant Reports minimieren Evidence-Inhalte
+    rationale: Management- und Beratungsberichte benötigen Evidenzlage, Trust, Claims und Gate-Begründungen, aber nicht automatisch vertrauliche Rohdateien oder freigegebene LLM-Textauszüge. Der Report enthält deshalb nur die für Nachvollziehbarkeit erforderlichen Metadaten und Ergebnisse.
+    source: INT-03
+  - id: DEC-030
+    status: accepted
+    title: LLM-Bridge-Importe bleiben beim Export eine Auditspur
+    rationale: Export und Restore dürfen den Human-Review-Boundary nicht umgehen. LLM-Proposals werden nachvollziehbar gesichert und referenziert, aber niemals beim Restore automatisch zu reviewed Answers, Claims oder Gate-Entscheidungen aufgewertet.
     source: INT-03
