@@ -1,4 +1,4 @@
-version: 5
+version: 6
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -23,20 +23,15 @@ priorities:
     github_issue: 13
     depends_on: [NEXT-110]
     outputs: [Relevanzprofil, deterministic applicability engine, guided question API, guided question UI, LLM Bridge filtering]
-    done_when:
-      - consultant does not have to manually work through all 128 questions.
-      - applicability is deterministic and traceable.
-      - unknown applicability stays visible as needs_review.
-      - public website and sensitive AI agent produce different question paths.
-      - all questions remain inspectable in the UI.
   - id: NEXT-112
     priority: P0
     phase: MVP-01B
     title: Evidence -> Claim -> Hard Gate in Webanwendung integrieren
     owner_role: developer
-    status: planned
+    status: in_progress
     github_issue: 15
     depends_on: [NEXT-102, NEXT-103, NEXT-110, NEXT-111]
+    outputs: [typed gate catalog, claim model, evidence-to-gate mapping, deterministic gate evaluation, API/UI gate cards]
     done_when:
       - all eight hard gates are represented.
       - missing evidence remains UNVERIFIED.
@@ -56,10 +51,6 @@ priorities:
     owner_role: evidence-analyst
     status: planned
     depends_on: [NEXT-110, NEXT-111]
-    done_when:
-      - clean VM installation documented.
-      - one synthetic assessment is completed from scope to LLM Bridge and result.
-      - UX blockers and method gaps become separate issues.
   - id: NEXT-101
     priority: P0
     phase: R6A
@@ -67,16 +58,14 @@ priorities:
     owner_role: evidence-analyst
     status: ready
     inputs: [data/templates/evidence-pack-example/, schemas/evidence-pack.schema.json, data/method/evidence_request_catalog.csv]
-    done_when:
-      - Pack ohne Cloud-Credentials verarbeitet wird.
-      - Manifest, Scope, Provenienz und Trust nachvollziehbar sind.
-      - mindestens vier Evidence-Klassen enthalten sind.
   - id: NEXT-102
     priority: P0
     phase: R6A
     title: Generische Domain-Modelle und Evidence Intake in Python vervollständigen
     owner_role: developer
-    status: ready
+    status: completed
+    github_issue: 3
+    outputs: [EvidenceRecord, evidence-pack schemas, local pack loader, schema validation, path traversal protection, unit tests]
     done_when:
       - synthetisches Pack wird geladen.
       - invalides Pack wird deterministisch abgewiesen.
@@ -86,10 +75,12 @@ priorities:
     phase: R6A
     title: Hard-Gate Mapping auf Evidence Request Catalog implementieren
     owner_role: methodologist
-    status: ready
+    status: in_progress
+    github_issue: 4
     done_when:
       - alle acht Hard Gates abgedeckt sind.
       - Providerbegriffe nicht im Kernmapping vorkommen.
+      - Mapping ist typisiert und durch Tests validiert.
   - id: NEXT-104
     priority: P1
     phase: R6B
@@ -128,6 +119,3 @@ priorities:
     status: deferred
     superseded_for_primary_ux_by: NEXT-110
     depends_on: [NEXT-101, NEXT-102, NEXT-103]
-    notes:
-      - CLI kann später als Automation-/Testinterface sinnvoll bleiben.
-      - Primäre Consultant-UX ist ab MVP-01 die Webanwendung.
