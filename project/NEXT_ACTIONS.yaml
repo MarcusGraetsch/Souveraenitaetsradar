@@ -1,4 +1,4 @@
-version: 10
+version: 11
 updated: "2026-09-03"
 priorities:
   - id: NEXT-110
@@ -42,11 +42,13 @@ priorities:
     phase: MVP-01C
     title: Guided Workflow progressiv priorisieren
     owner_role: methodologist
-    status: ready
+    status: in_review
     github_issue: 20
+    branch: feature/next-115-progressive-guided-workflow
     depends_on: [NEXT-111, NEXT-114]
     baseline: "NEXT-114 komplexer KI-Agent: 124/128 im Standardpfad, davon 83 applicable und 41 needs_review."
-    outputs: [deterministic workflow stages, clarification queue, deep-dive activation, gate/domain progress UI, regression tests]
+    outputs: [deterministic workflow stages, clarification queue, deep-dive queue, completed/excluded audit states, workflow summary API, staged consultant UI, regression tests, progressive workflow validation runner]
+    implementation_note: "Applicability bleibt unverändert. Workflow-Staging ordnet Fragen separat in screening, clarification, deep_dive, completed oder excluded. needs_review bleibt vollständig sichtbar; alle 128 Fragen bleiben in der Audit-Ansicht. CI-/PR-Validierung läuft als nächster Schritt."
     done_when:
       - unknown applicability remains visible and is never silently hidden.
       - needs_review has a dedicated visible clarification queue.
@@ -61,7 +63,7 @@ priorities:
     title: Assessment Backup, Export und Consultant Report implementieren
     owner_role: developer
     status: planned
-    depends_on: [NEXT-112, NEXT-114]
+    depends_on: [NEXT-112, NEXT-114, NEXT-115]
   - id: NEXT-101
     priority: P0
     phase: R6A
