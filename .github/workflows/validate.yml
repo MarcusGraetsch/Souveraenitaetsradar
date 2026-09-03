@@ -3,20 +3,34 @@ on:
   pull_request:
   push:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
-  validate:
+  python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install -r requirements-dev.txt
+        with: {python-version: "3.12"}
+      - run: pip install -e . -r requirements-dev.txt -r apps/api/requirements.txt
       - run: python tools/validate_repo.py
       - run: python -m pytest -q
-      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py src/sovradar/*.py
+      - run: python -m pytest -q apps/api/tests
+      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py src/sovradar/*.py apps/api/app/*.py
       - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - working-directory: apps/web
+        run: npm install --no-audit --no-fund
+      - working-directory: apps/web
+        run: npm run build
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose config >/dev/null

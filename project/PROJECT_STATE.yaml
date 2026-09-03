@@ -2,16 +2,17 @@ project:
   name: Souveraenitaetsradar
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
-  current_phase: R6
-  current_phase_name: customer-mediated-evidence-pilot
+  current_phase: MVP-01
+  current_phase_name: consultant-web-application
   method_version: "1.0"
+  product_version: "0.1.0-dev"
   updated: "2026-09-03"
 
 purpose:
   statement: >-
     Entwicklung einer belastbaren, nachvollziehbaren und später KI-gestützten
-    Methode sowie eines Tools zur Bewertung digitaler Souveränitätsrisiken von
-    Cloud-, Plattform-, SaaS- und KI-Lösungen.
+    Methode sowie eines praktisch nutzbaren Beratungswerkzeugs zur Bewertung
+    digitaler Souveränitätsrisiken von Cloud-, Plattform-, SaaS- und KI-Lösungen.
 
 current_truth:
   - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik ist Adapter-/Research-Layer.
@@ -22,20 +23,26 @@ current_truth:
   - Nicht kompensierbare Mindestanforderungen werden vor gewichteten Vergleichswerten geprüft.
   - Provider/Service Capability wird von Applied Capability getrennt.
   - Fehlende Evidence führt zu UNVERIFIED/EVIDENCE HOLD, nicht zu erfundenem PASS/FAIL.
-  - R5 Amazon-Bedrock-Public-Evidence bleibt ein Provider-Beispiel und methodischer Lernfall, nicht die Zielarchitektur.
-  - Der in v0.9 entwickelte direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
+  - Die Excel-Datei ist Methoden-/Entwicklungsreferenz, nicht mehr primäre Consultant-UI.
+  - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung.
+  - Dokumente liegen im MVP lokal unter .runtime; Object Storage folgt später.
+  - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
+  - R5 Amazon-Bedrock-Public-Evidence bleibt Provider-Beispiel und methodischer Lernfall, nicht Zielarchitektur.
+  - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
 primary_artifacts:
+  product_mvp: docs/product/MVP_01_CONSULTANT_WEBAPP.md
+  web_app: apps/web/
+  api_app: apps/api/
+  compose: docker-compose.yml
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
   question_bank: data/method/question_bank/
   risk_taxonomy: data/method/risk_taxonomy.csv
   source_register: data/method/source_register.csv
-  source_register_addendum: data/method/source_register_addendum_v1.csv
   hard_gates: data/method/r4_hard_gates.csv
   factor_rules: data/method/r4_factor_rules.csv
   evidence_request_catalog: data/method/evidence_request_catalog.csv
   evidence_pack_schema: schemas/evidence-pack.schema.json
-  evidence_pack_tool: tools/evidence-pack/validate_evidence_pack.py
 
 quality_gates:
   provenance_required: true
@@ -44,6 +51,8 @@ quality_gates:
   raw_customer_evidence_in_repo: false
   automatic_risk_acceptance_allowed: false
   customer_cloud_credentials_required: false
+  llm_api_required_for_mvp: false
+  uninstall_removes_generated_data: true
 
 blockers: []
 
@@ -56,11 +65,13 @@ open_method_questions:
     text: C5:2026 Detailmapping und weitere Framework-Versionen müssen weiter verfeinert werden.
 
 next_milestone:
-  id: R6A
-  name: provider-neutral-evidence-pack-pilot
+  id: MVP-01A
+  name: installable-consultant-skeleton
+  github_issue: 11
   exit_criteria:
-    - Ein synthetisches oder kundenbereitgestelltes Evidence Pack validiert erfolgreich gegen Schema.
-    - Mindestens sechs der acht Hard Gates können aus Evidence plus Interview vorbewertet werden.
-    - Provider-spezifische Begriffe werden über einen Adapter auf generische Capabilities gemappt.
-    - Kein Credential-/Accountzugriff ist erforderlich.
-    - PASS/FAIL/UNVERIFIED und Evidence Confidence bleiben nachvollziehbar.
+    - Clean clone can be installed with ./install.sh.
+    - Web/API/PostgreSQL start with Docker Compose and pass ./test.sh.
+    - Consultant can create an assessment and answer method questions.
+    - Evidence metadata and local file upload work without external services.
+    - LLM Bridge can export a prompt and validate imported proposal JSON.
+    - ./uninstall.sh removes database volume, .runtime and .env after explicit confirmation.

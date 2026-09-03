@@ -1,0 +1,44 @@
+name: sovradar
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sovradar
+      POSTGRES_USER: sovradar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - sovradar_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sovradar -d sovradar"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://sovradar:${POSTGRES_PASSWORD}@db:5432/sovradar
+      SOVRADAR_RUNTIME_DIR: /app/.runtime
+      SOVRADAR_METHOD_DIR: /app/data/method
+      SOVRADAR_MAX_UPLOAD_BYTES: ${SOVRADAR_MAX_UPLOAD_BYTES:-52428800}
+    volumes:
+      - ./.runtime:/app/.runtime
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "${BIND_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  sovradar_db_data:
