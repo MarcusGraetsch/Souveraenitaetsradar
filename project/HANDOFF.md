@@ -2,22 +2,13 @@
 
 ## Kurzfassung
 
-Der Souveränitätsradar hat zwei klar getrennte Ebenen: **Methodenkern** (cloud-agnostische Assessment-Methode) und **Produkt** (lokal installierbare Consultant-Webanwendung). Die Excel-Arbeitsmappe v1.0 bleibt Methoden-/Entwicklungsreferenz, ist aber nicht mehr die primäre Benutzeroberfläche.
+Der Souveränitätsradar besteht aus zwei getrennten Ebenen: **Methodenkern** (cloud-agnostische Assessment-Methode) und **Produkt** (lokal installierbare Consultant-Webanwendung). Die Excel-Arbeitsmappe v1.0 ist Methoden-/Entwicklungsreferenz, nicht operative Benutzeroberfläche.
 
-MVP-01A ist auf `main` implementiert und per CI inklusive Docker-Compose-Smoke-Test validiert. Der aktuelle Development-Fokus ist **NEXT-111 / Guided Workflow**.
+MVP-01A und NEXT-111 Guided Workflow sind auf `main`. Die NEXT-112-Core-Foundation **Evidence → Claim → Hard Gate** ist ebenfalls auf `main`. Aktueller Development-Fokus ist die Persistenz/API/UI der acht Hard Gates.
 
-## Aktuelle Produktarchitektur
+## Produktarchitektur
 
-MVP-01 verwendet:
-
-- React + TypeScript + Vite
-- FastAPI
-- PostgreSQL
-- lokalen Dokument-Speicher `.runtime/`
-- Docker Compose
-- Copy/Paste **LLM Bridge** ohne API-Keys
-
-Nicht im MVP: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
+MVP-01 verwendet React/TypeScript/Vite, FastAPI, PostgreSQL, lokalen Dokument-Speicher `.runtime/`, Docker Compose und eine Copy/Paste **LLM Bridge** ohne API-Keys. Nicht im MVP: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
 
 Consultant-Workflow:
 
@@ -26,102 +17,84 @@ Assessment
   -> Scope / Kritikalität / CIA
   -> Relevanzprofil
   -> Guided Questions
-  -> Evidence
-  -> LLM Bridge
-  -> Human Review
-  -> Rule Engine / Hard Gates / Risks
-  -> Management Ergebnis
+  -> Evidence erfassen und reviewen
+  -> optional LLM Bridge
+  -> Human-reviewed Claims
+  -> Hard Gates PASS / FAIL / UNVERIFIED / N/A
+  -> Risks / Management Ergebnis
 ```
 
-## Guided Workflow / NEXT-111
+## Evidence → Claim → Hard Gate
 
-Die 128 Methodenfragen sind **kein statischer Fragebogen**. Der Radar erzeugt einen Fragenpfad aus Assessment-Scope und einem separaten Relevanzprofil.
+Roh-Evidence oder LLM-Proposals wirken **nie direkt** auf einen Gate-Zustand.
 
-Das Relevanzprofil enthält generische Scope-Fakten, zum Beispiel:
+Ein Gate wird ausschließlich aus human-bestätigten Claims und geprüfter Evidence deterministisch ausgewertet:
 
-- Service-Modell / Cloud-Bezug
-- Datenverarbeitung und Persistenz
-- Verschlüsselung und Schlüsselmodell
-- KI / agentische KI
-- Exit-/Portabilitätsrelevanz
-- Backup/Restore
-- Multi-Provider / Unterauftragnehmer
-- IAM und Logging/Monitoring
-- C5/C3A-Relevanz
+- `Claim.review_status` muss `reviewed` oder `approved` sein.
+- Capability-Claims nutzen das interne Radar-Level 0–4.
+- Jeder Capability-Claim benötigt reviewed/approved Evidence, damit Evidence Trust ableitbar ist.
+- Mehrere bestätigte Capability-Claims werden konservativ aggregiert: die schwächste Capability begrenzt das Gate.
+- Pro Claim kann der stärkste passende Nachweis tragen; der Gate-Trust wird durch den schwächsten belegten Capability-Claim begrenzt.
+- Fehlende oder nicht ausreichend geprüfte Evidence bleibt `UNVERIFIED`.
+- Requirement 0 ergibt `N/A`.
+- Technisches Requirement unterschritten ergibt `FAIL`, auch bei starker Evidence.
 
-Applicability wird deterministisch im Core ausgewertet:
+Diese Aggregation ist interne Operationalisierung (`INT-03`), keine externe Normformel.
 
-- `applicable`
-- `not_applicable`
-- `needs_review`
+## Gate Requirements
 
-**Wichtig:** Fehlender Kontext oder eine noch nicht operationalisierte natürliche Anwendbarkeitsregel führt zu `needs_review`. Die Frage bleibt sichtbar. Die Anwendung darf eine Frage nur aus dem Standardpfad entfernen, wenn sie sicher `not_applicable` ist.
+Die R4-Templates werden im MVP nach Kritikalität vorbelegt:
 
-Die UI bietet deshalb `Relevante Fragen` und `Alle Fragen`. Jede Frage zeigt den Applicability-Zustand und die Begründung.
+- low → Basis
+- medium → Standard
+- high → Elevated
+- critical → Critical
 
-Die LLM Bridge erhält nur offene `applicable`- und `needs_review`-Fragen. Das LLM entscheidet nicht über Applicability.
+Das ist **nur eine interne Startkonfiguration**. Der Berater kann jedes Gate auf Basis von Rechtslage, Schutzbedarf, Policy und Risikoappetit auf 0–4 überschreiben. Overrides werden als `consultant-override` gespeichert.
 
-## Fachlicher Kern
+## Acht Hard Gates
 
-Bewertet wird ein Workload in einer konkreten Provider-/Service-/Architektur-/Vertragskonstellation, nicht ein Provider pauschal.
+1. HG-01 Jurisdiktion & Effective Control
+2. HG-02 Datenresidenz & Verarbeitung
+3. HG-03 Schlüsselhoheit
+4. HG-04 Exit & Portabilität
+5. HG-05 Operational Autonomy
+6. HG-06 Identity & Trust Anchors
+7. HG-07 Supply Chain Critical Dependencies
+8. HG-08 Security Minimum
 
-Getrennte Bewertungsachsen:
+Die fachliche Source-of-Truth bleibt `data/method/r4_hard_gates.csv`; akzeptable Evidence/Follow-ups stehen in `data/method/evidence_request_catalog.csv`.
 
-- Provider / Service Capability
-- Applied Capability
-- Workload Sovereignty Risk
-- klassisches Informationssicherheits-/Betriebsrisiko
-- Evidence Confidence
+## Aktueller Branch
 
-Hard Gates:
+`feature/next-112-gate-api-ui`
 
-1. Jurisdiktion & Effective Control
-2. Datenresidenz & Verarbeitung
-3. Schlüsselhoheit
-4. Exit & Portabilität
-5. Operational Autonomy
-6. Identity & Trust Anchors
-7. Supply Chain Critical Dependencies
-8. Security Minimum
+Bereits umgesetzt:
 
-Fehlende Evidence bleibt `UNVERIFIED`; LLM-Vorschläge sind keine Entscheidungen.
+- PostgreSQL-Persistenz für `EvidenceReview`, `AssessmentClaim`, `GateRequirement`
+- Evidence Review mit Applied State, Base Trust, Scope Fit, Freshness Fit und Review Status
+- Claim CRUD mit Gate-/Evidence-/Question-Links und Human Review State
+- Gate-Requirement Defaults + Consultant Override
+- API für alle acht Gate-Auswertungen inklusive Reasons und Evidence Requests
+- Consultant-UI: Evidence Review, Hard-Gate-Karten, Requirement-Override, Claim-Erfassung und Ergebnisübersicht
+- API-Tests für PASS/FAIL/UNVERIFIED, Human-Review-Grenzen und ungültige Links
 
-## Verworfene / verschobene Ansätze
+Noch vor Merge zu erledigen: CI prüfen, etwaige Fehler korrigieren, Projektstate/Agent-Log finalisieren, Self-Review und Merge.
 
-- Ein durch uns betriebener Cloud-Account-Collector ist nicht Zielarchitektur.
-- Kunden-Root-/Owner-/Cloud-Credentials sind keine Voraussetzung.
-- LLM-API-Integration ist für MVP-01 bewusst verschoben.
-- Excel ist nicht mehr die operative Consultant-UI.
-- Provider-spezifische Risikoregeln gehören nicht in den Core.
-
-## Development-Status
-
-- `NEXT-110` / Issue #11: MVP-01A Webapp-Skeleton – abgeschlossen auf `main`.
-- `NEXT-111` / Issue #13: Guided Workflow und Question Applicability – aktueller Change.
-- `NEXT-112`: Evidence -> Claim -> Hard Gate – nächster P0-Produkt-/Methodenschritt.
-- `NEXT-113`: Backup/Export/Consultant Report.
-- `NEXT-114`: vollständiger synthetischer Consultant-Durchlauf auf sauberer VM.
-
-Die Methodentasks `NEXT-101` bis `NEXT-108` bleiben relevant. `NEXT-109` (CLI als primäre MVP-Oberfläche) ist zurückgestellt; CLI kann später als Test-/Automationsinterface bestehen.
-
-## Regeln für den nächsten Agenten
+## Regeln für andere Agenten
 
 - `AGENTS.md` zuerst lesen.
 - Keine Cloud-Credentials anfordern.
 - Keine LLM API im MVP-01 ohne neue Decision einführen.
-- Keine Provider-spezifische Logik in den Rule-Core einbauen.
+- Keine Provider-spezifische Logik in Gate-/Rule-Core einbauen.
 - Raw Kundenevidence nie committen.
-- Keine LLM-Proposals automatisch als Answers übernehmen.
+- LLM-Proposals niemals automatisch als reviewed Claim oder Answer übernehmen.
+- Fehlende Evidence niemals automatisch als FAIL interpretieren.
+- Requirement-Defaults niemals als regulatorische Vorgabe darstellen.
 - Unklare Applicability nie still ausblenden.
 - `./uninstall.sh` muss alle erzeugten Runtime-Daten löschen können.
 - substantielle Änderungen über Issue/Branch/PR/CI/Agent-Log führen.
 
-## Nächster Handoff nach NEXT-111
+## Danach
 
-Nach grünem Merge von NEXT-111:
-
-1. `NEXT-112` starten.
-2. Evidence-Objekte und Human-reviewed Claims mit den acht Hard Gates verbinden.
-3. `UNVERIFIED` bei fehlender Evidence beibehalten.
-4. Service Capability und Applied Capability nicht vermischen.
-5. Danach den ersten vollständigen synthetischen Beraterdurchlauf durchführen.
+Nach NEXT-112 sollte zuerst ein vollständiger synthetischer Consultant-Durchlauf auf einer sauberen Installation erfolgen, bevor weitere methodische oder technische Komplexität ergänzt wird. Damit prüfen wir, ob der reale Beratungsworkflow verständlich und vollständig ist.
