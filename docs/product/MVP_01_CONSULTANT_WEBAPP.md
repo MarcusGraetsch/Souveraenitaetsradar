@@ -6,7 +6,7 @@ Der Souveränitäts-Radar wird ab MVP-01 als lokal installierbare Webanwendung e
 
 Der Beratungsworkflow lautet:
 
-`Assessment anlegen -> Scope -> Fragen -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
+`Assessment anlegen -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
 
 ## MVP-Technologien
 
@@ -23,11 +23,38 @@ Der Beratungsworkflow lautet:
 
 Nicht Teil von MVP-01: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
 
+## Guided Workflow / Question Applicability
+
+Die 128 Fragen der Methodenbank sind **kein statischer Fragebogen**. Die Webanwendung erzeugt einen nachvollziehbaren Fragenpfad aus Assessment-Scope und einem separaten Relevanzprofil.
+
+Das Relevanzprofil enthält Scope-Fakten wie:
+
+- Service-Modell und Cloud-Bezug
+- Datenverarbeitung und Persistenz
+- Verschlüsselung und Schlüsselmodell
+- KI- bzw. agentische KI-Nutzung
+- Exit-/Portabilitätsrelevanz
+- Backup/Restore
+- Multi-Provider und Unterauftragnehmer
+- IAM, Logging/Monitoring, C5/C3A
+
+Applicability wird im Methodenkern deterministisch bewertet. Es gibt genau drei Zustände:
+
+- `applicable` – die bekannten Bedingungen sind erfüllt
+- `not_applicable` – die Bedingung ist nach dem aktuellen Scope sicher ausgeschlossen
+- `needs_review` – Kontext fehlt oder die natürliche Anwendbarkeitsregel ist noch nicht ausreichend operationalisiert
+
+`needs_review` bleibt im Standardfragenpfad sichtbar. **Unklarheit darf nie dazu führen, dass eine Frage still verschwindet.** Im UI kann der Berater zusätzlich jederzeit auf `Alle Fragen` umschalten und auch sicher nicht anwendbare Fragen samt Begründung sehen.
+
+Die heutige Engine operationalisiert bewusst nur sichere, generische Bedingungen. Noch nicht modellierte Anwendbarkeitsausdrücke werden konservativ als `needs_review` behandelt statt durch heuristische KI oder Providerlogik entschieden.
+
 ## LLM Bridge
 
 Die erste Produktversion validiert den Nutzen von KI-Unterstützung, ohne gleichzeitig API-Key-Management, Kosten, Provider-Routing oder zusätzliche Datenübertragungen einzuführen.
 
 Die Anwendung erzeugt ein Prompt Package. Der Berater kopiert es in einen freigegebenen LLM-Chat und fügt das zurückgegebene JSON in den Radar ein. Das Backend validiert `assessment_id`, bekannte Question IDs, bekannte Evidence IDs und die JSON-Struktur. Der Import erzeugt **Vorschläge**, keine automatisch übernommenen Assessment-Antworten.
+
+Ab Guided Workflow enthält der LLM-Prompt nur offene `applicable`- und `needs_review`-Fragen. Die Applicability-Entscheidung selbst wird **nicht** an das LLM delegiert.
 
 ## Lokale Persistenz
 
@@ -58,14 +85,16 @@ Vollständige Datenlöschung: `./uninstall.sh`. Der Uninstaller verlangt explizi
 - Netzwerk-Bind `127.0.0.1` ist Default
 - `0.0.0.0` nur für vertrauenswürdige Testnetze, da Auth später kommt
 
-## Noch nicht implementiert
+## Nächste Produktstufe
 
-- dynamische Question Applicability statt reinem Domänenfilter
+Nach dem Guided Workflow sind die wichtigsten offenen Schritte:
+
 - Evidence -> Claim -> Hard Gate Integration
 - echte Gate-/Risikoansicht aus der Rule Engine
 - Human-Review-Übernahme einzelner LLM-Vorschläge in Answers
 - Assessment-/Evidence-Export und Backup
+- vollständiger synthetischer Consultant-Durchlauf auf sauberer VM
 - Dokumenttext-Extraktion
 - produktive Authentisierung
 
-Diese Punkte werden nach einem installierbaren End-to-End-Smoke-Test priorisiert.
+Die Excel-Arbeitsmappe bleibt fachliche Referenz. Neue operative Funktionen werden primär im Repository und in der Webanwendung entwickelt.
