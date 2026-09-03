@@ -3,56 +3,136 @@
 Datum: 2026-09-03
 Rollen: developer, methodologist, reviewer (Self-Review)
 Issues: #3, #4, #15
-Branch: `feature/evidence-gate-foundation`
+Branches: `feature/evidence-gate-foundation`, `feature/next-112-gate-api-ui`
 
 ## Ziel
 
-Die vorhandene providerneutrale Evidence-Foundation mit dem R4-Hard-Gate-Modell verbinden. Ein Gate darf nur aus human-bestätigten Claims und überprüfter Evidence deterministisch bewertet werden. LLM-Vorschläge dürfen niemals direkt ein Gate verändern.
+Die providerneutrale Evidence-Foundation mit dem R4-Hard-Gate-Modell und der Consultant-Webanwendung verbinden. Ein Gate darf nur aus human-bestätigten Claims und überprüfter Evidence deterministisch bewertet werden. LLM-Vorschläge dürfen niemals direkt ein Gate verändern.
 
-## Vorhandene Basis bestätigt
+## Vorhandene Basis / NEXT-102
 
-NEXT-102 ist im Repository bereits materiell erfüllt:
+NEXT-102 wurde verifiziert und abgeschlossen:
 
-- `src/sovradar/models.py` enthält typisierte Evidence Records.
-- `schemas/evidence-pack.schema.json` und `schemas/evidence-record.schema.json` validieren Customer Evidence Packs.
-- `src/sovradar/intake.py` lädt Packs lokal, ohne Netz-/Cloudzugriff.
-- Path-Traversal wird abgewehrt.
-- `tests/test_intake.py` deckt gültiges Pack, Gate-Filter und invaliden Pfad ab.
+- typisierte `EvidenceRecord`s
+- Evidence-Pack-/Record-Schemas
+- lokaler, cloud-unabhängiger Pack Loader
+- deterministische Schemafehler
+- Path-Traversal-Schutz
+- Unit Tests
 
-Deshalb wird NEXT-102 als abgeschlossen behandelt und nicht neu implementiert.
+Issue #3 ist geschlossen.
 
-## Neue Kernentscheidungen für NEXT-112
+## Kernentscheidungen
 
-1. `Claim` ist die verbindende Schicht zwischen Roh-/Reviewed Evidence und Gate-Bewertung.
+1. `Claim` ist die verbindende Schicht zwischen Evidence und Gate-Bewertung.
 2. Nur `reviewed`/`approved` Claims beeinflussen Gates.
-3. Claims ohne Capability-Level dürfen Fakten dokumentieren, aber keinen technischen PASS/FAIL erzeugen.
+3. Claims ohne Capability-Level dokumentieren Fakten, erzeugen aber keinen technischen PASS/FAIL.
 4. Pro Gate gilt konservativ die schwächste human-bestätigte Capability-Aussage.
 5. Ein Capability-Claim benötigt reviewed/approved Evidence, damit Evidence Trust ableitbar ist.
 6. Pro Claim darf der stärkste passende Nachweis tragen; Gate-Trust wird durch den schwächsten belegten Capability-Claim begrenzt.
 7. Fehlende Claims oder Evidence bleiben `UNVERIFIED`.
 8. Requirement 0 ergibt `N/A`.
-9. Diese Aggregationslogik ist interne Operationalisierung (`INT-03`), keine externe Normformel.
+9. Gate-Requirement-Templates werden nach Kritikalität vorbelegt (`low→Basis`, `medium→Standard`, `high→Elevated`, `critical→Critical`) und sind ausdrücklich als Consultant-Override editierbar.
+10. Diese Aggregations- und Defaultlogik ist interne Operationalisierung (`INT-03`), keine externe Normformel.
 
-## Bereits umgesetzt auf diesem Branch
+## Foundation – auf main
 
-- `Claim`, `GateDefinition`, `EvidenceRequest`, `GateEvaluation` im Core-Datenmodell.
-- typisierter Loader für `r4_hard_gates.csv` und `evidence_request_catalog.csv`.
-- deterministische Validierung, dass alle acht Hard Gates Evidence Requests besitzen.
-- `evaluate_gate()` mit PASS / FAIL / UNVERIFIED / N/A.
-- Unit Tests für Gate-Katalog und Gate-Auswertung.
+PR #16 wurde nach grüner CI squash-gemerged.
 
-## Nächste Umsetzung
+Enthalten:
 
-- Persistenz für Claims, Evidence-Review-Metadaten und Gate Requirements in FastAPI/PostgreSQL.
-- API-Endpunkte für Claim Review und Gate-Auswertung.
-- acht Gate-Karten im Consultant-UI mit Drill-down auf Claims/Evidence/Reasoning.
-- API-/Frontend-/Compose-Tests.
+- `Claim`, `GateDefinition`, `EvidenceRequest`, `GateEvaluation`
+- typisierter Loader für `r4_hard_gates.csv` und `evidence_request_catalog.csv`
+- Vollständigkeitsprüfung HG-01…HG-08
+- `evaluate_gate()` mit PASS / FAIL / UNVERIFIED / N/A
+- Unit Tests für Gate-Katalog und Gate-Auswertung
+- DEC-022/DEC-023
+
+## API/UI – aktueller Branch
+
+Auf `feature/next-112-gate-api-ui` umgesetzt:
+
+### Persistenz
+
+Neue Tabellen statt Spaltenänderungen an bestehenden MVP-Tabellen, damit vorhandene Installationen mit `Base.metadata.create_all()` weiterlaufen können:
+
+- `evidence_reviews`
+- `assessment_claims`
+- `gate_requirements`
+
+### Evidence Review
+
+Berater bewertet je Evidence:
+
+- Applied State (`asserted` bis `attested`)
+- Base Trust 0–5
+- Scope Fit 0–5
+- Freshness Fit 0–5
+- Review Status
+- Effective Trust = Minimum der drei Trust-Dimensionen
+
+Evidence ohne Review bleibt `raw` / Trust 0 und kann kein Gate verifizieren.
+
+### Claims
+
+Claim CRUD mit:
+
+- Gate-ID
+- Aussage
+- Capability Level 0–4 oder reiner Fakt
+- Evidence-Links
+- optionale Question-Links
+- Review State
+- Notiz
+
+Evidence-/Question-IDs werden serverseitig validiert.
+
+### Gate Requirements
+
+Default wird aus Kritikalität + `r4_hard_gates.csv` gelesen. Jede manuelle Anpassung wird als `consultant-override` gespeichert. Die UI weist ausdrücklich darauf hin, dass dies keine Normvorgabe ist.
+
+### Hard-Gate API
+
+- Methodenkatalog inkl. Evidence Requests
+- Requirements lesen/überschreiben
+- Evidence Review lesen/speichern
+- Claim CRUD
+- alle acht Gates auswerten
+
+Gate-Response enthält Requirement, Applied Capability, Evidence Trust, Technical/Evidence/Final State, Claim-/Evidence-IDs, deterministische Reasons und Evidence Requests.
+
+### Consultant UI
+
+- Evidence-Review-Felder direkt an Evidence-Karten
+- neuer Tab `Hard Gates`
+- acht Gate-Karten mit PASS/FAIL/UNVERIFIED/N/A
+- Requirement-Override 0–4
+- Drill-down auf Begründungen und benötigte Evidence
+- Claim-Erfassung und Human Review
+- Ergebnisübersicht mit Gate-Zählung und Arbeitsstatus
+
+LLM Bridge bleibt separat; kein Button erzeugt automatisch einen reviewed Claim aus einem LLM-Proposal.
+
+## Tests auf dem aktuellen Branch
+
+API-Tests wurden erweitert für:
+
+- acht Gates vorhanden
+- Kritikalitäts-Default
+- Evidence Review + Trust
+- reviewed Claim + ausreichende Evidence → PASS
+- Consultant-Override über Capability → FAIL
+- draft Claim / raw Evidence → UNVERIFIED
+- unbekannte Evidence-/Question-Links → 422
+
+Noch auszuführen/zu prüfen: vollständige CI (Core/API, Frontend Build, Compose Smoke). Erst bei Grün wird gemerged.
 
 ## Leitplanken für andere Agenten
 
-- Keine Provider-Sonderlogik in `gate_evaluation.py` oder Gate-Katalog.
+- Keine Provider-Sonderlogik in Gate-/Rule-Core.
 - Keine automatische Übernahme von LLM-Proposals in Claims.
 - Keine Ableitung `fehlende Evidence = FAIL`.
 - Keine Risikoakzeptanz automatisieren.
-- Bei neuen Schwellen/Heuristiken immer Provenienz als interne Regel kenntlich machen.
+- Requirement-Defaults nicht als regulatorische Pflicht darstellen.
+- Bei neuen Schwellen/Heuristiken Provenienz als interne Regel kenntlich machen.
 - Raw Kundenevidence nicht committen.
