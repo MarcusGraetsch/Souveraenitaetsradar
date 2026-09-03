@@ -17,7 +17,7 @@ async function restoreFile(file:File):Promise<{assessment_id:string;gate_semanti
 }
 
 function DownloadLink({href,children,dangerous=false}:{href:string;children:string;dangerous?:boolean}){
-  return <a className="primary export-link" href={href} onClick={event=>{if(dangerous&&!window.confirm('Vollbackup enthält ausdrücklich ausgewählte Raw-Evidence-Dateien und freigegebene Evidence-Auszüge. Backup jetzt erzeugen?'))event.preventDefault()}}>{children}</a>
+  return <a className="primary export-link" href={href} download onClick={event=>{if(dangerous&&!window.confirm('Vollbackup enthält ausdrücklich ausgewählte Raw-Evidence-Dateien und freigegebene Evidence-Auszüge. Backup jetzt erzeugen?'))event.preventDefault()}}>{children}</a>
 }
 
 export function ExportTools({assessment}:{assessment:Assessment}){
