@@ -3,6 +3,7 @@
 Datum: 2026-09-03
 Rollen: methodologist, developer, reviewer
 Issue: #20
+PR: #21
 Branch: `feature/next-115-progressive-guided-workflow`
 
 ## Ausgangslage
@@ -65,14 +66,7 @@ Workflow Stage ist reine Priorisierung und keine Risiko-/Normlogik.
 
 `apps/api/app/main.py`
 
-- bestehende Questions-API um Views erweitert:
-  - `work`
-  - `screening`
-  - `clarification`
-  - `deep_dive`
-  - `completed`
-  - `relevant`
-  - `all`
+- Questions-API mit Views `work`, `screening`, `clarification`, `deep_dive`, `completed`, `relevant`, `all`
 - Antworten werden bei der Stage-Berechnung berücksichtigt
 - neuer Endpoint `/api/assessments/{assessment_id}/question-workflow`
 - Summary enthält Total, Relevant, Work Queue, Applicability Counts, Stage Counts und Domänenfortschritt
@@ -80,11 +74,10 @@ Workflow Stage ist reine Priorisierung und keine Risiko-/Normlogik.
 ### Consultant UI
 
 - Stage-spezifische Navigation
-- unmittelbare Arbeitsqueue getrennt von Clarification und Deep Dive
-- sichtbare `needs_review`-Queue
-- Completed-Ansicht
+- sichtbare Screening-, Clarification-, Deep-Dive- und Completed-Queues
+- `needs_review` bleibt sichtbar
 - Audit-/All-Questions-Ansicht bleibt vollständig
-- Stage-/Progress-Metriken werden sichtbar gemacht
+- Stage-/Progress-Metriken werden angezeigt
 
 ### Tests
 
@@ -102,12 +95,91 @@ Der Runner arbeitet gegen die laufende installierte Anwendung und prüft:
 - NEXT-114-Baseline bleibt exakt erhalten
 - alle 41 `needs_review` erscheinen in Clarification
 - Screening und Deep Dive existieren
-- unmittelbare Work Queue ist kleiner als der bisherige relevante Pfad
+- Work Queue ist kleiner als der bisherige relevante Pfad
 - beantwortete Screening-Frage wechselt nach Completed
 - alle 128 Fragen bleiben in All/Audit sichtbar
-- einfacher Public-Content-Workload ist kürzer als der komplexe KI-Agent
+- einfacher Public-Content-Workload ist im relevanten Gesamtpfad kürzer als der komplexe KI-Agent
 
-CI wurde so erweitert, dass sowohl NEXT-114 als Regression als auch NEXT-115 ausgeführt und als JSON-Artefakte gespeichert werden.
+CI führt NEXT-114 weiterhin als Regression aus und erzeugt zusätzlich den NEXT-115-Report.
+
+## CI-Ergebnis
+
+PR #21 löste GitHub Actions Run `33794873133` aus.
+
+Alle Jobs erfolgreich:
+
+- `python` → success
+- `frontend` → success
+- `compose-smoke` → success
+- `consultant-walkthrough` → success
+  - Clean Install → success
+  - NEXT-114 Walkthrough → success
+  - NEXT-115 Progressive Workflow → success
+  - Stop/Restart/Test → success
+  - vollständiger Uninstall → success
+  - Report Upload → success
+
+Artifact: `consultant-validation-reports`, ID `9908787146`.
+
+## Validierte NEXT-115-Zahlen
+
+### Komplexer KI-Agent – vor Antwort
+
+- total 128
+- relevant 124
+- applicable 83
+- needs_review 41
+- not_applicable 4
+- screening 44
+- clarification 41
+- deep_dive 39
+- completed 0
+- excluded 4
+- work_queue 85
+
+### Nach einer beantworteten Screening-Frage
+
+- screening 43
+- clarification 41
+- deep_dive 39
+- completed 1
+- excluded 4
+- work_queue 84
+
+Question `OA-01` wechselte nach `completed`; `all` blieb bei 128.
+
+### Public-Content-Fall
+
+- total 128
+- relevant 84
+- applicable 43
+- needs_review 41
+- not_applicable 44
+- screening 43
+- clarification 41
+- deep_dive 0
+- completed 0
+- excluded 44
+- work_queue 84
+
+Alle im Runner definierten Akzeptanzchecks sind `true`.
+
+## Wichtiges Review-Finding
+
+Die progressive Stufung funktioniert, aber die aktuelle `work_queue` kombiniert Screening und Clarification. Dadurch ist die unmittelbare Queue beim komplexen KI-Agenten 85 und beim Public-Content-Fall 84 – also nahezu gleich groß.
+
+Das wurde **nicht als Erfolg umgedeutet**. Der relevante Gesamtpfad ist zwar bereits deutlich differenziert (124 vs. 84), aber die erste operative Queue braucht eine weitere Iteration.
+
+Dafür wurde **NEXT-116 / Issue #22** angelegt:
+
+`Screening und Klärungsqueue für einfache Workloads weiter reduzieren`.
+
+Vorgesehene Richtung:
+
+- `work` künftig stärker auf Screening begrenzen
+- Clarification separat sichtbar halten
+- Basis-/Domänenfragen deterministisch erst aus Scope, Answers, Evidence Gaps oder Gate State hochstufen
+- einfache vs. komplexe Workloads schon in der ersten Arbeitsstufe deutlicher differenzieren
 
 ## Governance
 
@@ -117,16 +189,14 @@ CI wurde so erweitert, dass sowohl NEXT-114 als Regression als auch NEXT-115 aus
 - Stage darf Applicability nicht überschreiben
 - All-Questions/Audit View muss vollständige Methodenbank erhalten
 - synthetische Testprofile sind keine Providerfakten
+- verbleibende UX-Schwächen werden als Findings dokumentiert statt Akzeptanzkriterien nachträglich weichzurechnen
 
-## Review-/Validierungsplan
+## Abschluss / Nächster Schritt
 
-1. PR gegen `main` öffnen.
-2. vollständige CI abwarten.
-3. NEXT-115 Artifact auswerten und exakte Stage Counts übernehmen.
-4. bei echten Problemen separate Issues erstellen.
-5. Self-Review durchführen.
-6. nach grüner CI squash-mergen und Issue #20 schließen.
+NEXT-115 ist fachlich und technisch validiert. Vor Merge von PR #21 erfolgt noch der finale Self-Review und ein letzter CI-Lauf nach den State-/Handoff-Updates.
 
-## Noch offen
+Danach:
 
-Die MVP-Screeningregel `Basis/Scope → Screening`, sonstige applicable → Deep Dive ist bewusst einfach. Sie ist eine erste operative Priorisierung und muss später anhand realer Consultant-Fälle und Inter-Rater-Erfahrung kalibriert werden. Sie darf nicht als fachliche oder regulatorische Prioritätsvorgabe interpretiert werden.
+1. PR #21 squash-mergen und Issue #20 schließen.
+2. NEXT-113 als nächsten P0 starten: Backup, Export und Consultant Report.
+3. NEXT-116 / Issue #22 als P1-UX-Verbesserung im Backlog behalten.
