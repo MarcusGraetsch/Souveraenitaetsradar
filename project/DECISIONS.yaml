@@ -1,0 +1,93 @@
+version: 2
+updated: "2026-09-03"
+decisions:
+  - id: DEC-001
+    status: accepted
+    title: Security und Souveränität bleiben getrennte Bewertungsachsen
+    rationale: Eine souveränere Lösung kann anfangs unsicherer sein; eine stark gemanagte Lösung kann sicherer und zugleich abhängiger sein.
+    source: INT-01
+
+  - id: DEC-002
+    status: accepted
+    title: Gate first, score second
+    rationale: Mindestanforderungen dürfen nicht durch andere gute Eigenschaften kompensiert werden.
+    sources: [SRC-24, INT-01]
+
+  - id: DEC-003
+    status: accepted
+    title: Radar Capability Level 0-4 ist kein offizieller EU-SEAL
+    rationale: Eigene Operationalisierung darf nicht als offizielles Framework-Ergebnis ausgegeben werden.
+    sources: [SRC-24, INT-01]
+
+  - id: DEC-004
+    status: accepted
+    title: Provider Capability und Applied Capability werden getrennt gespeichert
+    rationale: Das Vorhandensein einer Funktion belegt nicht ihre Nutzung oder Wirksamkeit im konkreten Workload.
+    source: INT-01
+
+  - id: DEC-005
+    status: accepted
+    title: Evidence Confidence ist keine Risikohöhe
+    rationale: Fehlende Evidence erzeugt Unsicherheit/Evidence Hold, nicht automatisch höheres technisches Risiko.
+    sources: [SRC-07, SRC-24, INT-01]
+
+  - id: DEC-006
+    status: accepted
+    title: Fehlende Evidence führt zu UNVERIFIED
+    rationale: Dreiwertige Logik verhindert erfundene PASS/FAIL-Aussagen.
+    source: INT-01
+
+  - id: DEC-007
+    status: accepted
+    title: Lock-in wird primär als strukturelle Exposition modelliert
+    rationale: Die Abhängigkeit besteht bereits; ein späterer Trigger aktiviert ihre Auswirkung.
+    sources: [SRC-08, SRC-12, INT-01]
+
+  - id: DEC-008
+    status: accepted
+    title: Exit-Transition und Cutover-Downtime werden getrennt bewertet
+    rationale: Eine Migration kann lange dauern, ohne dass der Dienst entsprechend lange ausfällt.
+    sources: [SRC-08, SRC-12, SRC-20, INT-01]
+
+  - id: DEC-009
+    status: superseded
+    superseded_by: DEC-011
+    title: Direkt betriebener Read-only Cloud Collector als R6-Standard
+    rationale: Im Experiment technisch plausibel, im realen Beratungsmodell jedoch häufig unrealistisch wegen Credentials, Zugriff, Haftung und Provider-Spezifik.
+    source: INT-01
+
+  - id: DEC-010
+    status: accepted
+    title: Raw kundenbezogene Evidence wird standardmäßig nicht committed
+    rationale: Architektur-, IAM-, Netzwerk-, Vertrags- und Konfigurationsinformationen können sensitiv sein.
+    source: INT-01
+
+  - id: DEC-011
+    status: accepted
+    title: Customer-mediated Evidence ist der Standard-Erhebungsweg
+    rationale: Der Kunde behält Kontrolle über Accounts und sensible Daten; Beratung benötigt keine Root-/Owner-/Cloud-Credentials.
+    source: INT-02
+
+  - id: DEC-012
+    status: accepted
+    title: Methodenkern ist cloud-agnostisch
+    rationale: AWS, Azure, GCP, OpenStack, Kubernetes, Sovereign Cloud und SaaS müssen durch dasselbe generische Risiko-/Capability-Modell bewertet werden.
+    source: INT-02
+
+  - id: DEC-013
+    status: accepted
+    title: Provider Adapter enthalten keine Risikomethode
+    rationale: Adapter übersetzen Providerbegriffe/Exporte in generische Facts und Capabilities; Gates und Schwellen bleiben zentral.
+    source: INT-02
+
+  - id: DEC-014
+    status: accepted
+    title: Evidence Pack ist primäre technische Übergabeschnittstelle
+    rationale: Dateien/Exporte/Verträge/Tests lassen sich versionieren, redigieren, lokal prüfen und providerunabhängig verarbeiten.
+    source: INT-02
+
+  - id: DEC-015
+    status: accepted
+    title: Kundenseitig ausgeführte Exporte sind optional, nicht zwingend
+    rationale: Tiefe technische Evidence kann durch Kundenexporte verbessert werden; Methodik muss auch mit Dokumenten, Interviews und Tests funktionieren.
+    source: INT-02

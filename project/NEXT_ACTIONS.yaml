@@ -1,0 +1,119 @@
+version: 2
+updated: "2026-09-03"
+
+priorities:
+  - id: NEXT-101
+    priority: P0
+    phase: R6A
+    title: Providerneutrales Customer Evidence Pack pilotieren
+    owner_role: evidence-analyst
+    status: ready
+    inputs:
+      - data/templates/evidence-pack-example/
+      - schemas/evidence-pack.schema.json
+      - data/method/evidence_request_catalog.csv
+    outputs:
+      - validiertes Evidence Pack
+      - normalisierte Evidence Records
+      - offene Evidence Gaps
+    done_when:
+      - Pack ohne Cloud-Credentials verarbeitet wird.
+      - Manifest, Scope, Provenienz und Trust nachvollziehbar sind.
+      - mindestens vier Evidence-Klassen enthalten sind.
+
+  - id: NEXT-102
+    priority: P0
+    phase: R6A
+    title: Generische Domain-Modelle und Evidence Intake in Python vervollständigen
+    owner_role: developer
+    status: ready
+    inputs:
+      - schemas/evidence.schema.json
+      - schemas/evidence-pack.schema.json
+      - docs/architecture/DOMAIN_MODEL.md
+    outputs:
+      - typed domain models
+      - pack loader
+      - validation errors
+      - unit tests
+    done_when:
+      - synthetisches Pack wird geladen.
+      - invalides Pack wird deterministisch abgewiesen.
+      - keine Netz-/Cloudverbindung nötig ist.
+
+  - id: NEXT-103
+    priority: P0
+    phase: R6A
+    title: Hard-Gate Mapping auf Evidence Request Catalog implementieren
+    owner_role: methodologist
+    status: ready
+    outputs:
+      - Gate -> required claims -> acceptable evidence mapping
+      - Pflicht-/Optional-/Follow-up-Logik
+    done_when:
+      - alle acht Hard Gates abgedeckt sind.
+      - Providerbegriffe nicht im Kernmapping vorkommen.
+
+  - id: NEXT-104
+    priority: P1
+    phase: R6B
+    title: Ersten Provider Adapter als reine Übersetzung implementieren
+    owner_role: architect
+    status: planned
+    notes:
+      - Start mit AWS, Azure oder GCP ist austauschbar.
+      - Adapter darf keine Credentials verlangen.
+      - Input ist kundenseitig erzeugter Export oder öffentliche Provider-Evidence.
+    done_when:
+      - provider-specific field names map to generic facts/capabilities.
+      - core rules contain no provider-specific conditions.
+
+  - id: NEXT-105
+    priority: P1
+    phase: R6B
+    title: Vertrags-/Assurance-Dokument-Pipeline entwerfen
+    owner_role: evidence-analyst
+    status: planned
+    outputs:
+      - document intake format
+      - claim extraction schema
+      - human review checkpoints
+    done_when:
+      - contract/provider/assurance claims are traceable to page/section/source.
+
+  - id: NEXT-106
+    priority: P1
+    phase: R7
+    title: C5:2026 und regulatorische Crosswalks verfeinern
+    owner_role: researcher
+    status: planned
+    done_when:
+      - versionsspezifisches Mapping existiert.
+      - keine veralteten Control IDs als aktuelle Anforderungen ausgegeben werden.
+
+  - id: NEXT-107
+    priority: P1
+    phase: R7
+    title: Portfolio-/Dependency-Graph für Konzentrationsrisiko implementieren
+    owner_role: architect
+    status: planned
+    notes:
+      - DataGerry/CMDB/DORA-RoI-artige Datenmodelle berücksichtigen.
+
+  - id: NEXT-108
+    priority: P1
+    phase: VALIDATION
+    title: Inter-Rater-Kalibrierung mit zwei oder mehr Beratern durchführen
+    owner_role: methodologist
+    status: planned
+    done_when:
+      - gleiche Evidence wird unabhängig bewertet.
+      - Abweichungen werden quantifiziert und Regeln nachgeschärft.
+
+  - id: NEXT-109
+    priority: P2
+    phase: MVP
+    title: Assessment CLI für Evidence Pack -> Gate Results entwickeln
+    owner_role: developer
+    status: planned
+    depends_on: [NEXT-101, NEXT-102, NEXT-103]

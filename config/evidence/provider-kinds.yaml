@@ -1,0 +1,14 @@
+version: 1
+provider_kinds:
+  - hyperscaler
+  - sovereign_cloud
+  - regional_cloud
+  - managed_service
+  - saas
+  - paas
+  - iaas
+  - private_cloud
+  - kubernetes_platform
+  - on_premises
+  - ai_model_provider
+  - colocation_datacenter

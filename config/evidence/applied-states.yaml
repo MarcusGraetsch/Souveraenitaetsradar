@@ -1,0 +1,13 @@
+version: 1
+source: INT-02
+states:
+  - asserted
+  - available
+  - documented
+  - observed
+  - configured
+  - tested
+  - attested
+notes:
+  - available is normally provider/service capability, not applied customer capability.
+  - transitions are not automatically monotonic across different evidence scopes.

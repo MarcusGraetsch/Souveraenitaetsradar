@@ -1,0 +1,22 @@
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: python tools/validate_repo.py
+      - run: python -m pytest -q
+      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py src/sovradar/*.py
+      - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example

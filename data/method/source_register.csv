@@ -1,0 +1,58 @@
+ID;Quelle;URL / Datei;Version / Stand;Fundstelle / Normbezug;Prüfstand
+SRC-01;BSI-Standard 200-3;"standard_200_3.pdf; https://www.bsi.bund.de/grundschutz";Version 1.0 / 2017;"Kap. 2; Kap. 3 Tabelle 1 S. 13–15; Kap. 4; Kap. 5; Kap. 6; Kap. 9.3/9.4";Volltext im Projekt geprüft
+SRC-02;IT-Grundschutz-Kompendium;https://www.bsi.bund.de/grundschutz;"jährliche Edition; Version beim Import fixieren";Gefährdungsbeschreibungen, Bausteine, Anforderungen;Noch nicht als Volltext im Projekt eingelesen
+SRC-03;EU Cloud Sovereignty Framework;https://commission.europa.eu/document/download/09579818-64a6-4dd5-9577-446ab6219113_en;v1.2.1 / Oct. 2025;"v1.2.1 §§2–5; SEAL-0–4; SOV-1–SOV-8; Sovereignty Score";Volltext/Fundstellen geprüft
+SRC-04;BSI C3A – Criteria enabling Cloud Computing Autonomy;https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Informationen-und-Empfehlungen/Empfehlungen-nach-Angriffszielen/Cloud-Computing/C3A/C3A.html;v1.0 / 27.04.2026;"C3A Kap. 2: SOV-1-01…SOV-1-04; SOV-2-01…SOV-2-03; SOV-3-01…SOV-3-05; SOV-4-01…SOV-4-10; SOV-5-01…SOV-5-05; SOV-6-01…SOV-6-03";Publikation + Kriterienstruktur geprüft
+SRC-05;BSI C5;https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Informationen-und-Empfehlungen/Empfehlungen-nach-Angriffszielen/Cloud-Computing/Kriterienkatalog-C5/Kriterienkatalog-C5_node.html;C5:2026 / veröffentlicht 07.04.2026;"C5:2026 Security-/Assurance-Kriterien; konkrete Control-ID nur nach Volltext-Mapping";Aktuelle Fassung/Publikation geprüft
+SRC-06;DVO (EU) 2024/2690 zu NIS2;https://eur-lex.europa.eu/eli/reg_impl/2024/2690/oj;2024;"Annex 2.1.1–2.1.4 Risk Management; 5.1.1–5.1.7 Supply Chain; weitere Domänen themenbezogen";Primärtext/Fundstellen geprüft
+SRC-07;ENISA NIS2 Technical Implementation Guidance;https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance;v1.0 / 2025;Guidance zu DVO 2024/2690;Publikation/Zweck geprüft
+SRC-08;DORA – VO (EU) 2022/2554;https://eur-lex.europa.eu/eli/reg/2022/2554/oj;2022/Anwendung ab 2025;"Art. 28(4),(7),(8); Art. 29(1)-(2); Art. 30(2)-(3)";Primärtext/Fundstellen geprüft
+SRC-09;DVO (EU) 2024/2956 – DORA Informationsregister;https://eur-lex.europa.eu/eli/reg_impl/2024/2956/oj;2024;Templates des Register of Information;Template-Struktur geprüft
+SRC-10;EBA DORA Register of Information – DPM/Taxonomie;https://www.eba.europa.eu/activities/direct-supervision-and-oversight/digital-operational-resilience-act/preparation-dora-application;laufend;Data Point Model / Reporting-Taxonomie;Webseite als Referenz
+SRC-11;EDPB Recommendations 01/2020;https://www.edpb.europa.eu/documents/recommendation/recommendations-012020-on-measures-that-supplement-transfer-tools-to_en;Final Version 2.0 / 18.06.2021;Transferprüfung / supplementary measures;Offizielle EDPB-Publikation geprüft
+SRC-12;Data Act – VO (EU) 2023/2854;https://eur-lex.europa.eu/eli/reg/2023/2854/oj;2023;"Kap. VI Art. 23–31; Art. 25(2)(a); Art. 30; Art. 35";Primärtext/Kapitel geprüft
+SRC-13;AI Act – VO (EU) 2024/1689;https://eur-lex.europa.eu/eli/reg/2024/1689/oj;2024;insb. Art. 9/10, soweit einschlägig;Regulatorisches Overlay
+SRC-14;Cyber Resilience Act – VO (EU) 2024/2847;https://eur-lex.europa.eu/eli/reg/2024/2847/oj;2024;produktsicherheits-/lieferkettenbezogene Anforderungen;Referenz
+SRC-15;NIST SP 800-30 Rev.1;https://csrc.nist.gov/pubs/sp/800/30/r1/final;Rev.1 / 2012;Risk Assessment Process und Appendices;Methodenreferenz
+SRC-16;NIST SP 800-161 Rev.1;https://csrc.nist.gov/pubs/sp/800/161/r1/final;Rev.1;C-SCRM;Methodenreferenz
+SRC-17;Bitkom Leitfaden Cloud-Souveränität praktisch umsetzen;https://www.bitkom.org/Bitkom/Publikationen/Cloud-Souveraenitaet-praktisch-umsetzen;2026;Risikofelder/Handlungsempfehlungen;Kernaussagen/Quelle als Referenz
+SRC-18;BSI AIC4 – AI Cloud Service Compliance Criteria Catalogue;https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/AIC4/AI-Cloud-Service-Compliance-Criteria-Catalogue_AIC4.pdf?__blob=publicationFile&v=4;Dokumentversion beim produktiven Mapping fixieren;KI-Cloud-Service-Kriterien;Dokument verfügbar
+SRC-19;BSI Kriterienkatalog KI-Modelle in der Bundesverwaltung;https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/KI/Kriterienkatalog_KI-Modelle_Bundesverwaltung.pdf?__blob=publicationFile&v=3;Dokumentversion beim produktiven Mapping fixieren;Kriterien zur Integration externer generativer KI-Modelle;Zweck/Scope geprüft
+SRC-20;BSI-Standard 200-4 / BCM;https://www.bsi.bund.de/grundschutz;Version beim produktiven Mapping fixieren;BIA/BCM-Zeitdimensionen;allgemeine Referenz
+SRC-21;BSI Mindeststandard Nutzung externer Cloud-Dienste;https://www.bsi.bund.de/dok/MST-Cloud;aktuelle Fassung beim Einsatz prüfen;Cloud-Nutzung in Bundesverwaltung;Webquelle geprüft
+SRC-22;ISO/IEC 27005;https://www.iso.org/standard/80585.html;2022;Informationssicherheits-Risikomanagement;Volltext nicht im Projekt
+SRC-23;EBIOS Risk Manager;https://cyber.gouv.fr/en/ebios-risk-manager-method;aktuelle Methodenausgabe beim Einsatz fixieren;Risk Sources, Ecosystem, strategische/operative Szenarien;Methodenreferenz
+INT-01;Souveränitäts-Radar – internes Methodendesign;intern / Repository;v0.9 / 02.09.2026;R1–R6 Methodendesign;intern nachvollziehbar
+PRJ-01;Projektinput – Beispielfälle A/B;Projektgespräch 02.09.2026;02.09.2026;"Szenario A1/A2: KI-Agent Fachdaten; Szenario B: Bürgerwebseite mit öffentlichen Daten";direkter Projektinput
+SRC-24;EU Cloud Sovereignty Framework – Implementation Guidance;https://commission.europa.eu/document/download/2ad80a48-166f-4c77-a513-80c53ca2a128_en?filename=Cloud+Sovereignty+Framework+-+Implementation+guidance.pdf;01.06.2026;"S. 1–4 SOV/SEAL; S. 8–10 Matrix/SEAL-Logik";Volltext via EU-Kommission geprüft
+SRC-25;AWS Contracting Party;https://aws.amazon.com/legal/aws-contracting-party/;Abruf 02.09.2026;Account Country bestimmt AWS Contracting Party;Primärseite geprüft
+SRC-26;AWS Europe FAQs;https://aws.amazon.com/legal/aws-emea/;Abruf 02.09.2026;AWS Europe / Konzernstruktur;Primärseite geprüft
+SRC-27;AWS Customer Agreement;https://aws.amazon.com/agreement/;Stand 2026 / Abruf 02.09.2026;AWS Contracting Party/Rechtswahl;Primärtext geprüft
+SRC-28;AWS Service Terms – Amazon Bedrock;https://aws.amazon.com/service-terms/;Abruf 02.09.2026;Amazon Bedrock Terms;Primärtext geprüft
+SRC-29;Amazon Bedrock FAQs;https://aws.amazon.com/bedrock/faqs/;Abruf 02.09.2026;Inputs/Outputs/Training/Model Provider;Providerdokument geprüft
+SRC-30;Amazon Bedrock – Data protection;https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html;Abruf 02.09.2026;Model Deployment Accounts / isolation;AWS-Dokumentation geprüft
+SRC-31;Amazon Bedrock – Abuse detection;https://docs.aws.amazon.com/bedrock/latest/userguide/abuse-detection.html;Abruf 02.09.2026;ZDR/Retention/Ausnahmen;AWS-Dokumentation geprüft
+SRC-32;Amazon Bedrock – Regional availability by models;https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html;Abruf 02.09.2026;In-Region/Geographic/Global;AWS-Dokumentation geprüft
+SRC-33;Amazon Bedrock – Cross-Region inference;https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html;Abruf 02.09.2026;Geographic/Global inference profiles;AWS-Dokumentation geprüft
+SRC-34;Amazon Bedrock – VPC interface endpoints / PrivateLink;https://docs.aws.amazon.com/bedrock/latest/userguide/vpc-interface-endpoints.html;Abruf 02.09.2026;private connectivity;AWS-Dokumentation geprüft
+SRC-35;Amazon Bedrock – Data encryption;https://docs.aws.amazon.com/bedrock/latest/userguide/data-encryption.html;Abruf 02.09.2026;TLS/KMS;AWS-Dokumentation geprüft
+SRC-36;Amazon Bedrock – Encryption of agent resources;https://docs.aws.amazon.com/bedrock/latest/userguide/encryption-agents-new.html;Abruf 02.09.2026;AWS-owned key / optional CMK;AWS-Dokumentation geprüft
+SRC-37;Amazon Bedrock – CloudTrail logging;https://docs.aws.amazon.com/bedrock/latest/userguide/logging-using-cloudtrail.html;Abruf 02.09.2026;Bedrock API CloudTrail events;AWS-Dokumentation geprüft
+SRC-38;Amazon Bedrock – Model invocation logging;https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html;Abruf 02.09.2026;optional Request/Response logging;AWS-Dokumentation geprüft
+SRC-39;Amazon Bedrock Agents – Service role permissions;https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html;Abruf 02.09.2026;Agent IAM/Lambda action groups;AWS-Dokumentation geprüft
+SRC-40;Amazon Bedrock Guardrails;https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html;Abruf 02.09.2026;Safety-/Privacy controls;AWS-Dokumentation geprüft
+SRC-41;Amazon Bedrock Guardrails – Prompt attacks;https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-prompt-attack.html;Abruf 02.09.2026;Prompt attack detection;AWS-Dokumentation geprüft
+SRC-42;Amazon Bedrock Guardrails – Content filters;https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-content-filters.html;Abruf 02.09.2026;Tool-use filter limitations;AWS-Dokumentation geprüft
+SRC-43;AWS Services in Scope – C5;https://aws.amazon.com/compliance/services-in-scope/C5/;Stand 13.01.2026 / Abruf 02.09.2026;Bedrock C5 scope;AWS-Compliance-Seite geprüft
+SRC-44;AWS Artifact – Downloading reports;https://docs.aws.amazon.com/artifact/latest/ug/downloading-documents.html;Abruf 02.09.2026;C5/SOC report acquisition;AWS-Dokumentation geprüft
+SRC-45;AWS Data Privacy FAQ;https://aws.amazon.com/compliance/data-privacy-faq/;Abruf 02.09.2026;Government requests/data region/key claims;Providerquelle geprüft
+SRC-46;AWS 2025 C5 Type 2 attestation announcement;https://aws.amazon.com/blogs/security/aws-achieves-2025-c5-type-2-attestation-report-with-183-services-in-scope/;23.01.2026;Audit period 01.10.2024–30.09.2025;Primärseite geprüft
+SRC-47;AWS CLI v2 – Amazon Bedrock command reference;https://docs.aws.amazon.com/cli/latest/reference/bedrock/;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-48;AWS CLI v2 – Bedrock Agents command reference;https://docs.aws.amazon.com/cli/latest/reference/bedrock-agent/;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-49;AWS CLI v2 – EC2 VPC Endpoints;https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-vpc-endpoints.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-50;AWS CLI v2 – CloudTrail Read APIs;https://docs.aws.amazon.com/cli/latest/userguide/cli_cloudtrail_code_examples.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-51;AWS CLI v2 – IAM role/policy read APIs;https://docs.aws.amazon.com/cli/latest/reference/iam/;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-52;AWS CLI v2 – KMS read APIs;https://docs.aws.amazon.com/cli/latest/userguide/cli_kms_code_examples.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-53;AWS CLI v2 – Lambda read APIs;https://docs.aws.amazon.com/cli/latest/userguide/cli_lambda_code_examples.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-54;AWS CLI v2 – CloudWatch Logs describe-log-groups;https://docs.aws.amazon.com/cli/latest/reference/logs/describe-log-groups.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-55;AWS Service Authorization – Amazon Bedrock;https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonbedrock.html;Abruf 02.09.2026;historischer R6 Collector;Service-Authorization-Referenz geprüft

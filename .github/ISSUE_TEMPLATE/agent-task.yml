@@ -1,0 +1,36 @@
+name: Agent / implementation task
+description: Scoped task for a human or AI contributor
+title: "[Task] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What must be true when this issue is done?
+    validations: {required: true}
+  - type: dropdown
+    id: role
+    attributes:
+      label: Primary role
+      options: [researcher, methodologist, architect, developer, reviewer, evidence-analyst, project-coordinator]
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope / non-scope
+    validations: {required: true}
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Sources / provenance requirements
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations: {required: true}
+  - type: dropdown
+    id: review
+    attributes:
+      label: Review class
+      options: [A-documentation, B-method-schema-rule, C-evidence-security, D-legal-compliance, E-provider-adapter]
+    validations: {required: true}

@@ -1,0 +1,27 @@
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+*.pyc
+.DS_Store
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Customer evidence / secure assessment workspaces
+customer-evidence/
+evidence-packs/
+raw-evidence/
+secure-workspace/
+
+# Common cloud credential files
+.aws/
+.azure/
+.config/gcloud/
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+!*.example.tfvars

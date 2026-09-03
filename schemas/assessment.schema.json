@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sovereignty Radar Assessment",
+  "type": "object",
+  "required": [
+    "assessment_id",
+    "workload_id",
+    "method_version",
+    "gate_results"
+  ],
+  "properties": {
+    "assessment_id": {"type":"string"},
+    "workload_id": {"type":"string"},
+    "method_version": {"type":"string"},
+    "source_snapshot": {"type":"array","items":{"type":"string"}},
+    "gate_results": {"type":"array","items":{"$ref":"#/$defs/gateResult"}},
+    "risks": {"type":"array","items":{"type":"object"}},
+    "evidence_confidence": {"type":["number","null"]},
+    "decision_state": {"type":"string","enum":["BLOCK","EVIDENCE_HOLD","CONDITIONAL","ACCEPTABLE_WITH_TREATMENT","ACCEPTABLE","UNDECIDED"]}
+  },
+  "$defs": {
+    "gateResult": {
+      "type":"object",
+      "required":["gate_id","technical_state","evidence_state","final_state"],
+      "properties": {
+        "gate_id":{"type":"string"},
+        "requirement":{"type":"integer","minimum":0,"maximum":4},
+        "capability":{"type":["integer","null"],"minimum":0,"maximum":4},
+        "technical_state":{"type":"string","enum":["PASS","FAIL","UNVERIFIED","N/A"]},
+        "evidence_state":{"type":"string","enum":["VERIFIED","UNVERIFIED","N/A"]},
+        "final_state":{"type":"string","enum":["PASS","FAIL","UNVERIFIED","N/A"]}
+      }
+    }
+  }
+}

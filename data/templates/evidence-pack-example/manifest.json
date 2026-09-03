@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "assessment_id": "SYNTH-R6A-001",
+  "created_at": "2026-09-03T10:30:00Z",
+  "producer": {"organization": "Synthetic Example", "role": "assessment-team"},
+  "scope": {"workload_id": "WL-001", "environment": "production-like", "providers": ["Provider-A", "Provider-B"], "notes": "Provider-neutral synthetic fixture"},
+  "evidence_files": ["evidence/EV-001.json", "evidence/EV-002.json", "evidence/EV-003.json", "evidence/EV-004.json", "evidence/EV-005.json"],
+  "attachment_policy": "Attachments omitted; locators represent secure external storage.",
+  "redaction_statement": "Synthetic fixture contains no customer data or secrets.",
+  "notes": "Used for repository tests and R6A method development."
+}

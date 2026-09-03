@@ -1,0 +1,29 @@
+name: Research / Source Review
+description: Recherche, Crosswalk oder Quellenprüfung
+title: "[Research] "
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Forschungsfrage
+    validations:
+      required: true
+  - type: textarea
+    id: primary_sources
+    attributes:
+      label: Bevorzugte Primärquellen
+  - type: textarea
+    id: output
+    attributes:
+      label: Gewünschtes Ergebnis / Artefakt
+    validations:
+      required: true
+  - type: checkboxes
+    id: provenance
+    attributes:
+      label: Qualitätsanforderungen
+      options:
+        - label: Fundstellen/Versionen müssen dokumentiert werden
+          required: true
+        - label: Ableitung und direkte Vorgabe müssen getrennt werden
+          required: true

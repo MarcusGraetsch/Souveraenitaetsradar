@@ -1,0 +1,30 @@
+name: Feature / Method Task
+description: Neue Funktion, Methodik oder Datenmodelländerung
+title: "[Task] "
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Ziel
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope / Non-Scope
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Akzeptanzkriterien
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Quellen / Evidence / Provenienz
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risiken / Abhängigkeiten

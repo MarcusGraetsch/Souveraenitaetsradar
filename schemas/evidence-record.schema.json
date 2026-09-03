@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/sovradar/evidence-record.schema.json",
+  "title": "Souveraenitaetsradar Evidence Record",
+  "type": "object",
+  "required": ["evidence_id", "evidence_type", "title", "producer", "scope", "applied_state", "base_trust", "scope_fit", "freshness_fit", "sensitivity", "review_status"],
+  "properties": {
+    "evidence_id": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+    "evidence_type": {"enum": ["contractual", "assurance", "architecture", "iac_config", "provider_export", "test_report", "interview", "public_provider", "manual_observation"]},
+    "title": {"type": "string", "minLength": 1},
+    "producer": {"type": "string", "minLength": 1},
+    "source_ref": {"type": "string"}, "attachment_ref": {"type": "string"}, "locator": {"type": "string"},
+    "claim_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "gate_ids": {"type": "array", "items": {"type": "string", "pattern": "^(HG-[0-9]{2}|KI)$"}, "uniqueItems": true},
+    "scope": {
+      "type": "object", "required": ["workload_id"],
+      "properties": {"workload_id":{"type":"string"},"service":{"type":"string"},"provider":{"type":"string"},"location":{"type":"string"},"resource":{"type":"string"},"contract":{"type":"string"},"notes":{"type":"string"}},
+      "additionalProperties": true
+    },
+    "valid_at": {"type": "string", "format": "date-time"}, "version": {"type": "string"},
+    "applied_state": {"enum": ["asserted", "available", "documented", "observed", "configured", "tested", "attested"]},
+    "base_trust": {"type":"integer","minimum":0,"maximum":5}, "scope_fit": {"type":"integer","minimum":0,"maximum":5}, "freshness_fit": {"type":"integer","minimum":0,"maximum":5},
+    "sensitivity": {"enum": ["public", "internal", "confidential", "restricted"]},
+    "review_status": {"enum": ["raw", "normalized", "reviewed", "approved", "rejected"]},
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,1 @@
+Read `AGENTS.md` first. The core is cloud-agnostic and customer-mediated; do not add provider credentials or provider-specific risk rules to the core. Read project state and next actions before implementing.

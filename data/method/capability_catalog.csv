@@ -1,0 +1,11 @@
+Capability-ID;Capability;Description;Primary Gates;Provider examples are non-normative;Provenance
+CAP-01;LegalControlCapability;contracting entity/effective control/jurisdiction properties;HG-01;AWS/Azure/GCP/SaaS legal structures;INT-02
+CAP-02;DataLocationControl;ability to constrain storage/processing/failover/support locations;HG-02;regions/geographies/residency controls;INT-02
+CAP-03;KeyControlCapability;customer influence over cryptographic key custody/use/revocation;HG-03;KMS/Key Vault/Cloud KMS/HSM/client-side crypto;INT-02
+CAP-04;ExitPortabilityCapability;usable export/alternative target/tested transition;HG-04;open formats/APIs/IaC/migration tests;INT-02
+CAP-05;OperationalAutonomyCapability;ability to operate during external dependency loss;HG-05;degraded mode/offline/self-operation;INT-02
+CAP-06;IdentityTrustAnchorResilience;control/recovery of IdP/PKI/DNS/KMS/control-plane dependencies;HG-06;federation/break-glass/redundant trust anchors;INT-02
+CAP-07;SupplyChainTransparencySubstitutability;visibility and replaceability of critical dependencies;HG-07;subprocessors/SBOM/model providers/network;INT-02
+CAP-08;SecurityControlCapability;implemented and effective security controls;HG-08;IAM/network/logging/vulnerability/IR/BCM;INT-02
+CAP-09;AuditObservabilityCapability;independent logs/telemetry/audit evidence;"HG-08; evidence confidence";logs/export/attestations;INT-02
+CAP-10;AIPortabilityCapability;data/model/agent-tool-policy portability;"HG-04; KI";model/runtime/tool abstraction and tests;INT-02
