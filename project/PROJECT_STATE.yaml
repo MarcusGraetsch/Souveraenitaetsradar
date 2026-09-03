@@ -18,29 +18,29 @@ current_truth:
   - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik ist Adapter-/Research-Layer.
   - Direkter Cloud-Account-, Root-, Owner- oder Credential-Zugang ist keine Voraussetzung des Beratungsprodukts.
   - "Standard ist Customer-mediated Evidence: Kunde liefert Dokumente, Exporte, Screenshare-Beobachtungen oder Testergebnisse."
-  - BSI-200-3-basierte Risikoanalyse bleibt Prozess-/Risikokern und wird um souveränitätsspezifische Risikotypen ergänzt.
   - Security Capability, Sovereignty Capability, Workload Sovereignty Risk und Evidence Confidence bleiben getrennt.
-  - Nicht kompensierbare Mindestanforderungen werden vor gewichteten Vergleichswerten geprüft.
+  - Gate first, score second; nicht kompensierbare Mindestanforderungen werden zuerst geprüft.
   - Provider/Service Capability wird von Applied Capability getrennt.
   - Fehlende Evidence führt zu UNVERIFIED/EVIDENCE HOLD, nicht zu erfundenem PASS/FAIL.
-  - Die Excel-Datei ist Methoden-/Entwicklungsreferenz, nicht mehr primäre Consultant-UI.
-  - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung.
-  - Dokumente liegen im MVP lokal unter .runtime; Object Storage folgt später.
+  - Die Excel-Datei ist Methoden-/Entwicklungsreferenz, nicht primäre Consultant-UI.
+  - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung mit lokalem Dokument-Speicher.
   - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
-  - Der Consultant-Fragenpfad wird deterministisch aus Assessment-Scope und einem separaten Relevanzprofil abgeleitet.
   - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
-  - Die LLM Bridge erhält nur relevante bzw. zu prüfende offene Fragen, entscheidet aber nicht über Applicability.
-  - "NEXT-102 Evidence Intake ist abgeschlossen: typisierte Records, Schemas, lokaler Loader, Validierung und Path-Traversal-Schutz sind vorhanden."
-  - "NEXT-103 ist in Umsetzung: Hard Gates und Evidence Requests werden typisiert geladen und auf Vollständigkeit geprüft."
+  - NEXT-102 Evidence Intake ist abgeschlossen.
+  - NEXT-103 providerneutrales Hard-Gate/Evidence-Request-Mapping ist abgeschlossen.
   - NEXT-112 nutzt Human-reviewed Claims als einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
-  - "Die Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
-  - R5 Amazon-Bedrock-Public-Evidence bleibt Provider-Beispiel und methodischer Lernfall, nicht Zielarchitektur.
+  - "Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
+  - Evidence wird vor Gate-Nutzung mit Applied State, Trust-Dimensionen und Review Status bewertet.
+  - Gate-Requirements werden aus internen Kritikalitäts-Templates vorbelegt und bleiben pro Gate als Consultant-Override editierbar.
+  - Die Webanwendung besitzt im aktuellen NEXT-112-Branch Evidence Review, Claim CRUD und acht Hard-Gate-Karten; Merge erst nach grüner CI.
+  - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
 primary_artifacts:
   product_mvp: docs/product/MVP_01_CONSULTANT_WEBAPP.md
   web_app: apps/web/
   api_app: apps/api/
+  gate_api: apps/api/app/gate_api.py
   compose: docker-compose.yml
   applicability_engine: src/sovradar/applicability.py
   gate_catalog_engine: src/sovradar/gate_catalog.py
@@ -66,6 +66,7 @@ quality_gates:
   uninstall_removes_generated_data: true
   unknown_applicability_may_be_hidden: false
   llm_proposal_may_change_gate_without_human_review: false
+  gate_requirement_defaults_are_regulatory_requirements: false
 
 blockers: []
 
@@ -77,7 +78,7 @@ open_method_questions:
   - id: OMQ-003
     text: C5:2026 Detailmapping und weitere Framework-Versionen müssen weiter verfeinert werden.
   - id: OMQ-004
-    text: Die noch nicht deterministisch operationalisierten natürlichen Anwendbarkeitsregeln der Question Bank müssen schrittweise strukturiert werden; bis dahin bleiben sie needs_review.
+    text: Noch nicht deterministisch operationalisierte natürliche Anwendbarkeitsregeln bleiben needs_review und müssen schrittweise strukturiert werden.
   - id: OMQ-005
     text: Die interne Aggregation mehrerer Capability-Claims pro Gate muss im späteren Inter-Rater-/Kundenpilot kalibriert werden.
 
@@ -92,3 +93,9 @@ next_milestone:
     - Technisch unterschrittene Mindestanforderungen können deterministisch FAIL erzeugen.
     - PASS wird nur bei erfüllter technischer Anforderung und ausreichender Evidence erzeugt.
     - LLM-Vorschläge haben ohne Human Review keine Gate-Auswirkung.
+    - Core/API, Frontend und Compose-Smoke sind in CI grün.
+
+next_after_merge:
+  id: NEXT-114
+  name: synthetic-consultant-walkthrough
+  rationale: Vor weiterem Feature-Ausbau wird geprüft, ob ein Berater den vollständigen Workflow auf einer sauberen Installation tatsächlich bedienen kann.
