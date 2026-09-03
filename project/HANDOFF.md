@@ -4,7 +4,9 @@
 
 Der Souveränitätsradar hat einen cloud-agnostischen Methodenkern und eine lokal installierbare Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI.
 
-MVP-01A, Guided Workflow, Evidence Intake und das providerneutrale Hard-Gate-Mapping sind auf `main`. NEXT-112 ist implementiert und nach grüner CI bereit zum Merge: Evidence Review → Human-reviewed Claim → deterministische Hard-Gate-Bewertung ist jetzt durchgängig in Backend und UI vorhanden.
+MVP-01A, Guided Workflow, Evidence Intake, providerneutrales Hard-Gate-Mapping und NEXT-112 sind auf `main`. PR #17 wurde nach grüner CI als Squash-Merge `85caf27f091ed728585c1db969eb325695f7e1db` integriert.
+
+**NEXT-114 ist erfolgreich durchlaufen.** GitHub Actions Run `33789278423` war in allen vier Jobs grün, einschließlich des vollständigen Clean-Checkout-Consultant-Lifecycle-Tests. Das wichtigste Finding ist jetzt NEXT-115 / Issue #20: bei einem komplexen KI-Agenten lagen 124 von 128 Fragen im Standardpfad. Der nächste P0-Schritt ist deshalb ein progressiv priorisierter Guided Workflow – ohne Unsicherheit zu verstecken.
 
 ## Consultant-Workflow
 
@@ -22,7 +24,7 @@ Assessment
   -> Ergebnis
 ```
 
-## NEXT-112 – verbindliche Regeln
+## Verbindliche Gate-Regeln
 
 - Roh-Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
 - Nur `reviewed`/`approved` Claims wirken.
@@ -54,7 +56,7 @@ Fachliche Source-of-Truth: `data/method/r4_hard_gates.csv` und `data/method/evid
 
 ## Produktstatus
 
-Implementiert:
+Implementiert auf `main`:
 
 - React/Vite Consultant UI
 - FastAPI + PostgreSQL
@@ -69,7 +71,56 @@ Implementiert:
 - acht Hard-Gate-Karten mit Reasons und Evidence Requests
 - Ergebnisübersicht
 
-PR #17 enthält die NEXT-112-Produktintegration. Eine vollständige CI auf dem Feature-Stand war grün für Core/API Tests, Frontend Build und Docker Compose Smoke. Nach finalem State-Commit CI nochmals prüfen und dann squash-mergen.
+## NEXT-114 – Ergebnis
+
+Branch/PR: `feature/next-114-synthetic-walkthrough` / #19
+Issue: #18
+CI Run: `33789278423`
+Artifact: `synthetic-consultant-walkthrough`, ID `9906680972`
+
+Resultate des synthetischen providerneutralen KI-Agent-Falls:
+
+- Methodenfragen gesamt: 128
+- Standardpfad: 124
+- davon `applicable`: 83
+- davon `needs_review`: 41
+- HG-01 → **PASS**
+- HG-03 → **FAIL**
+- HG-04 → **UNVERIFIED**
+- übrige Gates → N/A im isolierten Gate-Test
+- zwei Evidence-Objekte mit Effective Trust 4
+- drei human-reviewed Capability Claims plus ein draft Negativkontroll-Claim
+- LLM Proposal erfolgreich importiert; Claim Count blieb 4 → 4
+- Gate States blieben nach LLM Import unverändert
+- Installation, Stop, Restart, Health-Test und vollständige Deinstallation erfolgreich
+- `.runtime` und `.env` nach Uninstall entfernt; keine Radar-Container verblieben
+
+Vollständige Dokumentation:
+- `docs/validation/NEXT_114_SYNTHETIC_WALKTHROUGH.md`
+- `docs/validation/NEXT_114_RESULT_2026-09-03.md`
+- `project/agent-log/2026-09-03_next-114-synthetic-walkthrough.md`
+
+**Wichtig:** Alle Merkmale und Gate Overrides des NEXT-114-Falls sind Testannahmen. Keine Providerbewertung und keine regulatorischen Mindestwerte daraus ableiten.
+
+## NEXT-115 – nächster P0
+
+Issue #20: `Guided Workflow progressiv priorisieren (KI-Agent: 124/128 aktiv)`.
+
+Das Finding ist kein Fehler der konservativen Applicability-Regel: unklare Fragen wurden korrekt nicht versteckt. Das Produktproblem ist die Arbeitsorganisation. Bei komplexen Workloads sieht der Consultant fast die gesamte Fragenbank gleichzeitig.
+
+Zielbild für NEXT-115:
+
+```text
+Stage 0  Scope / Relevanzprofil
+Stage 1  Screening / Jetzt beantworten
+Stage 2  Klärung nötig (needs_review sichtbar)
+Stage 3  Deep Dive – deterministisch aktiviert
+Stage 4  Alle Fragen / Audit View
+```
+
+Deep-Dive-Aktivierung darf nur nachvollziehbar aus Scope, bestehenden Answers, Evidence Gaps oder Gate State entstehen. Ein LLM darf Textvorschläge/Folgefragen unterstützen, aber nicht Applicability oder Workflow Stage deterministisch entscheiden.
+
+Die Baseline für Regressionstests ist der NEXT-114-Fall: **124/128 im bisherigen Standardpfad, 83 applicable + 41 needs_review.** Zusätzlich muss ein einfacher Public-Content-Workload deutlich kürzer bleiben.
 
 ## Regeln für andere Agenten
 
@@ -80,26 +131,14 @@ PR #17 enthält die NEXT-112-Produktintegration. Eine vollständige CI auf dem F
 - Raw Kundenevidence nie committen.
 - LLM-Proposals niemals automatisch als reviewed Claim/Answer übernehmen.
 - Fehlende Evidence niemals automatisch als FAIL interpretieren.
-- Requirement-Defaults niemals als regulatorische Vorgabe darstellen.
-- Unklare Applicability nie still ausblenden.
+- Requirement-Defaults und synthetische Overrides niemals als regulatorische Vorgabe darstellen.
+- Synthetische Providermerkmale niemals zu realen Providerfakten umdeuten.
+- `needs_review` niemals still ausblenden, nur sichtbar priorisieren/stufen.
+- LLM niemals zum deterministischen Applicability-/Stage-Entscheider machen.
+- Alle 128 Fragen müssen über die Audit-/All-Questions-View inspizierbar bleiben.
 - `./uninstall.sh` muss alle erzeugten Runtime-Daten löschen können.
 - substantielle Änderungen via Issue/Branch/PR/CI/Agent-Log.
 
-## Nächster Schritt – NEXT-114 / Issue #18
+## Nächster Schritt
 
-**Kein weiterer Feature-Ausbau zuerst.** Einen vollständigen synthetischen Consultant-Durchlauf auf sauberer Installation durchführen:
-
-1. Clone / Install / Test
-2. synthetisches Assessment + Relevanzprofil
-3. Guided Questions
-4. synthetische Customer-mediated Evidence
-5. Evidence Review
-6. optional LLM Bridge
-7. Human-reviewed Claims
-8. Gate Requirements prüfen
-9. alle acht Hard Gates bewerten
-10. gezielt mindestens PASS, FAIL und UNVERIFIED zeigen
-11. UX-/Methodikprobleme als Issues erfassen
-12. Stop/Start und destruktive Deinstallation testen
-
-Erst danach NEXT-113 (Backup/Export/Consultant Report) priorisieren.
+PR #19 nach finalem grünen CI-Lauf mergen und NEXT-114 schließen. Danach auf einem eigenen NEXT-115-Branch die progressive Workflow-Staging-Logik implementieren. NEXT-113 (Backup/Export/Consultant Report) bleibt P1 dahinter.

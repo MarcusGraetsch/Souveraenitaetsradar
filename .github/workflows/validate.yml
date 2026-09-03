@@ -16,7 +16,7 @@ jobs:
       - run: python tools/validate_repo.py
       - run: python -m pytest -q
       - run: python -m pytest -q apps/api/tests
-      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py src/sovradar/*.py apps/api/app/*.py
+      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py tools/validation/synthetic_consultant_walkthrough.py src/sovradar/*.py apps/api/app/*.py
       - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example
 
   frontend:
@@ -62,3 +62,52 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose down -v --remove-orphans --rmi local
+
+  consultant-walkthrough:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install from clean checkout
+        run: printf '\n\n' | ./install.sh
+      - name: Run synthetic consultant walkthrough
+        run: |
+          python3 tools/validation/synthetic_consultant_walkthrough.py \
+            --base-url http://127.0.0.1:8080 \
+            --output .runtime/exports/synthetic-consultant-walkthrough.json
+          cp .runtime/exports/synthetic-consultant-walkthrough.json /tmp/sovradar-synthetic-walkthrough.json
+      - name: Validate stop and restart
+        run: |
+          ./stop.sh
+          ./start.sh
+          ./test.sh
+      - name: Validate complete uninstall
+        run: |
+          printf 'DELETE\nn\n' | ./uninstall.sh
+          test ! -e .runtime
+          test ! -e .env
+          if docker ps -a --format '{{.Names}}' | grep -Eqi 'souveraenitaetsradar|sovradar'; then
+            echo 'Souveraenitaets-Radar container remained after uninstall' >&2
+            docker ps -a
+            exit 1
+          fi
+      - name: Upload walkthrough report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-consultant-walkthrough
+          path: /tmp/sovradar-synthetic-walkthrough.json
+          if-no-files-found: warn
+      - name: Logs on failure
+        if: failure()
+        run: |
+          if [[ -f .env ]]; then
+            docker compose logs --no-color || true
+          else
+            docker ps -a || true
+          fi
+      - name: Emergency cleanup
+        if: always()
+        run: |
+          if [[ -f .env ]]; then
+            docker compose down -v --remove-orphans --rmi local || true
+          fi
