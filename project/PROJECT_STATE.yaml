@@ -5,7 +5,7 @@ project:
   current_phase: MVP-01
   current_phase_name: consultant-web-application
   method_version: "1.0"
-  product_version: "0.2.0-dev"
+  product_version: "0.3.0-dev"
   updated: "2026-09-03"
 
 purpose:
@@ -30,7 +30,10 @@ current_truth:
   - Der Consultant-Fragenpfad wird deterministisch aus Assessment-Scope und einem separaten Relevanzprofil abgeleitet.
   - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
   - Die LLM Bridge erhält nur relevante bzw. zu prüfende offene Fragen, entscheidet aber nicht über Applicability.
-  - NEXT-111 Guided Workflow ist implementiert und in PR-CI inklusive Compose-Smoke-Test validiert.
+  - NEXT-102 Evidence Intake ist abgeschlossen: typisierte Records, Schemas, lokaler Loader, Validierung und Path-Traversal-Schutz sind vorhanden.
+  - NEXT-103 ist in Umsetzung: Hard Gates und Evidence Requests werden typisiert geladen und auf Vollständigkeit geprüft.
+  - NEXT-112 nutzt Human-reviewed Claims als einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
+  - Die Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED.
   - R5 Amazon-Bedrock-Public-Evidence bleibt Provider-Beispiel und methodischer Lernfall, nicht Zielarchitektur.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
@@ -40,6 +43,9 @@ primary_artifacts:
   api_app: apps/api/
   compose: docker-compose.yml
   applicability_engine: src/sovradar/applicability.py
+  gate_catalog_engine: src/sovradar/gate_catalog.py
+  gate_evaluation_engine: src/sovradar/gate_evaluation.py
+  evidence_intake: src/sovradar/intake.py
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
   question_bank: data/method/question_bank/
   risk_taxonomy: data/method/risk_taxonomy.csv
@@ -59,6 +65,7 @@ quality_gates:
   llm_api_required_for_mvp: false
   uninstall_removes_generated_data: true
   unknown_applicability_may_be_hidden: false
+  llm_proposal_may_change_gate_without_human_review: false
 
 blockers: []
 
@@ -71,6 +78,8 @@ open_method_questions:
     text: C5:2026 Detailmapping und weitere Framework-Versionen müssen weiter verfeinert werden.
   - id: OMQ-004
     text: Die noch nicht deterministisch operationalisierten natürlichen Anwendbarkeitsregeln der Question Bank müssen schrittweise strukturiert werden; bis dahin bleiben sie needs_review.
+  - id: OMQ-005
+    text: Die interne Aggregation mehrerer Capability-Claims pro Gate muss im späteren Inter-Rater-/Kundenpilot kalibriert werden.
 
 next_milestone:
   id: NEXT-112
