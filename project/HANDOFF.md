@@ -2,87 +2,47 @@
 
 ## Kurzfassung
 
-Der Souveränitätsradar ist kein AWS-Collector-Projekt. Der aktuelle Kern ist eine **cloud-agnostische Assessment-Methode mit kundenvermittelter Evidence**.
+Der Souveränitätsradar hat zwei klar getrennte Ebenen: **Methodenkern** (cloud-agnostische Assessment-Methode) und **Produkt** (ab MVP-01 lokal installierbare Consultant-Webanwendung). Die Excel-Arbeitsmappe v1.0 bleibt Methoden-/Entwicklungsreferenz, ist aber nicht mehr die primäre Benutzeroberfläche.
 
-Am 03.09.2026 wurde die R6-Richtung korrigiert: Ein durch uns gesteuerter Read-only-Collector in Kundenaccounts wäre im Beratungsalltag häufig unrealistisch und erzeugt Credential-, Haftungs- und Security-Probleme. Dieser Ansatz ist als Standard verworfen.
+## Aktuelle Produktentscheidung
+
+MVP-01 verwendet React/TypeScript/Vite, FastAPI, PostgreSQL, lokalen Dokument-Speicher `.runtime/`, Docker Compose und eine Copy/Paste **LLM Bridge** ohne API-Keys. Nicht im MVP: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
+
+Consultant-Workflow:
+
+```text
+Assessment -> Scope/Kritikalität/CIA -> Fragen -> Evidence -> LLM Bridge -> Human Review -> Rule Engine/Hard Gates/Risks -> Management Ergebnis
+```
 
 ## Fachlicher Kern
 
-Bewertet wird ein **Workload in einer konkreten Provider-/Service-/Architektur-/Vertragskonstellation**, nicht ein Provider pauschal.
+Bewertet wird ein Workload in einer konkreten Provider-/Service-/Architektur-/Vertragskonstellation, nicht ein Provider pauschal. Security Capability, Sovereignty Capability, Workload Sovereignty Risk, klassisches Informationssicherheits-/Betriebsrisiko und Evidence Confidence bleiben getrennt.
 
-Getrennte Ausgaben:
+Hard Gates: Jurisdiktion & Effective Control; Datenresidenz & Verarbeitung; Schlüsselhoheit; Exit & Portabilität; Operational Autonomy; Identity & Trust Anchors; Supply Chain Critical Dependencies; Security Minimum.
 
-- Security Capability
-- Sovereignty Capability
-- Workload Sovereignty Risk
-- klassisches Informationssicherheits-/Betriebsrisiko
-- Evidence Confidence
+Fehlende Evidence bleibt `UNVERIFIED`; LLM-Vorschläge sind keine Entscheidungen.
 
-Hard Gates:
+## Verworfene Ansätze
 
-1. Jurisdiktion & Effective Control
-2. Datenresidenz & Verarbeitung
-3. Schlüsselhoheit
-4. Exit & Portabilität
-5. Operational Autonomy
-6. Identity & Trust Anchors
-7. Supply Chain Critical Dependencies
-8. Security Minimum
+- Ein durch uns betriebener Cloud-Account-Collector ist nicht Zielarchitektur.
+- LLM-API-Integration ist für MVP-01 bewusst verschoben.
+- Excel ist nicht mehr die geplante operative Consultant-UI.
 
-## Aktueller Evidence-Prozess
+## Aktueller Development-Fokus
 
-```text
-Customer / Provider / Auditor
-   │
-   ├─ Vertrag / DPA / SLA
-   ├─ Architektur / CMDB / Dependency Export
-   ├─ IaC / redigierter Konfig-Export
-   ├─ kundenseitiger Provider-Export
-   ├─ Assurance Report / Zertifikat
-   ├─ Screenshot / Screenshare Observation
-   └─ Testprotokoll
-          │
-          ▼
-Customer Evidence Pack
-          │
-          ▼
-Validation + Normalization + Claim/Evidence Mapping
-          │
-          ▼
-Generic Domain Graph / Rule Engine
-          │
-          ▼
-PASS / FAIL / UNVERIFIED + Risks + Confidence
-          │
-          ▼
-AI-assisted Explanation + Human Review
-```
+GitHub Issue #11 / `NEXT-110`: installierbarer End-to-End-Webapp-Skeleton.
 
-## Bereits vorhanden
+Danach: `NEXT-111` dynamische Question Applicability; `NEXT-112` Evidence -> Claim -> Hard Gate; `NEXT-113` Backup/Export/Consultant Report; `NEXT-114` vollständiger synthetischer Consultant-Durchlauf auf sauberer VM.
 
-- Methodenmodell v1.0 als Workbook
-- 128 Fragen in acht Domänen
-- Risiko-Taxonomie inkl. G z.S1–G z.S12
-- R4 Hard Gates/Factor Rules
-- Source-/Provenienzregister
-- erste deterministische Python-Regeln
-- Evidence-Pack-Schema und lokaler Validator
-- Multi-Agent-/Review-/PM-Struktur
-- historische R5-Bedrock-Evidence als Provider-Beispiel
-
-## Verworfener Ansatz
-
-Der v0.9 AWS-Bedrock-Collector ist **nicht** der nächste Schritt und **nicht** die Zielarchitektur. Historie siehe `docs/history/R6_AWS_COLLECTOR_APPROACH_RETIRED.md`.
-
-## Nächste Arbeit
-
-Beginne mit `NEXT-101`, `NEXT-102` oder `NEXT-103`. Ein guter erster Development-Task ist der lokale Evidence-Pack-Loader und die Verbindung `Evidence -> Claim -> Gate`.
+Die Methodentasks `NEXT-101` bis `NEXT-108` bleiben relevant. `NEXT-109` (CLI als primäre MVP-Oberfläche) ist zurückgestellt; CLI kann später als Test-/Automationsinterface bestehen.
 
 ## Regeln für den nächsten Agenten
 
+- `AGENTS.md` zuerst lesen.
 - Keine Cloud-Credentials anfordern.
-- Keine Provider-spezifische Logik in `src/sovradar/rules.py` einbauen.
-- Provider Adapter nur als Übersetzungsschicht.
-- Kein Evidence Gap als FAIL ausgeben.
-- Alle neuen Methodenregeln mit Provenienz versehen.
-- Issue/PR/Handoff/Agent-Log pflegen.
+- Keine LLM API im MVP-01 ohne neue Decision einführen.
+- Keine Provider-spezifische Logik in den Rule-Core einbauen.
+- Raw Kundenevidence nie committen.
+- Keine LLM-Proposals automatisch als Answers übernehmen.
+- `./uninstall.sh` muss alle erzeugten Runtime-Daten löschen können.
+- substantielle Änderungen über Issue/Branch/PR/CI/Agent-Log führen.

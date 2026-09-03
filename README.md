@@ -2,94 +2,110 @@
 
 Der **Souveränitätsradar** ist ein Beratungs- und Softwareprojekt zur nachvollziehbaren Bewertung digitaler Souveränitätsrisiken von Cloud-, Plattform-, SaaS- und KI-Lösungen.
 
-Das Projekt verbindet klassische Informationssicherheits-Risikoanalyse mit digitalen Souveränitätsdimensionen, Compliance-/Governance-Anforderungen, Evidenzbewertung und einer später KI-gestützten Assessment-Engine.
+Das Projekt verbindet Informationssicherheits-Risikoanalyse, digitale Souveränität, Compliance/Governance und Evidence-Bewertung. Der Methodenkern ist **cloud-agnostisch** und benötigt **keinen direkten Zugang zu Kunden-Cloud-Accounts**.
 
-## Aktuelle Leitentscheidung
+## MVP-01: Consultant Web Application
 
-Der Radar ist **cloud-agnostisch** und benötigt **keinen direkten Zugang zu Kunden-Cloud-Accounts**. Der Standardprozess arbeitet mit einem **Customer Evidence Pack**:
+Die operative Produktentwicklung läuft ab jetzt als lokal installierbare Webanwendung. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz; für den täglichen Beratungsworkflow ist sie nicht mehr die primäre Oberfläche.
 
-- Verträge, DPA, SLA, Exit-Regelungen
-- Architektur- und Dependency-Dokumentation
-- CMDB-/DataGerry-/DORA-RoI-artige Exporte
-- IaC und redigierte Konfigurationsauszüge
-- vom Kunden erzeugte Provider-Exporte
-- Audit-/Assurance-Nachweise
-- Screenshare-/Workshop-Beobachtungen
-- Testprotokolle für Exit, Restore, Failover, Key Control und Autonomie
-- öffentliche Provider-Dokumentation als Nachweis der **Service Capability**, nicht der Kundenkonfiguration
+Aktueller MVP-Stack:
 
-AWS, Azure, GCP, OpenStack, Kubernetes, europäische Sovereign-Cloud-Angebote oder SaaS werden über dasselbe generische Domänen- und Regelmodell bewertet. Provider-spezifische Adapter übersetzen nur Begriffe und Evidence in das generische Modell; sie enthalten **keine eigene Risikomethode**.
+- React + TypeScript + Vite
+- Python + FastAPI
+- PostgreSQL
+- lokaler Dokument-Speicher unter `.runtime/`
+- vorhandener deterministischer Methodenkern unter `src/sovradar/`
+- **LLM Bridge per Copy/Paste**, keine LLM-API-Calls
+- Docker Compose
+
+Noch **nicht** Teil des MVP: LiteLLM, n8n, LangGraph, Keycloak, S3, Kubernetes/GitOps.
+
+### Schnellstart
+
+```bash
+git clone https://github.com/MarcusGraetsch/Souveraenitaetsradar.git
+cd Souveraenitaetsradar
+./install.sh
+```
+
+Danach:
+
+```bash
+./start.sh       # starten
+./stop.sh        # stoppen, Daten behalten
+./test.sh        # Health-/Runtime-Test
+./uninstall.sh   # Anwendung + alle erzeugten Daten löschen
+```
+
+Default: `http://localhost:8080`
+
+> MVP-01 hat noch keine Authentisierung. Die Installation bindet deshalb standardmäßig nur an `127.0.0.1`. Netzwerkfreigabe nur in vertrauenswürdigen Testumgebungen verwenden.
+
+## Consultant Workflow
+
+`Assessment anlegen -> Scope -> Fragen -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
+
+Im aktuellen Skeleton können Assessments angelegt, Fragen aus der kanonischen Methodenbank beantwortet, Evidence-Metadaten/Dateien lokal erfasst und LLM-Analysepakete erzeugt werden.
+
+Die **LLM Bridge** funktioniert bewusst ohne API:
+
+1. Radar erzeugt einen strukturierten Prompt.
+2. Berater kopiert ihn in einen freigegebenen LLM-Chat seiner Wahl.
+3. LLM liefert strukturiertes JSON zurück.
+4. JSON wird in den Radar eingefügt.
+5. Das Backend validiert Assessment-ID, Question IDs, Evidence IDs und Schema.
+6. Ergebnisse bleiben **Vorschläge** und werden nicht automatisch als Beraterentscheidung übernommen.
+
+Details: [`docs/product/MVP_01_CONSULTANT_WEBAPP.md`](docs/product/MVP_01_CONSULTANT_WEBAPP.md)
+
+## Evidence- und Cloud-Prinzip
+
+Der Standardprozess arbeitet mit **Customer-mediated Evidence**: Verträge, Architektur-/CMDB-/Dependency-Dokumentation, IaC/redigierte Konfigurationen, kundenseitige Provider-Exporte, Assurance-Nachweise, Screenshare-/Workshop-Beobachtungen und Testprotokolle. Öffentliche Provider-Dokumentation belegt primär Service Capability, nicht Kundenkonfiguration.
+
+AWS, Azure, GCP, OpenStack, Kubernetes, europäische Sovereign-Cloud-Angebote und SaaS werden über dasselbe generische Domänen- und Regelmodell bewertet. Provider-Adapter sind reine Übersetzer und enthalten keine eigene Risikomethode.
 
 ## Was der Radar getrennt ausweist
 
-1. **Provider / Service Capability** – was ein Dienst grundsätzlich anbietet oder zusichert.
-2. **Applied Capability** – was der Kunde tatsächlich ausgewählt, konfiguriert, dokumentiert, getestet oder auditiert hat.
-3. **Workload Sovereignty Risk** – verbleibende souveränitätsbezogene Risiken des konkreten Geschäftsprozesses.
-4. **klassisches Informationssicherheits- und Betriebsrisiko** – damit mehr Souveränität nicht automatisch als mehr Sicherheit gilt.
-5. **Evidence Confidence** – Belastbarkeit und Scope der verwendeten Nachweise.
+1. Provider / Service Capability
+2. Applied Capability
+3. Workload Sovereignty Risk
+4. klassisches Informationssicherheits- und Betriebsrisiko
+5. Evidence Confidence
 
-Die Methode arbeitet nach **Gate first, score second**: nicht kompensierbare Mindestanforderungen werden vor gewichteten Vergleichswerten geprüft.
-
-## Aktueller Stand
-
-- **Projektphase:** R6 – Customer-mediated Evidence Pilot
-- **Methodenmodell:** v1.0
-- **R1–R5:** konsolidiert
-- **R6:** AWS-Collector-Idee als Standardpfad verworfen; cloud-agnostische Evidence-Architektur implementiert
-- **nächster Meilenstein:** ein providerneutraler Evidence-Pack-Pilot mit synthetischen oder vom Kunden exportierten Nachweisen
-
-### Einstieg
-
-- [`AGENTS.md`](AGENTS.md) – kanonische Arbeitsregeln für alle KI-Agenten
-- [`project/PROJECT_STATE.yaml`](project/PROJECT_STATE.yaml) – aktueller Zustand
-- [`project/HANDOFF.md`](project/HANDOFF.md) – Übergabe an neuen Menschen/Agenten
-- [`project/NEXT_ACTIONS.yaml`](project/NEXT_ACTIONS.yaml) – priorisiertes Backlog
-- [`project/DECISIONS.yaml`](project/DECISIONS.yaml) – akzeptierte Entscheidungen
-- [`docs/architecture/EVIDENCE_ACQUISITION_ARCHITECTURE.md`](docs/architecture/EVIDENCE_ACQUISITION_ARCHITECTURE.md)
-- [`docs/project/MULTI_AGENT_PROJECT_MANAGEMENT.md`](docs/project/MULTI_AGENT_PROJECT_MANAGEMENT.md)
-- [`data/method/`](data/method/) – maschinenlesbare Methodik
-- [`artifacts/method/METHOD_WORKBOOK_MANIFEST.md`](artifacts/method/METHOD_WORKBOOK_MANIFEST.md) – Manifest des erzeugten Methoden-Workbooks; kanonische Daten liegen unter `data/method/`
+Die Methode arbeitet nach **Gate first, score second**. Fehlende Evidence führt zu `UNVERIFIED`, nicht automatisch zu `FAIL`.
 
 ## Repository-Struktur
 
 ```text
 .
+├── apps/api/                        # FastAPI Backend
+├── apps/web/                        # React/Vite Consultant UI
+├── docker-compose.yml
+├── install.sh / start.sh / stop.sh / test.sh / uninstall.sh
 ├── AGENTS.md
-├── OPENAI.md / CLAUDE.md / GEMINI.md / CODEX.md
 ├── project/                         # State, Roadmap, Handoff, Decisions, Agent Logs
-├── docs/
-│   ├── method/                      # fachliche Methodik
-│   ├── architecture/                # Architektur + ADRs
-│   ├── project/                     # Projektmanagement, Review, DoD, Releases
-│   └── history/                     # R1–R6 Historie inkl. verworfener Ansätze
-├── data/
-│   ├── method/                      # aktuelle maschinenlesbare Methodik
-│   ├── templates/                   # providerneutrale Evidence-Pack-Templates
-│   └── history/                     # historische Pilotdaten
-├── config/                          # versionierte Regeln und Evidence-Typen
+├── docs/product/                    # Produkt-/UX-Dokumentation
+├── docs/method/                     # fachliche Methodik
+├── docs/architecture/               # Architektur + ADRs
+├── data/method/                     # kanonische maschinenlesbare Methodik
+├── config/                          # Regeln und Evidence-Typen
 ├── schemas/                         # JSON Schemas
 ├── src/sovradar/                    # deterministischer Methodenkern
-├── tests/                           # Unit-/Schema-/Intake-Tests
-├── tools/evidence-pack/             # lokaler, credential-freier Evidence-Pack-Workflow
-├── artifacts/method/                # aktuelles Methoden-Workbook
+├── tests/                           # Core Tests
 └── .github/                         # CI, Templates, CODEOWNERS
 ```
 
-## Sicherheits- und Beratungsprinzip
+## Laufzeitdaten
 
-Das Projekt soll **nicht** voraussetzen, dass Kunden uns Root-, Owner- oder sonstige Cloud-Credentials geben. Falls ein Kunde freiwillig technische Exporte erzeugt, geschieht dies unter seiner Kontrolle. Unsere Software verarbeitet bereitgestellte Evidence lokal oder in einer explizit freigegebenen Projektumgebung.
+Laufzeitdaten gehören **nicht** ins Git-Repository. Sie liegen lokal im PostgreSQL-Docker-Volume `sovradar_db_data`, unter `.runtime/` und in `.env`. `./uninstall.sh` entfernt diese Daten nach expliziter `DELETE`-Bestätigung vollständig.
 
-Raw Kundenevidence gehört standardmäßig **nicht** in dieses Repository.
+## Einstieg für Menschen und Agenten
 
-## Schnellstart für Agenten
+1. `AGENTS.md`
+2. `project/PROJECT_STATE.yaml`
+3. `project/HANDOFF.md`
+4. `project/NEXT_ACTIONS.yaml`
+5. `project/DECISIONS.yaml`
+6. offene Issues/PRs
 
-1. `AGENTS.md` vollständig lesen.
-2. `project/PROJECT_STATE.yaml`, `project/HANDOFF.md`, `project/NEXT_ACTIONS.yaml`, `project/DECISIONS.yaml` lesen.
-3. Offene Issues/PRs prüfen.
-4. Für substanzielle Arbeit einen Plan und eine Rolle nennen.
-5. Änderungen auf Branch + PR durchführen, Tests/Provenienz aktualisieren.
-6. Session-Log und Handoff/State nur bei tatsächlicher Zustandsänderung aktualisieren.
-
-## Externe Quellen
-
-Normen, regulatorische Dokumente und Provider-Inhalte werden nicht ungeprüft oder lizenzwidrig kopiert. Das Repository speichert Referenzen, Fundstellen, Ableitungen und eigene Arbeitsartefakte. Die Herkunft fachlicher Regeln ist über `data/method/source_register.csv` und die Provenienzfelder nachvollziehbar.
+Raw Kundenevidence, Cloud-Credentials und Secrets gehören niemals in GitHub Issues, PRs oder dieses Repository.

@@ -6,18 +6,18 @@ venv/
 .DS_Store
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.p12
 *.pfx
-
-# Customer evidence / secure assessment workspaces
+node_modules/
+dist/
+.runtime/
 customer-evidence/
 evidence-packs/
 raw-evidence/
 secure-workspace/
-
-# Common cloud credential files
 .aws/
 .azure/
 .config/gcloud/
