@@ -3,6 +3,7 @@
 Datum: 2026-09-03
 Rollen: methodologist, developer, reviewer (Self-Review)
 Issue: #13
+PR: #14
 Branch: `feature/next-111-guided-workflow`
 
 ## Ziel
@@ -31,30 +32,39 @@ Das Relevanzprofil ist Scope-Kontext und wird bewusst nicht als normale Fragenan
 
 ## Tests / Acceptance
 
-Geplante CI-Checks:
+PR-CI Run `33762878013` war vor dem finalen Status-/Handoff-Commit vollständig grün:
 
-- Repository Validator
-- bestehende Core Tests
-- neue `tests/test_applicability.py`
-- FastAPI Tests inkl. Profil-/Fragenpfad
-- TypeScript/Vite Build
-- Docker Compose Smoke Test
+- Repository Validator: PASS
+- bestehende Core Tests: PASS
+- `tests/test_applicability.py`: PASS
+- FastAPI Tests inkl. Profil-/Fragenpfad: PASS
+- TypeScript/Vite Build: PASS
+- Docker Compose Build/Runtime Smoke: PASS
 
-Expliziter Boundary-Test: fehlender Kontext bei `wenn Verschlüsselung` muss `needs_review` ergeben und darf die Frage nicht aus dem relevanten Pfad entfernen.
+Expliziter Boundary-Test: fehlender Kontext bei `wenn Verschlüsselung` ergibt `needs_review` und entfernt die Frage nicht aus dem relevanten Pfad.
+
+Nach den finalen Projektstatus-Updates muss die PR-CI nochmals vollständig grün sein, bevor gemerged wird.
 
 ## Bekannte Grenzen
 
 - Die Question Bank enthält viele natürliche Anwendbarkeitsformulierungen. Noch nicht modellierte Ausdrücke bleiben korrekt als `needs_review` sichtbar.
 - Das Relevanzprofil ist MVP-Scope und noch kein vollständiges Discovery-/BIA-Datenmodell.
-- Eine echte Hard-Gate-Auswertung gehört in NEXT-112.
+- Eine echte Hard-Gate-Auswertung gehört in NEXT-112 / Issue #15.
 - LLM-Vorschläge können weiterhin noch nicht einzeln per Human-Review in Antworten übernommen werden.
 
 ## Handoff
 
-Nach grünem PR:
+NEXT-111 ist funktional implementiert. Nächster P0-Produkt-/Methodenschritt ist `NEXT-112` / Issue #15: `Evidence -> Claim -> Hard Gate`.
 
-1. NEXT-111 auf completed setzen.
-2. NEXT-112 starten: Evidence -> Claim -> Hard Gate.
-3. Guided-Workflow-UX im ersten synthetischen End-to-End-Durchlauf (NEXT-114) prüfen.
+Dabei zwingend beibehalten:
+
+1. alle acht Hard Gates.
+2. fehlende/unzureichende Evidence = `UNVERIFIED`.
+3. technische Mindestunterschreitung kann `FAIL` ergeben.
+4. `PASS` nur mit ausreichender technischer und Evidence-Grundlage.
+5. Provider Capability und Applied Capability getrennt.
+6. LLM-Vorschläge ohne Human Review haben keine Gate-Auswirkung.
+
+Guided-Workflow-UX zusätzlich im ersten synthetischen End-to-End-Durchlauf (NEXT-114) prüfen.
 
 Provenienz: `INT-03` / interne Produkt- und Methodenoperationalisierung. Keine externe Norm wird durch die Applicability-Regeln neu behauptet.
