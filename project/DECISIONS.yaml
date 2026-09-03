@@ -1,4 +1,4 @@
-version: 3
+version: 4
 updated: "2026-09-03"
 decisions:
   - id: DEC-001
@@ -96,4 +96,14 @@ decisions:
     status: accepted
     title: Laufzeitdokumente liegen im MVP lokal und werden bei Deinstallation vollständig gelöscht
     rationale: S3/Object Storage ist für Entwicklung nicht erforderlich; lokaler Storage vereinfacht Betrieb, Datenhoheit und reproduzierbare Deinstallation.
+    source: INT-03
+  - id: DEC-020
+    status: accepted
+    title: Question Applicability wird deterministisch und konservativ ausgewertet
+    rationale: Der Berater soll nicht alle 128 Fragen manuell bearbeiten, aber unklare Anwendbarkeit darf keine Frage still ausblenden. Deshalb nutzt der Radar applicable, not_applicable und needs_review.
+    source: INT-03
+  - id: DEC-021
+    status: accepted
+    title: Ein separates Relevanzprofil steuert den Consultant-Fragenpfad
+    rationale: Scope-Fakten wie KI-Nutzung, Datenverarbeitung, Verschlüsselung, Exit, IAM oder Unterauftragnehmer sind Kontext für die Fragenwahl und keine Assessment-Antworten. Sie werden getrennt gespeichert und bleiben nachvollziehbar editierbar.
     source: INT-03
