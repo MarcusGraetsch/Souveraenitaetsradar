@@ -18,6 +18,16 @@ export type Assessment={
 export type ApplicabilityStatus='applicable'|'not_applicable'|'needs_review'
 export type WorkflowStage='screening'|'clarification'|'deep_dive'|'completed'|'excluded'
 export type QuestionView='work'|'screening'|'clarification'|'deep_dive'|'completed'|'relevant'|'all'
+export type AnswerControlKind='single_select'|'text'|'list'|'date'|'structured_text'
+export type AnswerControlOption={value:string;label:string}
+export type AnswerControl={
+  source_type:string
+  kind:AnswerControlKind
+  options:AnswerControlOption[]
+  placeholder:string
+  help_text:string
+  mapping_status:'mapped'|'needs_review'
+}
 
 export type Question={
   id:string
@@ -25,6 +35,7 @@ export type Question={
   target_object:string
   question:string
   answer_type:string
+  answer_control:AnswerControl
   applicability:string
   requiredness:string
   expected_evidence:string
