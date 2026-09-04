@@ -235,6 +235,37 @@
       }
     },
     "llm_imports": {"type": "array", "items": {"type": "object"}},
+    "llm_proposal_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "llm_import_id",
+          "proposal_index",
+          "question_id",
+          "decision",
+          "final_answer_value",
+          "evidence_ids",
+          "answer_id",
+          "reviewer_note",
+          "created_at"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "llm_import_id": {"type": "string", "minLength": 1},
+          "proposal_index": {"type": "integer", "minimum": 0},
+          "question_id": {"type": "string", "minLength": 1},
+          "decision": {"enum": ["accepted", "edited", "rejected"]},
+          "final_answer_value": {"type": "string"},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "answer_id": {"type": "string"},
+          "reviewer_note": {"type": "string"},
+          "created_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
     "warnings": {"type": "array", "items": {"type": "string"}}
   }
 }
