@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from './api'
+import { LlmClaimReviewWorkspace } from './LlmClaimReviewWorkspace'
 import type {
   Assessment,
   Evidence,
@@ -59,7 +60,7 @@ function ProposalReviewCard({assessment,refRow,evidence,onChanged}:{assessment:A
   const editedFormatValid=validForQuestion(question,editedValue)
   const canAccept=applicabilityResolved&&!review&&originalFormatValid
   const canEdit=applicabilityResolved&&!review
-  const toggleEvidence=(id:string)=>setSelectedEvidence(current=>current.includes(id)?current.filter(item=>item!==id):[...current,id])
+  const toggleEvidence=(id:string)=>setSelectedEvidence(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id])
   const submit=async(decision:'accepted'|'edited'|'rejected')=>{
     setBusy(true);setMessage('')
     try{
@@ -104,5 +105,8 @@ export function LlmReviewWorkspace({assessment}:{assessment:Assessment}){
   const reviewMap=useMemo(()=>new Map(reviews.map(review=>[`${review.llm_import_id}:${review.proposal_index}`,review])),[reviews])
   const proposalRows=useMemo(()=>imports.flatMap(importRow=>importRow.proposals.map((proposal,proposalIndex)=>({importRow,proposal,proposalIndex,question:questionMap.get(proposal.question_id),review:reviewMap.get(`${importRow.id}:${proposalIndex}`)}))),[imports,questionMap,reviewMap])
   const pending=proposalRows.filter(row=>!row.review).length
-  return <section><div className="row-between"><div><h2>KI-Antwortvorschläge prüfen</h2><p className="muted">LLM-Vorschläge werden erst durch Ihre Prüfung zu Radar-Antworten. Die ursprüngliche LLM-Ausgabe bleibt unverändert auditierbar.</p></div><span className="status">{pending} offen</span></div>{loading&&<p className="muted">Vorschläge werden geladen…</p>}{error&&<div className="error">{error}</div>}{!loading&&proposalRows.length===0&&<div className="notice">Noch keine importierten Antwortvorschläge vorhanden.</div>}{proposalRows.map(row=><ProposalReviewCard key={`${row.importRow.id}:${row.proposalIndex}`} assessment={assessment} refRow={row} evidence={evidenceMap} onChanged={load}/>)}</section>
+  return <>
+    <section><div className="row-between"><div><h2>KI-Antwortvorschläge prüfen</h2><p className="muted">LLM-Vorschläge werden erst durch Ihre Prüfung zu Radar-Antworten. Die ursprüngliche LLM-Ausgabe bleibt unverändert auditierbar.</p></div><span className="status">{pending} offen</span></div>{loading&&<p className="muted">Vorschläge werden geladen…</p>}{error&&<div className="error">{error}</div>}{!loading&&proposalRows.length===0&&<div className="notice">Noch keine importierten Antwortvorschläge vorhanden.</div>}{proposalRows.map(row=><ProposalReviewCard key={`${row.importRow.id}:${row.proposalIndex}`} assessment={assessment} refRow={row} evidence={evidenceMap} onChanged={load}/>)}</section>
+    <LlmClaimReviewWorkspace assessment={assessment}/>
+  </>
 }

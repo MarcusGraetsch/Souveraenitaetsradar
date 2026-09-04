@@ -295,6 +295,59 @@
         "additionalProperties": false
       }
     },
+    "llm_claim_imports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "prompt_version", "method_version", "validation_status", "proposals", "evidence_gaps", "warnings", "created_at"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "prompt_version": {"type": "string", "minLength": 1},
+          "method_version": {"type": "string", "minLength": 1},
+          "validation_status": {"type": "string"},
+          "proposals": {"type": "array", "items": {"type": "object"}},
+          "evidence_gaps": {"type": "array", "items": {"type": "object"}},
+          "warnings": {"type": "array", "items": {"type": "string"}},
+          "created_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "llm_claim_proposal_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "llm_claim_import_id",
+          "proposal_index",
+          "gate_id",
+          "decision",
+          "final_statement",
+          "final_capability_level",
+          "evidence_ids",
+          "question_ids",
+          "claim_id",
+          "reviewer_note",
+          "created_at"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "llm_claim_import_id": {"type": "string", "minLength": 1},
+          "proposal_index": {"type": "integer", "minimum": 0},
+          "gate_id": {"type": "string", "pattern": "^HG-0[1-8]$"},
+          "decision": {"enum": ["accepted", "edited", "rejected"]},
+          "final_statement": {"type": "string"},
+          "final_capability_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 4},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "question_ids": {"type": "array", "items": {"type": "string"}},
+          "claim_id": {"type": "string"},
+          "reviewer_note": {"type": "string"},
+          "created_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
     "warnings": {"type": "array", "items": {"type": "string"}}
   }
 }

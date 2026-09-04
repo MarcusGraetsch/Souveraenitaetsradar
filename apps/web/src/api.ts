@@ -10,6 +10,9 @@ import type {
   GateEvaluation,
   GateRequirement,
   GateRequirementChange,
+  LlmClaimImport,
+  LlmClaimProposalReview,
+  LlmClaimProposalReviewDecision,
   LlmImport,
   LlmProposalReview,
   LlmProposalReviewDecision,
@@ -144,6 +147,30 @@ export const api={
     evidence_ids?:string[]
     reviewer_note?:string
   })=>request<LlmProposalReview>(`/api/assessments/${assessmentId}/llm-bridge/imports/${importId}/proposals/${proposalIndex}/review`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+  }),
+  claimPrompt:(id:string)=>request<{prompt:string;prompt_version:string;method_version:string}>(`/api/assessments/${id}/llm-bridge/claim-prompt`),
+  importLlmClaims:(id:string,raw:string)=>{
+    validateLlmAssessmentId(id,raw)
+    return request<LlmClaimImport>(`/api/assessments/${id}/llm-bridge/claim-import`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:raw,
+    })
+  },
+  llmClaimImports:(id:string)=>request<LlmClaimImport[]>(`/api/assessments/${id}/llm-bridge/claim-imports`),
+  llmClaimProposalReviews:(id:string)=>request<LlmClaimProposalReview[]>(`/api/assessments/${id}/llm-bridge/claim-proposal-reviews`),
+  reviewLlmClaimProposal:(assessmentId:string,importId:string,proposalIndex:number,payload:{
+    decision:LlmClaimProposalReviewDecision
+    gate_id?:string
+    statement?:string
+    capability_level?:number|null
+    evidence_ids?:string[]
+    question_ids?:string[]
+    reviewer_note?:string
+  })=>request<LlmClaimProposalReview>(`/api/assessments/${assessmentId}/llm-bridge/claim-imports/${importId}/proposals/${proposalIndex}/review`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(payload),
