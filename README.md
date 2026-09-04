@@ -41,6 +41,16 @@ Default: `http://localhost:8080`
 
 > MVP-01 hat noch keine Authentisierung. Die Installation bindet deshalb standardmäßig nur an `127.0.0.1`. Netzwerkfreigabe nur in vertrauenswürdigen Testumgebungen verwenden.
 
+### Unternehmensnetz / Enterprise CA
+
+Der Installer prüft vor dem Docker-Build die TLS-Vertrauensketten für PyPI und die npm Registry und übernimmt den Host-CA-Bundle sicher als BuildKit-Secret. Wenn eine zusätzliche Unternehmens-CA nicht im System-Truststore liegt, kann sie als PEM explizit angegeben werden:
+
+```bash
+SOVRADAR_CA_CERT=/pfad/zur/enterprise-ca.pem ./install.sh
+```
+
+TLS-Verifikation wird nicht deaktiviert. Details: [`docs/operations/ENTERPRISE_CA.md`](docs/operations/ENTERPRISE_CA.md).
+
 ## Consultant Workflow
 
 `Assessment anlegen -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
@@ -109,7 +119,7 @@ Die Methode arbeitet nach **Gate first, score second**. Fehlende Evidence führt
 
 ## Laufzeitdaten
 
-Laufzeitdaten gehören **nicht** ins Git-Repository. Sie liegen lokal im PostgreSQL-Docker-Volume `sovradar_db_data`, unter `.runtime/` und in `.env`. `./uninstall.sh` entfernt diese Daten nach expliziter `DELETE`-Bestätigung vollständig.
+Laufzeitdaten gehören **nicht** ins Git-Repository. Sie liegen lokal im PostgreSQL-Docker-Volume `sovradar_db_data`, unter `.runtime/` und in `.env`. Lokales Build-Trust-Material liegt ausschließlich unter `.build/`. `./uninstall.sh` entfernt diese Daten nach expliziter `DELETE`-Bestätigung vollständig.
 
 ## Einstieg für Menschen und Agenten
 
