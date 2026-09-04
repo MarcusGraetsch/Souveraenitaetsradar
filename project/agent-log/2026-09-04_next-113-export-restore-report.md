@@ -62,7 +62,17 @@ Der Export-Router wird explizit in `main.py` registriert. Die frühere indirekte
 
 ## Validierung
 
-Der installierte NEXT-113-End-to-End-Runner prüft u. a.:
+Finaler Merge-Gate-Lauf:
+
+- GitHub Actions Run: `33834276156`
+- Artifact: `9922749183` (`consultant-validation-reports`)
+- Python: PASS
+- Frontend: PASS
+- Compose Smoke: PASS
+- Consultant Walkthrough: PASS
+- Install / Stop / Restart / Test / vollständiger Uninstall: PASS
+
+Der installierte NEXT-113-End-to-End-Runner bestätigte:
 
 - Standardexport enthält keine sensitiven Evidence-Inhalte.
 - Consultant Report enthält keine sensitiven Evidence-Inhalte.
@@ -82,7 +92,21 @@ Validierter synthetischer Gate-Zustand:
 - HG-04 UNVERIFIED
 - übrige Gates N/A
 
-Die fachlichen NEXT-113-Validierungen waren bereits in mehreren CI-Läufen erfolgreich. Ein zusätzlich aufgedecktes Lifecycle-Problem betraf Dateirechte im Linux-Bind-Mount: vom API-Container erzeugte Evidence-Dateien konnten hostseitig nicht zuverlässig durch `uninstall.sh` entfernt werden. Die Deinstallation wurde deshalb um containerseitige Runtime-Bereinigung, Host-Selbstprüfung und einen expliziten erfolgreichen Exit ergänzt.
+NEXT-114 und NEXT-115 liefen im selben Merge-Gate als Regression ebenfalls erfolgreich.
+
+## Lifecycle-Finding und Abschluss
+
+Die Full-Restore-Validierung deckte unter Linux ein reales Berechtigungsproblem auf: Evidence-Dateien im Bind-Mount konnten dem Container-Root gehören und hostseitig eine vollständige Deinstallation verhindern. Nach der containerseitigen Runtime-Bereinigung blieb zunächst ein zweites Problem sichtbar: `docker compose run` konsumierte die restliche stdin des interaktiven Uninstall-Dialogs, wodurch der abschließende `read` mit EOF und Exit 1 endete.
+
+Der finale Fix:
+
+- Runtime-Inhalte werden containerseitig gelöscht.
+- `docker compose run -T ... </dev/null` ist von der Dialog-stdin isoliert.
+- `.runtime` und `.env` werden nach der Deinstallation explizit auf Abwesenheit geprüft.
+- der optionale Repository-Dialog toleriert EOF.
+- erfolgreicher Uninstall endet explizit mit Exit 0.
+
+Run `33834276156` bestätigt den vollständigen Lifecycle.
 
 ## Governance-Entscheidungen
 
@@ -93,8 +117,8 @@ Die fachlichen NEXT-113-Validierungen waren bereits in mehreren CI-Läufen erfol
 
 ## Security Review / offener Hardening-Punkt
 
-Der Backup-Import nutzt `zipfile` ohne Dateisystem-Extraktion und vermeidet damit klassische Zip-Slip-Extraktion. Die aktuelle Uploadgröße ist begrenzt. Vor einem Einsatz außerhalb des lokalen MVP sollte zusätzlich die **unkomprimierte Größe jedes ZIP-Members vor `archive.read()`** geprüft werden, um komprimierte Decompression-Bombs frühzeitig abzulehnen. Dieses Finding wird separat im Backlog geführt und nicht als bereits gelöst dargestellt.
+Der Backup-Import nutzt `zipfile` ohne Dateisystem-Extraktion und vermeidet damit klassische Zip-Slip-Extraktion. Die aktuelle Uploadgröße ist begrenzt. Vor einem Einsatz außerhalb des lokalen MVP muss zusätzlich die **unkomprimierte Größe jedes ZIP-Members vor `archive.read()`** geprüft werden, um komprimierte Decompression-Bombs frühzeitig abzulehnen. Das ist als NEXT-117 / Issue #25 erfasst und wird nicht als bereits gelöst dargestellt.
 
 ## Reviewstatus
 
-PR #24 bleibt bis zu vollständig grüner CI im Review. Erst danach werden Projektstatus und NEXT-113 auf `completed` gesetzt und der PR gemerged.
+Alle definierten NEXT-113-Merge-Gates sind technisch erfüllt. PR #24 kann nach Self-Review aus Draft genommen und gemerged werden. Das Security-Hardening aus Issue #25 bleibt ein eigenständiges P1-Follow-up und blockiert den lokalen MVP-Nachweis nicht.
