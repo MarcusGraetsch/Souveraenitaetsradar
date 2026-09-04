@@ -2,7 +2,7 @@
 
 ## Kurzfassung
 
-Der Souveränitäts-Radar besteht aus einem cloud-agnostischen Methodenkern und einer lokal installierbaren Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI. Die produktive Arbeitskette lautet aktuell:
+Der Souveränitäts-Radar besteht aus einem cloud-agnostischen Methodenkern und einer lokal installierbaren Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI. Die aktuelle Arbeitskette lautet:
 
 ```text
 Assessment
@@ -24,7 +24,7 @@ Assessment
   -> Structured Export / Consultant Report / Backup / Restore
 ```
 
-NEXT-112, NEXT-114 und NEXT-115 sind auf `main`. NEXT-113 / Issue #23 befindet sich in PR #24 im finalen Review.
+NEXT-112, NEXT-114 und NEXT-115 sind auf `main`. NEXT-113 / Issue #23 / PR #24 hat alle definierten technischen Merge-Gates erfüllt und ist merge-ready. Danach ist NEXT-101 der nächste P0-Meilenstein: ein providerneutraler Customer-mediated-Evidence-Pilot.
 
 ## Verbindliche Methodenregeln
 
@@ -58,23 +58,9 @@ Workflow Stage:
 
 `needs_review` darf niemals still verschwinden. Alle 128 Methodenfragen bleiben über die All-Questions-/Audit-Ansicht inspizierbar. Ein LLM entscheidet weder Applicability noch Workflow Stage.
 
-NEXT-115 Baseline komplexer KI-Agent:
+NEXT-115 Baseline komplexer KI-Agent: 128 total, 124 relevant, 83 applicable, 41 needs_review, 4 not_applicable; Workflow 44 screening, 41 clarification, 39 deep_dive, 4 excluded. Der Public-Content-Fall ist mit 84 relevanten Fragen kürzer, besitzt aber wegen `work = screening + clarification` fast dieselbe unmittelbare Queue. NEXT-116 / Issue #22 bleibt dafür als P1-UX-Follow-up offen.
 
-- 128 total
-- 124 relevant
-- 83 applicable
-- 41 needs_review
-- 4 not_applicable
-- 44 screening
-- 41 clarification
-- 39 deep_dive
-- 4 excluded
-
-Der Public-Content-Fall ist mit 84 relevanten Fragen kürzer, besitzt aber aufgrund der aktuellen Definition von `work = screening + clarification` fast dieselbe unmittelbare Queue. NEXT-116 / Issue #22 bleibt dafür als P1-UX-Follow-up offen.
-
-## NEXT-113 – implementierter Stand
-
-PR #24 enthält jetzt:
+## NEXT-113 – abgeschlossener Implementierungsstand
 
 ### Structured Export
 
@@ -113,20 +99,21 @@ Der Markdown-Bericht enthält Scope, Evidenzlage, Hard-Gate-Ergebnisse, UNVERIFI
 
 Im Ergebnis-Tab stehen Structured JSON, Consultant Report, Structured Backup, Full Backup mit Warnung sowie JSON-/ZIP-Restore zur Verfügung.
 
-## NEXT-113 – validierte Fachchecks
+## NEXT-113 – finaler Merge-Gate
 
-Der installierte E2E-Runner `tools/validation/export_restore_validation.py` hat wiederholt erfolgreich geprüft:
+GitHub Actions Run `33834276156`, Artifact `9922749183`:
 
-- Default Export omits sensitive Evidence
-- Consultant Report omits sensitive Evidence
-- Default Backup has no Raw Evidence
-- Full Backup requires explicit opt-in
-- Structured Restore creates a new Assessment
-- Structured Restore preserves Gate Semantics
-- Structured Restore reports missing Raw Evidence
-- Full Restore restores Raw Evidence
-- Full Restore preserves Gate Semantics
-- Source Gate States remain unchanged
+- Python PASS
+- Frontend PASS
+- Compose Smoke PASS
+- Consultant Walkthrough PASS
+- NEXT-114 Regression PASS
+- NEXT-115 Regression PASS
+- NEXT-113 Export/Restore PASS
+- Stop/Restart/Test PASS
+- vollständiger Uninstall PASS
+
+Der NEXT-113-E2E-Test bestätigt unter anderem Evidence-Minimierung, explizites Full-Backup-Opt-in, neues Assessment beim Restore, ID-Remapping, fehlende-Raw-Evidence-Warnungen und semantisch identische Gate-Neuberechnung.
 
 Synthetischer Testzustand:
 
@@ -137,22 +124,18 @@ Synthetischer Testzustand:
 
 ## Lifecycle-Finding und Fix
 
-Die Full-Restore-Validierung deckte unter Linux ein reales Berechtigungsproblem auf: Evidence-Dateien im Bind-Mount konnten dem Container-Root gehören und hostseitig eine vollständige Deinstallation verhindern.
+Die Full-Restore-Validierung deckte zwei reale Linux-Lifecycle-Probleme auf:
 
-`uninstall.sh` wurde deshalb gehärtet:
+1. Container-Root konnte Evidence-Dateien im Bind-Mount erzeugen, die hostseitig nicht löschbar waren.
+2. Der containerseitige Cleanup mit `docker compose run` konsumierte die restliche stdin des interaktiven Uninstall-Dialogs und verursachte trotz erfolgreicher Löschung Exit 1.
 
-1. Runtime-Inhalte werden vor `docker compose down` innerhalb des API-Containers entfernt.
-2. Der Mountpoint wird für die Host-Löschung wieder beschreibbar gemacht.
-3. Nach der Löschung prüft das Script explizit, dass `.runtime` und `.env` nicht mehr existieren.
-4. Ein erfolgreicher Nicht-Repository-Löschpfad endet explizit mit `exit 0`.
-
-Der finale vollständige CI-Lauf nach dieser Korrektur ist das letzte technische Merge-Gate von NEXT-113.
+`uninstall.sh` löscht Runtime-Daten deshalb zuerst containerseitig, isoliert `docker compose run -T ... </dev/null` von der Dialog-stdin, prüft `.runtime`/`.env` explizit und toleriert EOF im optionalen Repository-Löschdialog. Run `33834276156` bestätigt den vollständigen Lifecycle.
 
 ## Security-Hardening-Finding – NEXT-117 / Issue #25
 
 Der Backup-Import extrahiert keine fremden ZIP-Pfade auf das Dateisystem und begrenzt die komprimierte Uploadgröße. Einzelne ZIP-Member werden aktuell jedoch mit `archive.read(...)` gelesen, bevor für alle Member die unkomprimierte Größe geprüft ist.
 
-Vor Nutzung nicht vertrauenswürdiger Backup-Dateien müssen daher ergänzt werden:
+Vor Nutzung nicht vertrauenswürdiger Backup-Dateien müssen ergänzt werden:
 
 - Vorabprüfung von `ZipInfo.file_size`
 - kleine Limits für `assessment.json` und `manifest.json`
@@ -161,7 +144,7 @@ Vor Nutzung nicht vertrauenswürdiger Backup-Dateien müssen daher ergänzt werd
 - Limit der ZIP-Eintragsanzahl
 - negative Tests für Oversize-/Decompression-Bomb-Fälle
 
-Das ist als Issue #25 dokumentiert. Es ist kein bereits gelöster Schutz und keine Methodenanforderung.
+Issue #25 dokumentiert das als offenen Schutz. Es wird nicht als bereits gelöst dargestellt.
 
 ## Agent-Regeln
 
@@ -179,8 +162,7 @@ Das ist als Issue #25 dokumentiert. Es ist kein bereits gelöster Schutz und kei
 
 ## Unmittelbar nächste Schritte
 
-1. Vollständigen CI-Lauf von PR #24 nach dem letzten Uninstall-Fix abwarten und prüfen.
-2. PR #24 aktualisieren, Self-Review durchführen und aus Draft nehmen.
-3. Bei grüner CI NEXT-113 mergen und Issue #23 schließen.
-4. Danach Projektstatus/NEXT_ACTIONS auf `completed` aktualisieren.
-5. Nächste Produktentscheidung zwischen NEXT-101 (realer Customer-Evidence-Pack-Pilot), NEXT-116 (UX-Reduktion) und NEXT-117 (Backup-Import-Hardening) anhand P0/P1 und Pilotbedarf treffen.
+1. PR #24 Self-Review abschließen, aus Draft nehmen und mergen; Issue #23 muss geschlossen sein.
+2. Main-CI nach dem Merge kontrollieren.
+3. NEXT-101 als neuen P0-Arbeitsstrang starten: providerneutralen Customer Evidence Pack Pilot definieren und end-to-end gegen Webapp/Gates/Export/Report durchführen.
+4. NEXT-116 / Issue #22 und NEXT-117 / Issue #25 bleiben P1-Follow-ups und dürfen beim Pilot neue Evidenz/UX-Findings aufnehmen.
