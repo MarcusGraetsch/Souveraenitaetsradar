@@ -54,7 +54,36 @@ if [[ -e .env ]];then
 fi
 
 echo "✔ Anwendung und alle durch sie erzeugten Daten wurden entfernt."
+echo
+echo "Optionale Zusatzaktion: lokalen Git-Repository-Ordner löschen."
+echo "Standard ist: Repository behalten."
 REMOVE_REPO=""
-read -rp "Auch den geklonten Repository-Ordner löschen? [j/N]: " REMOVE_REPO || true
-if [[ "$REMOVE_REPO" =~ ^[jJyY]$ ]];then PARENT="$(dirname "$ROOT")";NAME="$(basename "$ROOT")";cd "$PARENT";rm -rf -- "$NAME";echo "✔ Repository-Ordner gelöscht.";fi
+read -rp "Zum Behalten Enter drücken. Zum Löschen exakt DELETE REPO eingeben: " REMOVE_REPO || true
+if [[ "$REMOVE_REPO" != "DELETE REPO" ]];then
+  echo "✔ Repository-Ordner bleibt erhalten."
+  exit 0
+fi
+
+DIRTY=""
+if command -v git >/dev/null 2>&1 && git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1;then
+  DIRTY="$(git -C "$ROOT" status --porcelain --untracked-files=all || true)"
+fi
+if [[ -n "$DIRTY" ]];then
+  echo
+  echo "⚠ Im Repository existieren lokale, nicht eingecheckte oder nicht nachverfolgte Änderungen:" >&2
+  printf '%s\n' "$DIRTY" >&2
+  echo "Diese Änderungen würden beim Löschen verloren gehen." >&2
+  CONFIRM_DIRTY=""
+  read -rp "Zum endgültigen Löschen trotz lokaler Änderungen exakt DELETE REPO WITH CHANGES eingeben: " CONFIRM_DIRTY || true
+  if [[ "$CONFIRM_DIRTY" != "DELETE REPO WITH CHANGES" ]];then
+    echo "✔ Repository-Ordner bleibt erhalten."
+    exit 0
+  fi
+fi
+
+PARENT="$(dirname "$ROOT")"
+NAME="$(basename "$ROOT")"
+cd "$PARENT"
+rm -rf -- "$NAME"
+echo "✔ Repository-Ordner gelöscht."
 exit 0
