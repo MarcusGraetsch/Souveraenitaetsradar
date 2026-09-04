@@ -30,6 +30,7 @@ class EvidenceRecord:
     review_status: str
     claim_ids: tuple[str, ...] = field(default_factory=tuple)
     gate_ids: tuple[str, ...] = field(default_factory=tuple)
+    request_ids: tuple[str, ...] = field(default_factory=tuple)
     source_ref: str | None = None
     attachment_ref: str | None = None
     locator: str | None = None
