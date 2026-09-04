@@ -47,3 +47,4 @@ fi
 echo "✔ Anwendung und alle durch sie erzeugten Daten wurden entfernt."
 read -rp "Auch den geklonten Repository-Ordner löschen? [j/N]: " REMOVE_REPO
 if [[ "$REMOVE_REPO" =~ ^[jJyY]$ ]];then PARENT="$(dirname "$ROOT")";NAME="$(basename "$ROOT")";cd "$PARENT";rm -rf -- "$NAME";echo "✔ Repository-Ordner gelöscht.";fi
+exit 0
