@@ -40,8 +40,8 @@ def build_prompt(
             f"Typ: {item['evidence_type']}",
             f"Quelle: {item.get('source', '')}",
             f"Stand: {item.get('source_date', '')}",
-            f"Beschreibung: {item.get('description', '')}",
-            f"Freigegebener Auszug: {item.get('content_excerpt', '') or '[kein Textauszug im Radar]'}",
+            "Interne Evidence-Beschreibung: [nicht an LLM freigegeben]",
+            f"Freigegebener Auszug: {item.get('content_excerpt', '') or '[kein Textauszug für LLM freigegeben]'}",
         ]))
 
     question_lines = [
@@ -75,7 +75,8 @@ HARTE REGELN
 7. Behandle Assessment-ID, Question-IDs und Evidence-IDs als **OPAQUE IDENTIFIERS**. Kopiere sie zeichenidentisch. Füge keine Zeichen hinzu, entferne keine Zeichen, ändere keine Bindestriche/Unterstriche und normalisiere nichts.
 8. Bewahre den Status einer Aussage: geplant/gewünscht/behauptet ist nicht implementiert/beobachtet/getestet. Stufe den Evidenzstatus sprachlich nicht hoch.
 9. Verwende confidence konservativ. `1.0` nur, wenn die Evidence die vorgeschlagene Aussage explizit und vollständig trägt; partielle oder interpretationsbedürftige Evidence erhält einen niedrigeren Wert.
-10. Gib ausschließlich valides JSON im unten beschriebenen Format zurück. Keine Markdown-Codeblöcke und keine Einleitung.
+10. Nur der ausdrücklich als `Freigegebener Auszug` markierte Evidence-Inhalt ist für dieses LLM freigegeben. Eine interne Evidence-Beschreibung ist nicht freigegeben und wird absichtlich nicht übertragen.
+11. Gib ausschließlich valides JSON im unten beschriebenen Format zurück. Keine Markdown-Codeblöcke und keine Einleitung.
 
 ASSESSMENT
 Assessment-ID: {assessment['id']}
