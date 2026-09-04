@@ -21,11 +21,13 @@ read -rp "Tippe DELETE, um fortzufahren: " CONFIRM;[[ "$CONFIRM" == "DELETE" ]]|
 # und Unterverzeichnisse dem Container-Root gehören. Vor dem Entfernen der
 # Container werden daher alle Inhalte innerhalb des Containers gelöscht und der
 # Mountpoint für die abschließende Host-Löschung wieder beschreibbar gemacht.
+# -T und </dev/null verhindern, dass docker compose die restliche stdin des
+# interaktiven Uninstall-Dialogs konsumiert.
 if [[ -d .runtime ]];then
-  docker compose run --rm --no-deps api sh -c '
+  docker compose run -T --rm --no-deps api sh -c '
     find /app/.runtime -mindepth 1 -depth -delete 2>/dev/null || true
     chmod 0777 /app/.runtime 2>/dev/null || true
-  ' || true
+  ' </dev/null || true
 fi
 
 docker compose down -v --remove-orphans --rmi local||true
@@ -45,6 +47,7 @@ if [[ -e .env ]];then
 fi
 
 echo "✔ Anwendung und alle durch sie erzeugten Daten wurden entfernt."
-read -rp "Auch den geklonten Repository-Ordner löschen? [j/N]: " REMOVE_REPO
+REMOVE_REPO=""
+read -rp "Auch den geklonten Repository-Ordner löschen? [j/N]: " REMOVE_REPO || true
 if [[ "$REMOVE_REPO" =~ ^[jJyY]$ ]];then PARENT="$(dirname "$ROOT")";NAME="$(basename "$ROOT")";cd "$PARENT";rm -rf -- "$NAME";echo "✔ Repository-Ordner gelöscht.";fi
 exit 0
