@@ -19,6 +19,8 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      secrets:
+        - build_ca_bundle
     environment:
       DATABASE_URL: postgresql+psycopg://sovradar:${POSTGRES_PASSWORD}@db:5432/sovradar
       SOVRADAR_RUNTIME_DIR: /app/.runtime
@@ -34,6 +36,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      secrets:
+        - build_ca_bundle
     ports:
       - "${BIND_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
     depends_on:
@@ -42,3 +46,7 @@ services:
 
 volumes:
   sovradar_db_data:
+
+secrets:
+  build_ca_bundle:
+    file: ${SOVRADAR_BUILD_CA_BUNDLE:-.build/ca-bundle.crt}
