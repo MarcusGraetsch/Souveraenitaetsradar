@@ -4,7 +4,7 @@ import json
 import uuid
 from functools import lru_cache
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,7 +15,7 @@ from sovradar.models import AppliedState, Claim as CoreClaim, EvidenceRecord
 from .database import get_db
 from .llm_review_api import router as llm_review_router
 from .method_catalog import question_ids
-from .models import Assessment, AssessmentClaim, Evidence, EvidenceReview, GateRequirement
+from .models import Assessment, AssessmentClaim, Evidence, EvidenceReview, GateRequirement, GateRequirementChange
 from .schemas import (
     ClaimCreate,
     ClaimOut,
@@ -24,7 +24,9 @@ from .schemas import (
     EvidenceReviewUpsert,
     GateDefinitionOut,
     GateEvaluationOut,
+    GateRequirementChangeOut,
     GateRequirementOut,
+    GateRequirementReset,
     GateRequirementUpsert,
 )
 from .settings import settings
@@ -83,6 +85,54 @@ def _requirement(assessment: Assessment, gate_id: str, db: Session) -> tuple[int
         return row.requirement_level, row.source, row.updated_at
     level, source = _default_requirement(assessment, gate_id)
     return level, source, None
+
+
+def _requirement_out(assessment: Assessment, gate_id: str, db: Session) -> GateRequirementOut:
+    default_level, default_source = _default_requirement(assessment, gate_id)
+    row = db.get(GateRequirement, (assessment.id, gate_id))
+    if row is None:
+        return GateRequirementOut(
+            assessment_id=assessment.id,
+            gate_id=gate_id,
+            requirement_level=default_level,
+            source=default_source,
+            default_level=default_level,
+            default_source=default_source,
+            is_override=False,
+            updated_at=None,
+        )
+    return GateRequirementOut(
+        assessment_id=assessment.id,
+        gate_id=gate_id,
+        requirement_level=row.requirement_level,
+        source=row.source,
+        default_level=default_level,
+        default_source=default_source,
+        is_override=True,
+        updated_at=row.updated_at,
+    )
+
+
+def _change_out(row: GateRequirementChange) -> GateRequirementChangeOut:
+    return GateRequirementChangeOut(
+        id=row.id,
+        assessment_id=row.assessment_id,
+        gate_id=row.gate_id,
+        change_type=row.change_type,
+        previous_level=row.previous_level,
+        new_level=row.new_level,
+        previous_source=row.previous_source,
+        new_source=row.new_source,
+        reason=row.reason,
+        created_at=row.created_at,
+    )
+
+
+def _governance_reason(value: str) -> str:
+    reason = value.strip()
+    if len(reason) < 3:
+        raise HTTPException(422, "override/reset reason must contain at least 3 non-whitespace characters")
+    return reason
 
 
 def _as_claim(row: AssessmentClaim) -> ClaimOut:
@@ -183,6 +233,7 @@ def hard_gates():
             name=gate.name,
             subject=gate.subject,
             requirement_templates=gate.requirements,
+            capability_levels=gate.capability_levels,
             source_ids=list(gate.source_ids),
             provenance=gate.provenance,
             evidence_requests=[_evidence_request_out(item) for item in grouped.get(gate.gate_id, [])],
@@ -197,11 +248,7 @@ def gate_requirements(assessment_id: str, db: Session = Depends(get_db)):
     if not assessment:
         raise HTTPException(404, "Assessment not found")
     gates, _ = _catalog()
-    result = []
-    for gate in gates:
-        level, source, updated_at = _requirement(assessment, gate.gate_id, db)
-        result.append(GateRequirementOut(assessment_id=assessment_id, gate_id=gate.gate_id, requirement_level=level, source=source, updated_at=updated_at))
-    return result
+    return [_requirement_out(assessment, gate.gate_id, db) for gate in gates]
 
 
 @router.put("/api/assessments/{assessment_id}/gate-requirements/{gate_id}", response_model=GateRequirementOut)
@@ -211,16 +258,95 @@ def put_gate_requirement(assessment_id: str, gate_id: str, payload: GateRequirem
         raise HTTPException(404, "Assessment not found")
     if gate_id not in _gate_map():
         raise HTTPException(400, "unknown gate_id")
+
+    reason = _governance_reason(payload.reason)
+    default_level, default_source = _default_requirement(assessment, gate_id)
+    if payload.requirement_level == default_level:
+        raise HTTPException(422, "requested level equals the current default; use the reset endpoint instead of creating an override")
+
     row = db.get(GateRequirement, (assessment_id, gate_id))
+    previous_level = row.requirement_level if row is not None else default_level
+    previous_source = row.source if row is not None else default_source
+    if row is not None and row.requirement_level == payload.requirement_level:
+        raise HTTPException(409, "requirement override is already set to this level")
+
     if row is None:
-        row = GateRequirement(assessment_id=assessment_id, gate_id=gate_id, requirement_level=payload.requirement_level, source="consultant-override")
+        row = GateRequirement(
+            assessment_id=assessment_id,
+            gate_id=gate_id,
+            requirement_level=payload.requirement_level,
+            source="consultant-override",
+        )
         db.add(row)
     else:
         row.requirement_level = payload.requirement_level
         row.source = "consultant-override"
+
+    db.add(
+        GateRequirementChange(
+            id=str(uuid.uuid4()),
+            assessment_id=assessment_id,
+            gate_id=gate_id,
+            change_type="override",
+            previous_level=previous_level,
+            new_level=payload.requirement_level,
+            previous_source=previous_source,
+            new_source="consultant-override",
+            reason=reason,
+        )
+    )
     db.commit()
-    db.refresh(row)
-    return GateRequirementOut(assessment_id=row.assessment_id, gate_id=row.gate_id, requirement_level=row.requirement_level, source=row.source, updated_at=row.updated_at)
+    return _requirement_out(assessment, gate_id, db)
+
+
+@router.post("/api/assessments/{assessment_id}/gate-requirements/{gate_id}/reset", response_model=GateRequirementOut)
+def reset_gate_requirement(assessment_id: str, gate_id: str, payload: GateRequirementReset, db: Session = Depends(get_db)):
+    assessment = db.get(Assessment, assessment_id)
+    if not assessment:
+        raise HTTPException(404, "Assessment not found")
+    if gate_id not in _gate_map():
+        raise HTTPException(400, "unknown gate_id")
+
+    row = db.get(GateRequirement, (assessment_id, gate_id))
+    if row is None:
+        raise HTTPException(409, "gate already uses the criticality-based default requirement")
+
+    reason = _governance_reason(payload.reason)
+    default_level, default_source = _default_requirement(assessment, gate_id)
+    db.add(
+        GateRequirementChange(
+            id=str(uuid.uuid4()),
+            assessment_id=assessment_id,
+            gate_id=gate_id,
+            change_type="reset",
+            previous_level=row.requirement_level,
+            new_level=default_level,
+            previous_source=row.source,
+            new_source=default_source,
+            reason=reason,
+        )
+    )
+    db.delete(row)
+    db.commit()
+    return _requirement_out(assessment, gate_id, db)
+
+
+@router.get("/api/assessments/{assessment_id}/gate-requirement-changes", response_model=list[GateRequirementChangeOut])
+def gate_requirement_changes(
+    assessment_id: str,
+    gate_id: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    if not db.get(Assessment, assessment_id):
+        raise HTTPException(404, "Assessment not found")
+    if gate_id is not None and gate_id not in _gate_map():
+        raise HTTPException(400, "unknown gate_id")
+
+    statement = select(GateRequirementChange).where(GateRequirementChange.assessment_id == assessment_id)
+    if gate_id is not None:
+        statement = statement.where(GateRequirementChange.gate_id == gate_id)
+    rows = db.scalars(statement.order_by(GateRequirementChange.created_at, GateRequirementChange.id)).all()
+    return [_change_out(row) for row in rows]
 
 
 @router.get("/api/assessments/{assessment_id}/evidence-reviews", response_model=list[EvidenceReviewOut])
