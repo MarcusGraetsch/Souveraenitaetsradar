@@ -38,6 +38,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: cp .env.example .env
       - run: mkdir -p .runtime/documents .runtime/exports .runtime/temp
+      - name: Prepare host CA bundle for BuildKit
+        run: bash scripts/prepare-build-ca.sh
       - run: docker compose config >/dev/null
       - run: docker compose build
       - run: docker compose up -d
@@ -113,13 +115,19 @@ jobs:
             find .runtime -maxdepth 3 -ls >&2 || true
             exit 1
           fi
+          if [[ -e .build ]]; then
+            echo '.build still exists after uninstall' >&2
+            ls -lad .build >&2 || true
+            find .build -maxdepth 2 -ls >&2 || true
+            exit 1
+          fi
           if [[ -e .env ]]; then
             echo '.env still exists after uninstall' >&2
             ls -l .env >&2 || true
             exit 1
           fi
           if docker ps -a --format '{{.Names}}' | grep -Eqi 'souveraenitaetsradar|sovradar'; then
-            echo 'Souveraenitaets-Radar container remained after uninstall' >&2
+            echo 'Souveraenitäts-Radar container remained after uninstall' >&2
             docker ps -a
             exit 1
           fi
