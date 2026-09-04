@@ -146,7 +146,23 @@ export type GateRequirement={
   gate_id:string
   requirement_level:number
   source:string
+  default_level:number
+  default_source:string
+  is_override:boolean
   updated_at:string|null
+}
+
+export type GateRequirementChange={
+  id:string
+  assessment_id:string
+  gate_id:string
+  change_type:'override'|'reset'
+  previous_level:number
+  new_level:number
+  previous_source:string
+  new_source:string
+  reason:string
+  created_at:string
 }
 
 export type EvidenceRequest={
@@ -166,6 +182,7 @@ export type GateDefinition={
   name:string
   subject:string
   requirement_templates:Record<string,number>
+  capability_levels:Record<number,string>
   source_ids:string[]
   provenance:string
   evidence_requests:EvidenceRequest[]

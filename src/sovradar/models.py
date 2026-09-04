@@ -83,6 +83,7 @@ class GateDefinition:
     name: str
     subject: str
     requirements: dict[str, int]
+    capability_levels: dict[int, str] = field(default_factory=dict)
     source_ids: tuple[str, ...] = field(default_factory=tuple)
     provenance: str = ""
 

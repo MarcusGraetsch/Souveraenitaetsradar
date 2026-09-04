@@ -1,4 +1,4 @@
-version: 10
+version: 11
 updated: "2026-09-04"
 decisions:
   - id: DEC-001
@@ -176,4 +176,9 @@ decisions:
     status: accepted
     title: AI-gestützte Kontextstrukturierung benötigt ein explizites Processing Profile
     rationale: Architektur-, Organisations-, Vertrags- und Sicherheitsinformationen können sensitiv sein. Vor LLM-Verarbeitung muss feststehen, ob nur lokale Parser, freigegebene interne LLMs, extern nur redigierte Inhalte oder eine explizit freigegebene externe Verarbeitung zulässig ist. Raw Evidence wird nicht automatisch extern übertragen.
+    source: INT-03
+  - id: DEC-036
+    status: accepted
+    title: Gate-Requirement-Overrides erfordern Begründung und Auditspur
+    rationale: Eine manuelle Änderung der internen Gate-Mindeststufe kann die deterministische PASS-/FAIL-Grenze verändern. Abweichungen vom Kritikalitäts-Standard werden deshalb nur mit expliziter Begründung gespeichert; vorheriger und neuer Wert, Quellen und Zeitpunkt bleiben auditierbar. Die Rückkehr zum Standard ist ein eigener dokumentierter Vorgang. Die Gate-Formel und die internen 0-4-Stufen selbst werden dadurch nicht verändert.
     source: INT-03

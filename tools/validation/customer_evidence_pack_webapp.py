@@ -179,14 +179,29 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         review_results[record.evidence_id] = reviewed
 
     gate_requirements = plan["gate_requirements"]
+    current_requirements = {
+        item["gate_id"]: item
+        for item in _json_request(base_url, "GET", f"/api/assessments/{assessment_id}/gate-requirements")
+    }
+    governed_change_count = 0
     for gate_id, level in gate_requirements.items():
+        current = current_requirements[gate_id]
+        if current["requirement_level"] == level:
+            continue
         updated = _json_request(
             base_url,
             "PUT",
             f"/api/assessments/{assessment_id}/gate-requirements/{gate_id}",
-            {"requirement_level": level},
+            {
+                "requirement_level": level,
+                "reason": "Synthetischer NEXT-101-Pilotplan zur reproduzierbaren Methodenvalidierung.",
+            },
         )
         _assert(updated["requirement_level"] == level, f"requirement override failed for {gate_id}")
+        _assert(updated["is_override"] is True, f"requirement was not marked as override for {gate_id}")
+        governed_change_count += 1
+    requirement_audit = _json_request(base_url, "GET", f"/api/assessments/{assessment_id}/gate-requirement-changes")
+    _assert(len(requirement_audit) == governed_change_count, "gate requirement changes were not audited")
 
     created_claims: list[dict[str, Any]] = []
     for claim in plan["human_reviewed_claims"]:
@@ -219,6 +234,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     _assert(structured_export["export_meta"]["includes_raw_evidence_files"] is False, "default export contains raw evidence")
     _assert(structured_export["export_meta"]["includes_sensitive_evidence_fields"] is False, "default export contains sensitive fields")
     _assert(all("content_excerpt" not in item for item in structured_export["evidence"]), "default export leaked excerpts")
+    _assert(len(structured_export["gate_requirement_changes"]) == governed_change_count, "default export lost requirement audit")
     _assert("secure://" not in consultant_report, "consultant report leaked Evidence source locators")
     _assert("HG-01" in consultant_report and "UNVERIFIED" in consultant_report, "report misses gate outcomes")
 
@@ -238,6 +254,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         ) == (3, 4, 1, 3),
         "public_provider_capability_not_promoted": provider_public["sufficient"] is False,
         "only_explicit_human_claims_created": len(created_claims) == len(plan["human_reviewed_claims"]) == 1,
+        "gate_requirement_changes_audited": len(requirement_audit) == governed_change_count,
         "gate_states_match_conservative_baseline": gate_states == expected_gate_states,
         "default_export_minimizes_evidence": structured_export["export_meta"]["includes_sensitive_evidence_fields"] is False,
         "consultant_report_omits_source_locators": "secure://" not in consultant_report,
@@ -257,6 +274,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         "review_statuses": {key: value["review_status"] for key, value in review_results.items()},
         "explicit_human_claim_count": len(created_claims),
         "gate_requirements": gate_requirements,
+        "gate_requirement_change_count": governed_change_count,
         "gate_states": gate_states,
         "export_schema": structured_export["export_meta"]["schema_name"],
         "acceptance_checks": acceptance_checks,
@@ -265,6 +283,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
             "Only the explicit synthetic human-reviewed claim was allowed to affect a Hard Gate.",
             "Unresolved Evidence Requests remain visible as gaps instead of being converted into invented FAIL/PASS claims.",
             "Provider/service capability evidence remains distinct from applied customer configuration.",
+            "Any synthetic deviation from the criticality-based gate requirement default is explicitly reasoned and audited.",
         ],
     }
     output.parent.mkdir(parents=True, exist_ok=True)

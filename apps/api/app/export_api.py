@@ -26,6 +26,7 @@ from .models import (
     Evidence,
     EvidenceReview,
     GateRequirement,
+    GateRequirementChange,
     LlmImport,
     LlmProposalReview,
 )
@@ -211,6 +212,11 @@ def build_structured_export(
     reviews = db.scalars(select(EvidenceReview).where(EvidenceReview.assessment_id == assessment_id)).all()
     claims = db.scalars(select(AssessmentClaim).where(AssessmentClaim.assessment_id == assessment_id).order_by(AssessmentClaim.created_at)).all()
     overrides = db.scalars(select(GateRequirement).where(GateRequirement.assessment_id == assessment_id).order_by(GateRequirement.gate_id)).all()
+    requirement_changes = db.scalars(
+        select(GateRequirementChange)
+        .where(GateRequirementChange.assessment_id == assessment_id)
+        .order_by(GateRequirementChange.created_at, GateRequirementChange.id)
+    ).all()
     llm_imports = db.scalars(select(LlmImport).where(LlmImport.assessment_id == assessment_id).order_by(LlmImport.created_at)).all()
     llm_proposal_reviews = db.scalars(
         select(LlmProposalReview)
@@ -304,6 +310,20 @@ def build_structured_export(
             }
             for row in overrides
         ],
+        "gate_requirement_changes": [
+            {
+                "id": row.id,
+                "gate_id": row.gate_id,
+                "change_type": row.change_type,
+                "previous_level": row.previous_level,
+                "new_level": row.new_level,
+                "previous_source": row.previous_source,
+                "new_source": row.new_source,
+                "reason": row.reason,
+                "created_at": _iso(row.created_at),
+            }
+            for row in requirement_changes
+        ],
         "gate_results": _gate_snapshot(assessment, db),
         "llm_imports": [
             {
@@ -360,6 +380,8 @@ def validate_export_payload(payload: dict[str, Any]) -> None:
         expected = dict if field == "relevance_profile" else list
         if not isinstance(payload.get(field), expected):
             raise HTTPException(422, f"invalid or missing field: {field}")
+    if "gate_requirement_changes" in payload and not isinstance(payload["gate_requirement_changes"], list):
+        raise HTTPException(422, "invalid field: gate_requirement_changes")
     if "llm_proposal_reviews" in payload and not isinstance(payload["llm_proposal_reviews"], list):
         raise HTTPException(422, "invalid field: llm_proposal_reviews")
 
@@ -381,6 +403,8 @@ def render_consultant_report(export: dict[str, Any]) -> str:
     evidence = export["evidence"]
     reviews = {item["evidence_id"]: item for item in export["evidence_reviews"]}
     claims = export["claims"]
+    overrides = export["gate_requirement_overrides"]
+    requirement_changes = export.get("gate_requirement_changes", [])
     llm_imports = export["llm_imports"]
     proposal_reviews = export.get("llm_proposal_reviews", [])
 
@@ -473,6 +497,19 @@ def render_consultant_report(export: dict[str, Any]) -> str:
         "- Radar Capability Level 0–4 und interne Schwellen sind interne Operationalisierung und kein offizieller EU-SEAL.",
         "- Fehlende Evidence wird als UNVERIFIED behandelt und nicht automatisch als technisches FAIL interpretiert.",
         "- Legal-Schlussfolgerungen, Ausnahmen und finale Freigaben bleiben menschliche Entscheidungen.",
+        f"- Aktive manuelle Mindeststufenabweichungen: **{len(overrides)}**.",
+        f"- Dokumentierte Mindeststufenänderungen: **{len(requirement_changes)}**.",
+    ])
+    if requirement_changes:
+        lines.extend(["", "### Mindeststufen-Audit", ""])
+        for item in requirement_changes:
+            lines.append(
+                f"- {item.get('gate_id', '—')}: Stufe {item.get('previous_level', '—')} → "
+                f"Stufe {item.get('new_level', '—')} ({item.get('change_type', 'change')}) · "
+                f"Begründung: {item.get('reason') or '—'}"
+            )
+
+    lines.extend([
         "",
         "## 7. Provenienz",
         "",
@@ -617,6 +654,41 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
             )
         )
 
+    restored_requirement_change_count = 0
+    for item in list(payload.get("gate_requirement_changes") or []):
+        gate_id = str(item.get("gate_id") or "")[:16]
+        if gate_id not in _gate_map():
+            raise HTTPException(422, f"invalid gate requirement change gate_id: {gate_id!r}")
+        change_type = str(item.get("change_type") or "")
+        if change_type not in {"override", "reset"}:
+            raise HTTPException(422, f"invalid gate requirement change type: {change_type!r}")
+        try:
+            previous_level = int(item.get("previous_level"))
+            new_level = int(item.get("new_level"))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(422, "invalid gate requirement change level") from exc
+        if previous_level not in range(0, 5) or new_level not in range(0, 5):
+            raise HTTPException(422, "gate requirement change level outside 0..4")
+        reason = str(item.get("reason") or "").strip()
+        if len(reason) < 3:
+            raise HTTPException(422, "gate requirement change reason is missing or too short")
+        created_at = _parse_datetime(item.get("created_at")) or datetime.now(timezone.utc)
+        db.add(
+            GateRequirementChange(
+                id=str(uuid.uuid4()),
+                assessment_id=new_assessment_id,
+                gate_id=gate_id,
+                change_type=change_type,
+                previous_level=previous_level,
+                new_level=new_level,
+                previous_source=str(item.get("previous_source") or "unknown")[:64],
+                new_source=str(item.get("new_source") or "unknown")[:64],
+                reason=reason,
+                created_at=created_at,
+            )
+        )
+        restored_requirement_change_count += 1
+
     for item in payload["llm_imports"]:
         old_import_id = str(item.get("id") or "")
         new_import_id = str(uuid.uuid4())
@@ -722,6 +794,7 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         "evidence_id_map": evidence_map,
         "answer_id_map": answer_map,
         "llm_import_id_map": llm_import_map,
+        "restored_gate_requirement_change_count": restored_requirement_change_count,
         "restored_llm_proposal_review_count": restored_review_count,
         "missing_raw_file_source_evidence_ids": missing_raw_files,
         "gate_semantic_drift": drift,

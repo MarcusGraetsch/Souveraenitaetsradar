@@ -72,6 +72,7 @@ from apps.api.app.models import (  # noqa: E402
     Evidence,
     EvidenceReview,
     GateRequirement,
+    GateRequirementChange,
     LlmImport,
 )
 
@@ -84,6 +85,7 @@ def reset_db() -> None:
         for model in (
             LlmImport,
             AssessmentClaim,
+            GateRequirementChange,
             GateRequirement,
             EvidenceReview,
             Answer,
@@ -237,6 +239,16 @@ def test_hard_gate_api_pass_fail_and_unverified_flow():
         catalog = client.get("/api/method/hard-gates")
         assert catalog.status_code == 200
         assert len(catalog.json()) == 8
+        hg04_catalog = next(item for item in catalog.json() if item["gate_id"] == "HG-04")
+        assert hg04_catalog["capability_levels"] == {"0": "0", "1": "1", "2": "2", "3": "3", "4": "4"}
+
+        requirements = client.get(f"/api/assessments/{assessment_id}/gate-requirements")
+        assert requirements.status_code == 200
+        hg04_requirement = next(item for item in requirements.json() if item["gate_id"] == "HG-04")
+        assert hg04_requirement["requirement_level"] == 2
+        assert hg04_requirement["default_level"] == 2
+        assert hg04_requirement["default_source"] == "criticality-template:standard"
+        assert hg04_requirement["is_override"] is False
 
         initial = client.get(f"/api/assessments/{assessment_id}/gates")
         assert initial.status_code == 200
@@ -285,17 +297,78 @@ def test_hard_gate_api_pass_fail_and_unverified_flow():
         assert hg04["final_state"] == "PASS"
         assert evidence_id in hg04["evidence_ids"]
 
-        override = client.put(
+        no_reason = client.put(
             f"/api/assessments/{assessment_id}/gate-requirements/HG-04",
             json={"requirement_level": 3},
         )
+        assert no_reason.status_code == 422
+
+        same_as_default = client.put(
+            f"/api/assessments/{assessment_id}/gate-requirements/HG-04",
+            json={"requirement_level": 2, "reason": "Kein echter Override."},
+        )
+        assert same_as_default.status_code == 422
+
+        override_reason = "Für den synthetischen Testfall gilt eine bewusst erhöhte Exit-Anforderung."
+        override = client.put(
+            f"/api/assessments/{assessment_id}/gate-requirements/HG-04",
+            json={"requirement_level": 3, "reason": override_reason},
+        )
         assert override.status_code == 200
         assert override.json()["source"] == "consultant-override"
+        assert override.json()["is_override"] is True
+        assert override.json()["default_level"] == 2
+
+        history = client.get(
+            f"/api/assessments/{assessment_id}/gate-requirement-changes?gate_id=HG-04"
+        )
+        assert history.status_code == 200
+        assert len(history.json()) == 1
+        assert history.json()[0]["change_type"] == "override"
+        assert history.json()[0]["previous_level"] == 2
+        assert history.json()[0]["new_level"] == 3
+        assert history.json()[0]["reason"] == override_reason
 
         failed = client.get(f"/api/assessments/{assessment_id}/gates").json()
         hg04 = next(item for item in failed if item["gate_id"] == "HG-04")
         assert hg04["technical_state"] == "FAIL"
         assert hg04["final_state"] == "FAIL"
+
+        reset_without_reason = client.post(
+            f"/api/assessments/{assessment_id}/gate-requirements/HG-04/reset",
+            json={},
+        )
+        assert reset_without_reason.status_code == 422
+
+        reset_reason = "Die erhöhte Testanforderung wird beendet; das Kritikalitätsprofil gilt wieder."
+        reset = client.post(
+            f"/api/assessments/{assessment_id}/gate-requirements/HG-04/reset",
+            json={"reason": reset_reason},
+        )
+        assert reset.status_code == 200
+        assert reset.json()["is_override"] is False
+        assert reset.json()["requirement_level"] == 2
+        assert reset.json()["source"] == "criticality-template:standard"
+
+        history = client.get(
+            f"/api/assessments/{assessment_id}/gate-requirement-changes?gate_id=HG-04"
+        ).json()
+        assert len(history) == 2
+        assert history[-1]["change_type"] == "reset"
+        assert history[-1]["previous_level"] == 3
+        assert history[-1]["new_level"] == 2
+        assert history[-1]["reason"] == reset_reason
+
+        passed_again = client.get(f"/api/assessments/{assessment_id}/gates").json()
+        hg04 = next(item for item in passed_again if item["gate_id"] == "HG-04")
+        assert hg04["technical_state"] == "PASS"
+        assert hg04["final_state"] == "PASS"
+
+        second_reset = client.post(
+            f"/api/assessments/{assessment_id}/gate-requirements/HG-04/reset",
+            json={"reason": "Es gibt keinen Override mehr."},
+        )
+        assert second_reset.status_code == 409
 
 
 def test_unreviewed_claim_and_evidence_cannot_change_gate():

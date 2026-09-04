@@ -9,6 +9,7 @@ import type {
   GateDefinition,
   GateEvaluation,
   GateRequirement,
+  GateRequirementChange,
   LlmImport,
   LlmProposalReview,
   LlmProposalReviewDecision,
@@ -83,11 +84,18 @@ export const api={
   }),
   hardGates:()=>request<GateDefinition[]>('/api/method/hard-gates'),
   gateRequirements:(id:string)=>request<GateRequirement[]>(`/api/assessments/${id}/gate-requirements`),
-  saveGateRequirement:(assessmentId:string,gateId:string,requirementLevel:number)=>
+  gateRequirementChanges:(id:string,gateId?:string)=>request<GateRequirementChange[]>(`/api/assessments/${id}/gate-requirement-changes${gateId?`?gate_id=${encodeURIComponent(gateId)}`:''}`),
+  saveGateRequirement:(assessmentId:string,gateId:string,requirementLevel:number,reason:string)=>
     request<GateRequirement>(`/api/assessments/${assessmentId}/gate-requirements/${gateId}`,{
       method:'PUT',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({requirement_level:requirementLevel}),
+      body:JSON.stringify({requirement_level:requirementLevel,reason}),
+    }),
+  resetGateRequirement:(assessmentId:string,gateId:string,reason:string)=>
+    request<GateRequirement>(`/api/assessments/${assessmentId}/gate-requirements/${gateId}/reset`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({reason}),
     }),
   claims:(id:string)=>request<Claim[]>(`/api/assessments/${id}/claims`),
   createClaim:(assessmentId:string,payload:{
