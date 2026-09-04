@@ -213,6 +213,12 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         assert all(item["matches"] for item in result["gate_comparison"])
 
         restored_id = result["assessment_id"]
+        assessments = client.get("/api/assessments").json()
+        assessment_ids = {item["id"] for item in assessments}
+        assert assessment_id in assessment_ids
+        assert restored_id in assessment_ids
+        assert len(assessment_ids) == 2
+
         restored_states = {
             item["gate_id"]: item["final_state"]
             for item in client.get(f"/api/assessments/{restored_id}/gates").json()
