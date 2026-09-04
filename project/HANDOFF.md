@@ -16,6 +16,7 @@ Assessment
        -> Alle Fragen / Audit
   -> Evidence erfassen
   -> Evidence Review / Trust
+  -> Evidence-Request-Coverage prüfen
   -> optional LLM Bridge
   -> Human-reviewed Claims
   -> Gate Requirements prüfen/überschreiben
@@ -24,7 +25,7 @@ Assessment
   -> Structured Export / Consultant Report / Backup / Restore
 ```
 
-NEXT-112, NEXT-114 und NEXT-115 sind auf `main`. NEXT-113 / Issue #23 / PR #24 hat alle definierten technischen Merge-Gates erfüllt und ist merge-ready. Danach ist NEXT-101 der nächste P0-Meilenstein: ein providerneutraler Customer-mediated-Evidence-Pilot.
+NEXT-101, NEXT-112, NEXT-113, NEXT-114 und NEXT-115 sind technisch abgeschlossen bzw. für den Merge von PR #27 validiert. Der nächste P0-Schritt ist **NEXT-118 / Issue #28: erste manuelle Consultant-Installation und Evaluation**.
 
 ## Verbindliche Methodenregeln
 
@@ -34,6 +35,7 @@ NEXT-112, NEXT-114 und NEXT-115 sind auf `main`. NEXT-113 / Issue #23 / PR #24 h
 - Fehlende Evidence ist `UNVERIFIED`, kein erfundenes PASS oder FAIL.
 - Human-reviewed/approved Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
 - Raw Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
+- Evidence-Request-Coverage ist ein Workflow-/Sufficiency-Zustand und **kein Hard-Gate-Ergebnis**.
 - Gate-Requirement-Defaults sind interne Startkonfigurationen und keine Normvorgaben.
 - Radar Capability Level 0–4 ist interne Operationalisierung und kein offizieller EU-SEAL.
 - Customer-mediated Evidence ist Standard; Kunden-Cloud-Credentials sind keine Voraussetzung.
@@ -60,91 +62,128 @@ Workflow Stage:
 
 NEXT-115 Baseline komplexer KI-Agent: 128 total, 124 relevant, 83 applicable, 41 needs_review, 4 not_applicable; Workflow 44 screening, 41 clarification, 39 deep_dive, 4 excluded. Der Public-Content-Fall ist mit 84 relevanten Fragen kürzer, besitzt aber wegen `work = screening + clarification` fast dieselbe unmittelbare Queue. NEXT-116 / Issue #22 bleibt dafür als P1-UX-Follow-up offen.
 
-## NEXT-113 – abgeschlossener Implementierungsstand
+## NEXT-101 – Customer Evidence Pack Pilot
 
-### Structured Export
+PR #27 implementiert den ersten providerneutralen Customer-mediated-Evidence-Pilot ohne Cloud-Credentials.
 
-- versioniertes Schema `sovradar.assessment-export` v1.0
-- JSON-Schema `schemas/assessment-export.schema.json`
-- Scope und Assessment-Metadaten
-- Relevanzprofil
-- Answers inkl. Review State und Evidence-Links
-- Evidence-Metadaten und Evidence Reviews
-- Applied State sowie Base/Scope/Freshness Trust
-- Claims inkl. Review Status und Referenzen
-- Gate-Requirement-Overrides
-- deterministisch neu berechnete Gate Results
-- LLM-Bridge-Importe als Auditspur
-- Exportwarnungen
+### Evidence Pack
 
-Standardexport enthält keine Raw-Evidence-Dateien und keine `content_excerpt`-Inhalte.
+Das synthetische Pack enthält fünf Evidence-Klassen:
 
-### Consultant Report
+- contractual
+- architecture
+- provider_export
+- test_report
+- public_provider
 
-Der Markdown-Bericht enthält Scope, Evidenzlage, Hard-Gate-Ergebnisse, UNVERIFIED/Evidence Gaps, technische Mindestabweichungen, Governance-Hinweise und Provenienz. Raw Evidence und freigegebene Evidence-Auszüge werden nicht automatisch eingebettet. Der Bericht ist keine Rechtsfeststellung und keine automatische Risikoakzeptanz.
+Evidence Records besitzen jetzt explizite `request_ids`, die auf `data/method/evidence_request_catalog.csv` verweisen. Das Mapping ist interne Methodenmetadaten und keine Normfeststellung.
 
-### Backup / Restore
+### Evidence-Coverage
 
-- Structured Backup ist Default und enthält keine Raw Evidence.
-- Full Backup mit Raw Evidence ist explizites Opt-in.
-- Restore überschreibt kein bestehendes Assessment, sondern erzeugt ein neues.
-- Evidence-IDs und Referenzen werden remapped.
-- Hard Gates werden nach Restore neu berechnet.
-- Source- und Restored-Gate-Zustand werden semantisch verglichen.
-- Structured Restore meldet fehlende Raw Evidence transparent.
-- Full Restore kann ausdrücklich eingebettete Raw Evidence wiederherstellen.
-- LLM-Proposals bleiben nach Restore reine Vorschläge/Auditspur.
+`src/sovradar/evidence_coverage.py` bewertet assessment-spezifische Evidence Requests konservativ mit vier Zuständen:
 
-### UI
+- `VERIFIED`: Scope, Trust und Applied State passen und Evidence ist reviewed/approved.
+- `REVIEW_REQUIRED`: Evidence passt technisch, Human Review fehlt noch.
+- `INSUFFICIENT`: gemappte Evidence verfehlt Scope, Trust oder Applied-State-Anforderung.
+- `MISSING`: keine Evidence ist dem Request zugeordnet.
 
-Im Ergebnis-Tab stehen Structured JSON, Consultant Report, Structured Backup, Full Backup mit Warnung sowie JSON-/ZIP-Restore zur Verfügung.
+Die Applied-State-Beziehung ist bewusst nicht als simple numerische Rangfolge implementiert. `observed` und `configured` sind beispielsweise nicht austauschbar.
 
-## NEXT-113 – finaler Merge-Gate
+Baseline des synthetischen High-Criticality-Falls:
 
-GitHub Actions Run `33834276156`, Artifact `9922749183`:
+- 11 erforderliche Evidence Requests
+- 3 VERIFIED
+- 4 REVIEW_REQUIRED
+- 1 INSUFFICIENT
+- 3 MISSING
+- 5 Evidence-Klassen
+- keine Scope-Mismatches
+
+Öffentliche Provider-Dokumentation mit `applied_state=available` erfüllt eine Anforderung an `configured` Applied Capability ausdrücklich nicht.
+
+### Live-Webapp-Pilot
+
+`tools/validation/customer_evidence_pack_webapp.py` führt das Pack durch die laufende Webanwendung:
+
+1. Assessment und Relevanzprofil anlegen.
+2. fünf Evidence Records aufnehmen.
+3. Applied State, Trust und Review Status übernehmen.
+4. explizite interne Gate Requirements setzen.
+5. ausschließlich den im Pilotplan ausdrücklich vorgegebenen Human-Reviewed Claim anlegen.
+6. Hard Gates berechnen.
+7. Structured Export und Consultant Report prüfen.
+
+Erwarteter und validierter Zustand:
+
+- HG-01 = PASS
+- HG-02 bis HG-08 = UNVERIFIED
+
+Das ist absichtlich konservativ. Der Runner erzeugt **keine Claims automatisch aus Evidence-Coverage**. Nur der explizite synthetische Consultant-Claim darf Gate-Wirkung entfalten.
+
+### CI
+
+GitHub Actions Run `33837372041`, Artifact `9923731562`:
 
 - Python PASS
+- Core Tests PASS
+- API Tests PASS
+- Offline NEXT-101 Coverage Pilot PASS
 - Frontend PASS
 - Compose Smoke PASS
-- Consultant Walkthrough PASS
 - NEXT-114 Regression PASS
 - NEXT-115 Regression PASS
-- NEXT-113 Export/Restore PASS
+- NEXT-113 Export/Restore Regression PASS
+- NEXT-101 Live-Webapp-Pilot PASS
 - Stop/Restart/Test PASS
 - vollständiger Uninstall PASS
 
-Der NEXT-113-E2E-Test bestätigt unter anderem Evidence-Minimierung, explizites Full-Backup-Opt-in, neues Assessment beim Restore, ID-Remapping, fehlende-Raw-Evidence-Warnungen und semantisch identische Gate-Neuberechnung.
+## NEXT-113 – Export / Report / Backup / Restore
 
-Synthetischer Testzustand:
+- Structured Export ist versioniert und enthält standardmäßig keine Raw Evidence.
+- Consultant Report minimiert Evidence-Inhalte.
+- Full Backup mit Raw Evidence ist explizites Opt-in.
+- Restore erzeugt ein neues Assessment, remappt Referenzen und berechnet Gates neu.
+- semantischer Gate-Vergleich nach Restore ist vorhanden.
 
-- HG-01 = PASS
-- HG-03 = FAIL
-- HG-04 = UNVERIFIED
-- übrige Gates = N/A
+Merge-Gate Run: `33834276156`, Artifact `9922749183`.
 
-## Lifecycle-Finding und Fix
+## Offene Security-Hardening-Punkte
 
-Die Full-Restore-Validierung deckte zwei reale Linux-Lifecycle-Probleme auf:
+### Issue #25 / NEXT-117
 
-1. Container-Root konnte Evidence-Dateien im Bind-Mount erzeugen, die hostseitig nicht löschbar waren.
-2. Der containerseitige Cleanup mit `docker compose run` konsumierte die restliche stdin des interaktiven Uninstall-Dialogs und verursachte trotz erfolgreicher Löschung Exit 1.
+Vor Nutzung nicht vertrauenswürdiger ZIP-Backups fehlen noch Vorablimits für:
 
-`uninstall.sh` löscht Runtime-Daten deshalb zuerst containerseitig, isoliert `docker compose run -T ... </dev/null` von der Dialog-stdin, prüft `.runtime`/`.env` explizit und toleriert EOF im optionalen Repository-Löschdialog. Run `33834276156` bestätigt den vollständigen Lifecycle.
+- `ZipInfo.file_size`
+- unkomprimierte Gesamtgröße
+- per-Evidence-Größe
+- Anzahl ZIP-Einträge
 
-## Security-Hardening-Finding – NEXT-117 / Issue #25
+### Issue #26
 
-Der Backup-Import extrahiert keine fremden ZIP-Pfade auf das Dateisystem und begrenzt die komprimierte Uploadgröße. Einzelne ZIP-Member werden aktuell jedoch mit `archive.read(...)` gelesen, bevor für alle Member die unkomprimierte Größe geprüft ist.
+Structured JSON und `assessment.json` aus Backup-ZIPs sollen vor untrusted Nutzung vollständig serverseitig gegen das versionierte Export-Schema validiert werden.
 
-Vor Nutzung nicht vertrauenswürdiger Backup-Dateien müssen ergänzt werden:
+Diese Findings blockieren den lokalen Ersttest mit eigenen synthetischen Daten nicht, sind aber vor fremden/untrusted Importen zu schließen.
 
-- Vorabprüfung von `ZipInfo.file_size`
-- kleine Limits für `assessment.json` und `manifest.json`
-- per-Evidence-Limit vor Dekompression
-- Limit der gesamten unkomprimierten Archivgröße
-- Limit der ZIP-Eintragsanzahl
-- negative Tests für Oversize-/Decompression-Bomb-Fälle
+## NEXT-118 – erste manuelle Consultant-Evaluation
 
-Issue #25 dokumentiert das als offenen Schutz. Es wird nicht als bereits gelöst dargestellt.
+Runbook:
+
+`docs/validation/FIRST_INSTALL_EVALUATION.md`
+
+Ziel: Nicht erneut nur technische Automation testen, sondern die Anwendung als Berater selbst bedienen und bewerten.
+
+Prüfschwerpunkte:
+
+- Installation und lokaler Zugriff
+- Scope-/Assessment-Verständlichkeit
+- Guided Workflow und Fragenmenge
+- Evidence Intake, Applied State und Trust
+- Human-reviewed Claims
+- Requirement/Capability/Evidence-Logik der Hard Gates
+- Export, Consultant Report, Backup und Restore
+- Trennung fachlicher Methodikprobleme von reinen UX-Problemen
+
+Für Findings mindestens Stelle, Beobachtung, Erwartung, Schweregrad und Einordnung `Methodik` vs. `Produkt/UX` notieren.
 
 ## Agent-Regeln
 
@@ -155,6 +194,7 @@ Issue #25 dokumentiert das als offenen Schutz. Es wird nicht als bereits gelöst
 - Keine Provider-spezifische Logik in Gate-/Rule-Core.
 - Raw Kundenevidence nie committen.
 - LLM-Proposals niemals automatisch als reviewed Claim/Answer übernehmen.
+- Evidence-Coverage niemals automatisch in reviewed Claims umwandeln.
 - Fehlende Evidence niemals automatisch als FAIL interpretieren.
 - `needs_review` niemals still ausblenden.
 - Workflow Stage niemals als Ersatz für Applicability verwenden.
@@ -162,7 +202,8 @@ Issue #25 dokumentiert das als offenen Schutz. Es wird nicht als bereits gelöst
 
 ## Unmittelbar nächste Schritte
 
-1. PR #24 Self-Review abschließen, aus Draft nehmen und mergen; Issue #23 muss geschlossen sein.
-2. Main-CI nach dem Merge kontrollieren.
-3. NEXT-101 als neuen P0-Arbeitsstrang starten: providerneutralen Customer Evidence Pack Pilot definieren und end-to-end gegen Webapp/Gates/Export/Report durchführen.
-4. NEXT-116 / Issue #22 und NEXT-117 / Issue #25 bleiben P1-Follow-ups und dürfen beim Pilot neue Evidenz/UX-Findings aufnehmen.
+1. PR #27 nach finalem Self-Review mergen; Issue #2 schließen.
+2. Main-CI prüfen.
+3. NEXT-118 / Issue #28 auf einem frischen Zielsystem durchführen.
+4. Findings aus dem manuellen Test als konkrete Issues/Decisions erfassen.
+5. Danach Priorität zwischen NEXT-116, Security-Hardening (#25/#26) und erstem realen Customer-mediated Pilot festlegen.

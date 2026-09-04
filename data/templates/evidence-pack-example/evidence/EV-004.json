@@ -1,3 +1,21 @@
 {
-  "evidence_id":"EV-004","evidence_type":"test_report","title":"Exit and restore dry-run","producer":"Synthetic Customer Platform Team","source_ref":"secure://test-exit-001","locator":"results 3-9","claim_ids":["CL-EXIT-01"],"gate_ids":["HG-04"],"scope":{"workload_id":"WL-001","service":"Service-X"},"valid_at":"2026-08-20T00:00:00Z","version":"test-1","applied_state":"tested","base_trust":4,"scope_fit":5,"freshness_fit":4,"sensitivity":"internal","review_status":"reviewed"
+  "evidence_id": "EV-004",
+  "evidence_type": "test_report",
+  "title": "Exit and restore dry-run",
+  "producer": "Synthetic Customer Platform Team",
+  "source_ref": "secure://test-exit-001",
+  "locator": "results 3-9",
+  "claim_ids": ["CL-EXIT-01"],
+  "gate_ids": ["HG-04"],
+  "request_ids": ["ER-006"],
+  "scope": {"workload_id": "WL-001", "service": "Service-X"},
+  "valid_at": "2026-08-20T00:00:00Z",
+  "version": "test-1",
+  "applied_state": "tested",
+  "base_trust": 4,
+  "scope_fit": 5,
+  "freshness_fit": 4,
+  "sensitivity": "internal",
+  "review_status": "reviewed",
+  "notes": "End-to-end exit/restore test evidence. Does not by itself document export format completeness for ER-005."
 }

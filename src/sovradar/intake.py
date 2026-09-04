@@ -56,7 +56,7 @@ def load_evidence_pack(pack_dir: str | Path, schema_dir: str | Path) -> tuple[di
             scope=raw["scope"], applied_state=AppliedState(raw["applied_state"]), base_trust=raw["base_trust"],
             scope_fit=raw["scope_fit"], freshness_fit=raw["freshness_fit"], sensitivity=raw["sensitivity"],
             review_status=raw["review_status"], claim_ids=tuple(raw.get("claim_ids", [])), gate_ids=tuple(raw.get("gate_ids", [])),
-            source_ref=raw.get("source_ref"), attachment_ref=raw.get("attachment_ref"), locator=raw.get("locator"),
+            request_ids=tuple(raw.get("request_ids", [])), source_ref=raw.get("source_ref"), attachment_ref=raw.get("attachment_ref"), locator=raw.get("locator"),
             valid_at=raw.get("valid_at"), version=raw.get("version"), notes=raw.get("notes")
         ))
     return manifest, records
@@ -64,3 +64,7 @@ def load_evidence_pack(pack_dir: str | Path, schema_dir: str | Path) -> tuple[di
 
 def evidence_for_gate(records: Iterable[EvidenceRecord], gate_id: str) -> list[EvidenceRecord]:
     return [r for r in records if gate_id in r.gate_ids]
+
+
+def evidence_for_request(records: Iterable[EvidenceRecord], request_id: str) -> list[EvidenceRecord]:
+    return [r for r in records if request_id in r.request_ids]

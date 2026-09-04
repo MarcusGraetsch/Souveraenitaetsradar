@@ -16,8 +16,10 @@ jobs:
       - run: python tools/validate_repo.py
       - run: python -m pytest -q
       - run: python -m pytest -q apps/api/tests
-      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py tools/validation/synthetic_consultant_walkthrough.py tools/validation/progressive_workflow_validation.py tools/validation/export_restore_validation.py src/sovradar/*.py apps/api/app/*.py
+      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py tools/validation/synthetic_consultant_walkthrough.py tools/validation/progressive_workflow_validation.py tools/validation/export_restore_validation.py tools/validation/customer_evidence_pack_pilot.py tools/validation/customer_evidence_pack_webapp.py src/sovradar/*.py apps/api/app/*.py
       - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example
+      - name: Validate NEXT-101 Evidence Pack coverage baseline
+        run: python tools/validation/customer_evidence_pack_pilot.py
 
   frontend:
     runs-on: ubuntu-latest
@@ -87,6 +89,12 @@ jobs:
             --base-url http://127.0.0.1:8080 \
             --output .runtime/exports/export-restore-validation.json
           cp .runtime/exports/export-restore-validation.json /tmp/sovradar-export-restore.json
+      - name: Run NEXT-101 Customer Evidence Pack through Webapp API
+        run: |
+          python3 tools/validation/customer_evidence_pack_webapp.py \
+            --base-url http://127.0.0.1:8080 \
+            --output .runtime/exports/next-101-webapp-pilot.json
+          cp .runtime/exports/next-101-webapp-pilot.json /tmp/sovradar-next-101-webapp.json
       - name: Validate stop and restart
         run: |
           ./stop.sh
@@ -129,6 +137,7 @@ jobs:
             /tmp/sovradar-synthetic-walkthrough.json
             /tmp/sovradar-progressive-workflow.json
             /tmp/sovradar-export-restore.json
+            /tmp/sovradar-next-101-webapp.json
           if-no-files-found: warn
       - name: Logs on failure
         if: failure()
