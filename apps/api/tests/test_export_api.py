@@ -107,12 +107,22 @@ def _create_export_fixture() -> tuple[str, str, dict[str, str]]:
         "HG-07": 0,
         "HG-08": 0,
     }
+    current_requirements = {
+        item["gate_id"]: item
+        for item in client.get(f"/api/assessments/{assessment_id}/gate-requirements").json()
+    }
     for gate_id, level in requirement_plan.items():
+        if current_requirements[gate_id]["requirement_level"] == level:
+            continue
         response = client.put(
             f"/api/assessments/{assessment_id}/gate-requirements/{gate_id}",
-            json={"requirement_level": level},
+            json={
+                "requirement_level": level,
+                "reason": "Synthetic export/restore fixture requirement plan.",
+            },
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
+        assert response.json()["is_override"] is True
 
     claims = [
         {
@@ -180,6 +190,8 @@ def test_structured_export_validates_and_omits_sensitive_evidence_by_default():
         assert payload["evidence"][0]["has_content_excerpt"] is True
         assert "content_excerpt" not in payload["evidence"][0]
         assert len(payload["llm_proposal_reviews"]) == 1
+        assert payload["gate_requirement_changes"]
+        assert all(item["reason"] for item in payload["gate_requirement_changes"])
         review = payload["llm_proposal_reviews"][0]
         assert review["decision"] == "accepted"
         assert review["question_id"] == "DK-03"
@@ -208,6 +220,8 @@ def test_consultant_report_does_not_embed_sensitive_evidence_content():
         assert "HG-01" in report and "HG-03" in report and "HG-04" in report
         assert "keine automatische Risikoakzeptanz" in report
         assert "Human-geprüfte LLM-Antwortvorschläge: **1**" in report
+        assert "Mindeststufen-Audit" in report
+        assert "Begründung:" in report
         assert EXCERPT_SENTINEL not in report
         assert RAW_SENTINEL not in report
         after = {
@@ -230,6 +244,7 @@ def test_structured_backup_excludes_raw_files_and_full_backup_requires_opt_in():
         assert not any(name.startswith("evidence/") for name in structured_files)
         structured_payload = json.loads(structured_files["assessment.json"].decode("utf-8"))
         assert len(structured_payload["llm_proposal_reviews"]) == 1
+        assert structured_payload["gate_requirement_changes"]
         assert EXCERPT_SENTINEL not in structured_files["assessment.json"].decode("utf-8")
         assert RAW_SENTINEL.encode("utf-8") not in b"".join(structured_files.values())
 
@@ -250,6 +265,7 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         assessment_id, evidence_id, before = _create_export_fixture()
         payload = client.get(f"/api/assessments/{assessment_id}/export").json()
         source_review = payload["llm_proposal_reviews"][0]
+        source_requirement_changes = payload["gate_requirement_changes"]
 
         restored = client.post("/api/assessments/import", json=payload)
         assert restored.status_code == 201, restored.text
@@ -257,6 +273,7 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         assert result["assessment_id"] != assessment_id
         assert result["evidence_id_map"][evidence_id] != evidence_id
         assert result["restored_llm_proposal_review_count"] == 1
+        assert result["restored_gate_requirement_change_count"] == len(source_requirement_changes)
         assert result["gate_semantic_drift"] is False
         assert evidence_id in result["missing_raw_file_source_evidence_ids"]
         assert all(item["matches"] for item in result["gate_comparison"])
@@ -281,6 +298,16 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         assert restored_review["llm_import_id"] == result["llm_import_id_map"][source_review["llm_import_id"]]
         assert restored_review["answer_id"] == result["answer_id_map"][source_review["answer_id"]]
 
+        restored_requirement_changes = client.get(
+            f"/api/assessments/{restored_id}/gate-requirement-changes"
+        ).json()
+        assert len(restored_requirement_changes) == len(source_requirement_changes)
+        assert [item["change_type"] for item in restored_requirement_changes] == [item["change_type"] for item in source_requirement_changes]
+        assert [item["reason"] for item in restored_requirement_changes] == [item["reason"] for item in source_requirement_changes]
+        assert [(item["previous_level"], item["new_level"]) for item in restored_requirement_changes] == [
+            (item["previous_level"], item["new_level"]) for item in source_requirement_changes
+        ]
+
         restored_states = {
             item["gate_id"]: item["final_state"]
             for item in client.get(f"/api/assessments/{restored_id}/gates").json()
@@ -289,15 +316,17 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         restored_export = client.get(f"/api/assessments/{restored_id}/export").json()
         assert restored_export["evidence"][0]["has_file"] is False
         assert len(restored_export["llm_proposal_reviews"]) == 1
+        assert len(restored_export["gate_requirement_changes"]) == len(source_requirement_changes)
         assert restored_export["warnings"]
 
 
-def test_restore_accepts_legacy_v1_export_without_proposal_reviews():
+def test_restore_accepts_legacy_v1_export_without_optional_audit_fields():
     _reset()
     with client:
         assessment_id, _, _ = _create_export_fixture()
         payload = client.get(f"/api/assessments/{assessment_id}/export").json()
         payload.pop("llm_proposal_reviews")
+        payload.pop("gate_requirement_changes")
 
         schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
         Draft202012Validator(schema).validate(payload)
@@ -305,16 +334,23 @@ def test_restore_accepts_legacy_v1_export_without_proposal_reviews():
         assert restored.status_code == 201, restored.text
         result = restored.json()
         assert result["restored_llm_proposal_review_count"] == 0
+        assert result["restored_gate_requirement_change_count"] == 0
         reviews = client.get(
             f"/api/assessments/{result['assessment_id']}/llm-bridge/proposal-reviews"
         ).json()
         assert reviews == []
+        requirement_changes = client.get(
+            f"/api/assessments/{result['assessment_id']}/gate-requirement-changes"
+        ).json()
+        assert requirement_changes == []
 
 
 def test_full_backup_restore_recovers_raw_evidence_and_preserves_gate_semantics():
     _reset()
     with client:
         assessment_id, _, before = _create_export_fixture()
+        source_export = client.get(f"/api/assessments/{assessment_id}/export").json()
+        source_requirement_change_count = len(source_export["gate_requirement_changes"])
         backup = client.get(f"/api/assessments/{assessment_id}/backup?include_evidence=true")
         assert backup.status_code == 200
 
@@ -326,6 +362,7 @@ def test_full_backup_restore_recovers_raw_evidence_and_preserves_gate_semantics(
         result = restored.json()
         assert result["gate_semantic_drift"] is False
         assert result["restored_llm_proposal_review_count"] == 1
+        assert result["restored_gate_requirement_change_count"] == source_requirement_change_count
         assert len(result["restored_raw_evidence_ids"]) == 1
         assert result["missing_raw_file_source_evidence_ids"] == []
 
@@ -339,7 +376,12 @@ def test_full_backup_restore_recovers_raw_evidence_and_preserves_gate_semantics(
             f"/api/assessments/{restored_id}/llm-bridge/proposal-reviews"
         ).json()
         assert len(restored_reviews) == 1
+        restored_requirement_changes = client.get(
+            f"/api/assessments/{restored_id}/gate-requirement-changes"
+        ).json()
+        assert len(restored_requirement_changes) == source_requirement_change_count
         restored_export = client.get(f"/api/assessments/{restored_id}/export").json()
         assert restored_export["evidence"][0]["has_file"] is True
         assert len(restored_export["llm_proposal_reviews"]) == 1
+        assert len(restored_export["gate_requirement_changes"]) == source_requirement_change_count
         assert restored_export["warnings"] == []
