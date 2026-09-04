@@ -118,6 +118,11 @@ class ClaimOut(ClaimCreate):
 
 class GateRequirementUpsert(BaseModel):
     requirement_level: int = Field(ge=0, le=4)
+    reason: str = Field(min_length=3, max_length=2000)
+
+
+class GateRequirementReset(BaseModel):
+    reason: str = Field(min_length=3, max_length=2000)
 
 
 class GateRequirementOut(BaseModel):
@@ -125,7 +130,23 @@ class GateRequirementOut(BaseModel):
     gate_id: str
     requirement_level: int
     source: str
+    default_level: int
+    default_source: str
+    is_override: bool
     updated_at: datetime | None = None
+
+
+class GateRequirementChangeOut(BaseModel):
+    id: str
+    assessment_id: str
+    gate_id: str
+    change_type: Literal["override", "reset"]
+    previous_level: int
+    new_level: int
+    previous_source: str
+    new_source: str
+    reason: str
+    created_at: datetime
 
 
 class EvidenceRequestOut(BaseModel):
@@ -145,6 +166,7 @@ class GateDefinitionOut(BaseModel):
     name: str
     subject: str
     requirement_templates: dict[str, int]
+    capability_levels: dict[int, str]
     source_ids: list[str]
     provenance: str
     evidence_requests: list[EvidenceRequestOut] = Field(default_factory=list)
