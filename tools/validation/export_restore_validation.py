@@ -190,14 +190,28 @@ def create_fixture(base_url: str) -> dict[str, Any]:
         "HG-07": 0,
         "HG-08": 0,
     }
+    current_requirements = {
+        item["gate_id"]: item
+        for item in request_json(base_url, "GET", f"/api/assessments/{assessment_id}/gate-requirements")
+    }
+    requirement_change_count = 0
     for gate_id, level in requirements.items():
+        current = current_requirements[gate_id]
+        if current["requirement_level"] == level:
+            continue
         stored = request_json(
             base_url,
             "PUT",
             f"/api/assessments/{assessment_id}/gate-requirements/{gate_id}",
-            {"requirement_level": level},
+            {
+                "requirement_level": level,
+                "reason": "Synthetischer Export-/Restore-Validierungsplan für reproduzierbare Gate-Zustände.",
+            },
         )
         check(stored["source"] == "consultant-override", f"Override provenance missing for {gate_id}")
+        requirement_change_count += 1
+    requirement_audit = request_json(base_url, "GET", f"/api/assessments/{assessment_id}/gate-requirement-changes")
+    check(len(requirement_audit) == requirement_change_count, "Requirement audit count mismatch")
 
     claims = [
         {
@@ -235,7 +249,12 @@ def create_fixture(base_url: str) -> dict[str, Any]:
     check(states["HG-01"] == "PASS", f"HG-01 expected PASS: {states}")
     check(states["HG-03"] == "FAIL", f"HG-03 expected FAIL: {states}")
     check(states["HG-04"] == "UNVERIFIED", f"HG-04 expected UNVERIFIED: {states}")
-    return {"assessment_id": assessment_id, "evidence_id": evidence_id, "gate_states": states}
+    return {
+        "assessment_id": assessment_id,
+        "evidence_id": evidence_id,
+        "gate_states": states,
+        "gate_requirement_change_count": requirement_change_count,
+    }
 
 
 def run(base_url: str, output: Path) -> dict[str, Any]:
@@ -245,6 +264,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     assessment_id = fixture["assessment_id"]
     evidence_id = fixture["evidence_id"]
     states_before = fixture["gate_states"]
+    requirement_change_count = fixture["gate_requirement_change_count"]
 
     structured = request_json(base_url, "GET", f"/api/assessments/{assessment_id}/export")
     serialized = json.dumps(structured, ensure_ascii=False)
@@ -255,11 +275,13 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     check(EXCERPT_SENTINEL not in serialized, "default export leaked Evidence excerpt")
     check(RAW_SENTINEL not in serialized, "default export leaked raw file content")
     check(structured["evidence"][0]["has_file"] is True, "export lost file-presence metadata")
+    check(len(structured["gate_requirement_changes"]) == requirement_change_count, "export lost gate requirement audit history")
 
     report_bytes, report_headers = request_bytes(base_url, "GET", f"/api/assessments/{assessment_id}/report")
     report = report_bytes.decode("utf-8")
     check("text/markdown" in report_headers.get("content-type", ""), "report has wrong media type")
     check("HG-01" in report and "HG-03" in report and "HG-04" in report, "report misses gates")
+    check("Mindeststufen-Audit" in report, "report misses gate requirement governance audit")
     check(EXCERPT_SENTINEL not in report, "report leaked Evidence excerpt")
     check(RAW_SENTINEL not in report, "report leaked raw file content")
 
@@ -291,10 +313,12 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     structured_restored_id = structured_restore["assessment_id"]
     check(structured_restored_id != assessment_id, "structured restore overwrote source Assessment")
     check(structured_restore["gate_semantic_drift"] is False, f"structured restore gate drift: {structured_restore}")
+    check(structured_restore["restored_gate_requirement_change_count"] == requirement_change_count, "structured restore lost requirement audit")
     check(evidence_id in structured_restore["missing_raw_file_source_evidence_ids"], "missing raw file was not reported")
     check(gate_states(base_url, structured_restored_id) == states_before, "structured restore changed gate states")
     structured_restored_export = request_json(base_url, "GET", f"/api/assessments/{structured_restored_id}/export")
     check(structured_restored_export["evidence"][0]["has_file"] is False, "structured restore invented raw file")
+    check(len(structured_restored_export["gate_requirement_changes"]) == requirement_change_count, "structured restore export lost requirement audit")
     check(bool(structured_restored_export["warnings"]), "structured restore did not expose missing file warning")
 
     full_restore = request_multipart_json(
@@ -309,11 +333,13 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     full_restored_id = full_restore["assessment_id"]
     check(full_restored_id not in {assessment_id, structured_restored_id}, "full restore reused an existing Assessment ID")
     check(full_restore["gate_semantic_drift"] is False, f"full restore gate drift: {full_restore}")
+    check(full_restore["restored_gate_requirement_change_count"] == requirement_change_count, "full restore lost requirement audit")
     check(len(full_restore["restored_raw_evidence_ids"]) == 1, "full restore did not restore raw Evidence")
     check(full_restore["missing_raw_file_source_evidence_ids"] == [], "full restore still reports raw Evidence missing")
     check(gate_states(base_url, full_restored_id) == states_before, "full restore changed gate states")
     full_restored_export = request_json(base_url, "GET", f"/api/assessments/{full_restored_id}/export")
     check(full_restored_export["evidence"][0]["has_file"] is True, "full restore lost raw file presence")
+    check(len(full_restored_export["gate_requirement_changes"]) == requirement_change_count, "full restore export lost requirement audit")
 
     states_after = gate_states(base_url, assessment_id)
     check(states_after == states_before, "export/report/restore operations mutated source gate states")
@@ -321,13 +347,16 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     checks = {
         "default_export_omits_sensitive_evidence": EXCERPT_SENTINEL not in serialized and RAW_SENTINEL not in serialized,
         "consultant_report_omits_sensitive_evidence": EXCERPT_SENTINEL not in report and RAW_SENTINEL not in report,
+        "gate_requirement_audit_exported": len(structured["gate_requirement_changes"]) == requirement_change_count,
         "default_backup_has_no_raw_evidence": not any(name.startswith("evidence/") for name in structured_files),
         "full_backup_requires_explicit_opt_in": full_headers.get("x-sovradar-includes-evidence") == "true" and len(raw_paths) == 1,
         "structured_restore_uses_new_assessment": structured_restored_id != assessment_id,
         "structured_restore_preserves_gate_semantics": structured_restore["gate_semantic_drift"] is False,
+        "structured_restore_preserves_requirement_audit": structured_restore["restored_gate_requirement_change_count"] == requirement_change_count,
         "structured_restore_reports_missing_raw_file": evidence_id in structured_restore["missing_raw_file_source_evidence_ids"],
         "full_restore_restores_raw_file": len(full_restore["restored_raw_evidence_ids"]) == 1,
         "full_restore_preserves_gate_semantics": full_restore["gate_semantic_drift"] is False,
+        "full_restore_preserves_requirement_audit": full_restore["restored_gate_requirement_change_count"] == requirement_change_count,
         "source_gate_states_unchanged": states_after == states_before,
     }
     check(all(checks.values()), f"acceptance failure: {checks}")
@@ -339,6 +368,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         "structured_restored_assessment_id": structured_restored_id,
         "full_restored_assessment_id": full_restored_id,
         "source_gate_states": states_before,
+        "gate_requirement_change_count": requirement_change_count,
         "schema": {
             "name": structured["export_meta"]["schema_name"],
             "version": structured["export_meta"]["schema_version"],
@@ -350,10 +380,12 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         },
         "structured_restore": {
             "gate_semantic_drift": structured_restore["gate_semantic_drift"],
+            "restored_gate_requirement_change_count": structured_restore["restored_gate_requirement_change_count"],
             "missing_raw_file_source_evidence_ids": structured_restore["missing_raw_file_source_evidence_ids"],
         },
         "full_restore": {
             "gate_semantic_drift": full_restore["gate_semantic_drift"],
+            "restored_gate_requirement_change_count": full_restore["restored_gate_requirement_change_count"],
             "restored_raw_evidence_count": len(full_restore["restored_raw_evidence_ids"]),
         },
         "acceptance_checks": checks,
