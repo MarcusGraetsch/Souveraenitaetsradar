@@ -194,6 +194,35 @@
         "additionalProperties": true
       }
     },
+    "gate_requirement_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "gate_id",
+          "change_type",
+          "previous_level",
+          "new_level",
+          "previous_source",
+          "new_source",
+          "reason",
+          "created_at"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "gate_id": {"type": "string", "pattern": "^HG-0[1-8]$"},
+          "change_type": {"enum": ["override", "reset"]},
+          "previous_level": {"type": "integer", "minimum": 0, "maximum": 4},
+          "new_level": {"type": "integer", "minimum": 0, "maximum": 4},
+          "previous_source": {"type": "string"},
+          "new_source": {"type": "string"},
+          "reason": {"type": "string", "minLength": 3},
+          "created_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
     "gate_results": {
       "type": "array",
       "items": {
