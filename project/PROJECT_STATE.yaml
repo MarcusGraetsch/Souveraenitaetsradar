@@ -6,7 +6,7 @@ project:
   current_phase_name: assessment-reporting-export
   method_version: "1.0"
   product_version: "0.4.0-dev"
-  updated: "2026-09-03"
+  updated: "2026-09-04"
 
 purpose:
   statement: >-
@@ -34,16 +34,20 @@ current_truth:
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
   - "NEXT-114 ist auf main und validierte den vollständigen Consultant-Lifecycle inklusive PASS/FAIL/UNVERIFIED und LLM-Negativkontrolle."
   - "NEXT-114 Baseline: komplexer KI-Agent = 128 total, 124 relevant, 83 applicable, 41 needs_review, 4 not_applicable."
-  - "NEXT-115 ist fachlich und technisch validiert: CI Run 33794873133 vollständig grün; Artifact 9908787146."
+  - "NEXT-115 ist auf main und validiert: CI Run 33794873133 vollständig grün; Artifact 9908787146."
   - Applicability und Workflow-Priorisierung sind getrennte Zustände; Workflow Stage ersetzt keine fachliche Applicability.
   - "NEXT-115 Stufen: screening, clarification, deep_dive, completed, excluded."
   - needs_review wird vollständig in einer sichtbaren clarification-Queue geführt und niemals still ausgeblendet.
   - answered questions wechseln in completed und bleiben in der All-Questions-/Audit-Ansicht sichtbar.
   - deterministisch not_applicable Fragen liegen in excluded und bleiben vollständig inspizierbar.
-  - "NEXT-115 komplexer KI-Agent: 44 screening, 41 clarification, 39 deep_dive, 0 completed, 4 excluded; nach einer Testantwort 43 screening + 1 completed."
-  - "NEXT-115 Public-Content-Fall: 84 relevant, 43 screening, 41 clarification, 0 deep_dive, 44 excluded."
-  - "Alle NEXT-115 Akzeptanzchecks bestanden: Audit-Vollständigkeit, Baseline-Erhalt, sichtbares needs_review, Staging, Completed-Transition und einfacher-vs-komplexer Pfad."
-  - "Verbleibende UX-Grenze: aktuelle work_queue ist 85 beim komplexen KI-Agenten und 84 beim Public-Content-Fall, weil Screening und Clarification zusammengezählt werden. Das ist als NEXT-116 / Issue #22 dokumentiert und wird nicht verdeckt."
+  - "NEXT-115 komplexer KI-Agent: 44 screening, 41 clarification, 39 deep_dive, 0 completed, 4 excluded; Public-Content-Fall: 43 screening, 41 clarification, 0 deep_dive, 44 excluded."
+  - "NEXT-116 / Issue #22 adressiert die noch zu große unmittelbare work_queue und bleibt P1."
+  - "NEXT-113 / Issue #23 / PR #24 ist implementiert und im finalen Review: Structured Export, Consultant Report, strukturierte/full Backups, Restore, Gate-Semantikvergleich und Consultant-UI sind vorhanden."
+  - "NEXT-113 Fachvalidierung ist erfolgreich: Standardexport/Report enthalten keine sensitiven Evidence-Inhalte, Full Backup ist Opt-in, Structured und Full Restore erhalten die synthetische Gate-Semantik HG-01 PASS / HG-03 FAIL / HG-04 UNVERIFIED."
+  - "Export, Report und Backup verändern den Source-Gate-Zustand nicht; Restore erzeugt immer ein neues Assessment und berechnet Gates neu."
+  - "Export-Routen werden explizit in main.py registriert; die frühere Router-Registrierung als LLM-Bridge-Import-Side-Effect wurde entfernt."
+  - "Der Linux-Lifecycle-Test deckte Root-owned Bind-Mount-Dateien auf; uninstall.sh bereinigt Runtime nun containerseitig, prüft Host-Reste und beendet einen erfolgreichen Lauf explizit mit Exit 0."
+  - "Security-Hardening-Finding NEXT-117 / Issue #25: ZIP-Import soll vor nicht vertrauenswürdiger Nutzung um unkomprimierte Member-/Gesamtgrößenlimits ergänzt werden."
   - LLM darf weder Applicability noch Workflow Stage deterministisch entscheiden.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
@@ -52,6 +56,9 @@ primary_artifacts:
   web_app: apps/web/
   api_app: apps/api/
   gate_api: apps/api/app/gate_api.py
+  export_api: apps/api/app/export_api.py
+  export_ui: apps/web/src/ExportTools.tsx
+  export_schema: schemas/assessment-export.schema.json
   compose: docker-compose.yml
   applicability_engine: src/sovradar/applicability.py
   gate_catalog_engine: src/sovradar/gate_catalog.py
@@ -59,6 +66,7 @@ primary_artifacts:
   evidence_intake: src/sovradar/intake.py
   synthetic_walkthrough: tools/validation/synthetic_consultant_walkthrough.py
   progressive_workflow_validation: tools/validation/progressive_workflow_validation.py
+  export_restore_validation: tools/validation/export_restore_validation.py
   validation_runbook: docs/validation/NEXT_114_SYNTHETIC_WALKTHROUGH.md
   validation_result: docs/validation/NEXT_114_RESULT_2026-09-03.md
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
@@ -86,6 +94,8 @@ quality_gates:
   workflow_stage_may_replace_applicability: false
   needs_review_may_be_silently_hidden: false
   all_questions_audit_view_required: true
+  report_may_embed_raw_evidence_by_default: false
+  structured_restore_may_overwrite_existing_assessment: false
 
 blockers: []
 
@@ -107,15 +117,21 @@ open_method_questions:
   - id: OMQ-008
     text: Die aktuelle work_queue fasst Screening und Clarification zusammen und differenziert einfache vs. komplexe Workloads noch nicht ausreichend; NEXT-116 / Issue #22 adressiert das.
 
+open_security_questions:
+  - id: OSQ-001
+    text: Backup-ZIP-Import benötigt vor nicht vertrauenswürdiger Nutzung Vorablimits für unkomprimierte Membergrößen, Gesamtgröße und Eintragsanzahl; siehe NEXT-117 / Issue #25.
+
 next_milestone:
   id: NEXT-113
   name: assessment-backup-export-consultant-report
   priority: P0
+  status: in_review
   exit_criteria:
     - Ein Assessment kann vollständig und reproduzierbar exportiert/gesichert werden.
     - Der Export enthält Scope, Relevanzprofil, Antworten, Evidence-Metadaten/Reviews, Claims, Gate Requirements und Gate Results.
     - Raw Evidence wird nicht unbeabsichtigt in einen Report eingebettet.
-    - Ein Consultant Report trennt Fakten/Evidence, Capability/Gates, Risiken, Unsicherheit und Management-Entscheidungen.
+    - Ein Consultant Report trennt Scope/Evidence, Capability/Gates, Unsicherheit und Management-Entscheidungen.
     - Provenienz und interne vs. externe Anforderungen bleiben sichtbar.
     - Backup/Restore wird gegen einen synthetischen Assessment-Datensatz getestet.
     - Report-/Exportfunktionen verändern keine deterministischen Gate States.
+    - Vollständiger PR-CI-Lauf einschließlich Install/Stop/Restart/Uninstall ist grün.
