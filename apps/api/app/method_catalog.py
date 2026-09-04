@@ -3,13 +3,14 @@ from __future__ import annotations
 import csv
 from functools import lru_cache
 
+from .answer_controls import answer_control_for
 from .settings import settings
 
 
 @lru_cache(maxsize=1)
-def load_questions() -> list[dict[str, str]]:
+def load_questions() -> list[dict[str, object]]:
     question_dir = settings.method_dir / "question_bank"
-    questions: list[dict[str, str]] = []
+    questions: list[dict[str, object]] = []
     if not question_dir.exists():
         return questions
 
@@ -19,12 +20,14 @@ def load_questions() -> list[dict[str, str]]:
             for row in reader:
                 if not row.get("QID"):
                     continue
+                answer_type = row.get("Antworttyp", "")
                 questions.append({
                     "id": row.get("QID", ""),
                     "domain": row.get("Domäne", ""),
                     "target_object": row.get("Zielobjekt", ""),
                     "question": row.get("Frage", ""),
-                    "answer_type": row.get("Antworttyp", ""),
+                    "answer_type": answer_type,
+                    "answer_control": answer_control_for(answer_type),
                     "applicability": row.get("Anwendbarkeit", ""),
                     "requiredness": row.get("Pflichtgrad", ""),
                     "expected_evidence": row.get("Erwartete Evidenz", ""),
@@ -37,4 +40,4 @@ def load_questions() -> list[dict[str, str]]:
 
 
 def question_ids() -> set[str]:
-    return {q["id"] for q in load_questions()}
+    return {str(q["id"]) for q in load_questions()}
