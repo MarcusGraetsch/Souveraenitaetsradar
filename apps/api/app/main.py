@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from sovradar.applicability import apply_to_questions, default_profile
 
 from .database import Base, engine, get_db
+from .export_api import router as export_router
 from .gate_api import router as gate_router
 from .llm_bridge import build_prompt
 from .method_catalog import load_questions, question_ids
@@ -39,6 +40,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(gate_router)
+app.include_router(export_router)
 
 
 @app.on_event("startup")
