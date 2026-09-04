@@ -1,4 +1,4 @@
-version: 9
+version: 10
 updated: "2026-09-04"
 decisions:
   - id: DEC-001
@@ -156,4 +156,24 @@ decisions:
     status: accepted
     title: Enterprise-CA-Vertrauen wird als Build-Trust konfiguriert, TLS-Verifikation bleibt aktiv
     rationale: Unternehmensnetze mit TLS-Inspection oder eigener CA sind ein realistischer Installationsfall. Zusätzliche Trust Anchors werden deshalb explizit als lokaler CA-Bundle über BuildKit Secrets an pip/npm übergeben; unsichere Bypässe wie trusted-host oder deaktivierte Zertifikatsprüfung sind keine unterstützte Lösung.
+    source: INT-03
+  - id: DEC-032
+    status: accepted
+    title: Natürliche Sprache und vorhandene Artefakte sind gleichwertige Intake-Kanäle
+    rationale: Strukturierte Modelle liefern explizite Architektur-/Repository-Fakten, natürliche Sprache liefert Nutzungskontext, Intention, organisatorische Realität und Informationen, die noch nicht modelliert sind. Beide Kanäle müssen in dasselbe kanonische Kontextmodell münden und einzeln provenance-/reviewbar bleiben.
+    source: INT-03
+  - id: DEC-033
+    status: accepted
+    title: ADOIT ist priorisierter Referenz-/Showcase-Adapter, aber keine Produktvoraussetzung
+    rationale: Der BOC/ADOIT-Referenzfall ist für Demonstration und Validierung besonders wichtig. Der Radar bleibt dennoch toolneutral; ADOIT-Parser schreiben nur in das generische Kontextmodell und enthalten keine eigene Risiko-/Gate-Logik.
+    source: INT-03
+  - id: DEC-034
+    status: accepted
+    title: Kontext-Fact und Evidence bleiben getrennt
+    rationale: Eine natürlichsprachliche Aussage oder KI-Extraktion kann Scope und Folgefragen vorschlagen, wird dadurch aber nicht automatisch zu ausreichender technischer, vertraglicher oder getesteter Evidence. Evidence Trust und Human Review bleiben separat.
+    source: INT-03
+  - id: DEC-035
+    status: accepted
+    title: AI-gestützte Kontextstrukturierung benötigt ein explizites Processing Profile
+    rationale: Architektur-, Organisations-, Vertrags- und Sicherheitsinformationen können sensitiv sein. Vor LLM-Verarbeitung muss feststehen, ob nur lokale Parser, freigegebene interne LLMs, extern nur redigierte Inhalte oder eine explizit freigegebene externe Verarbeitung zulässig ist. Raw Evidence wird nicht automatisch extern übertragen.
     source: INT-03
