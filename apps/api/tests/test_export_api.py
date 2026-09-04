@@ -6,13 +6,23 @@ import zipfile
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
+from sqlalchemy import delete
 
+from apps.api.app.database import SessionLocal
+from apps.api.app.models import LlmProposalReview
 from apps.api.tests.test_api import client, reset_db
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_PATH = REPO_ROOT / "schemas" / "assessment-export.schema.json"
 RAW_SENTINEL = "RAW-EVIDENCE-SECRET-SENTINEL"
 EXCERPT_SENTINEL = "EXCERPT-SECRET-SENTINEL"
+
+
+def _reset() -> None:
+    with SessionLocal() as db:
+        db.execute(delete(LlmProposalReview))
+        db.commit()
+    reset_db()
 
 
 def _create_export_fixture() -> tuple[str, str, dict[str, str]]:
@@ -58,6 +68,34 @@ def _create_export_fixture() -> tuple[str, str, dict[str, str]]:
         },
     )
     assert reviewed.status_code == 200
+
+    llm_import = client.post(
+        f"/api/assessments/{assessment_id}/llm-bridge/import",
+        json={
+            "assessment_id": assessment_id,
+            "proposals": [
+                {
+                    "question_id": "DK-03",
+                    "proposed_answer": "Provider",
+                    "rationale": "Synthetic proposal for export/restore audit.",
+                    "evidence_ids": [evidence_id],
+                    "confidence": 0.72,
+                }
+            ],
+            "evidence_gaps": [],
+            "warnings": [],
+        },
+    )
+    assert llm_import.status_code == 200, llm_import.text
+    llm_import_id = llm_import.json()["id"]
+    llm_review = client.post(
+        f"/api/assessments/{assessment_id}/llm-bridge/imports/{llm_import_id}/proposals/0/review",
+        json={
+            "decision": "accepted",
+            "reviewer_note": "Synthetic consultant accepted the answer proposal.",
+        },
+    )
+    assert llm_review.status_code == 201, llm_review.text
 
     requirement_plan = {
         "HG-01": 2,
@@ -125,7 +163,7 @@ def _zip_files(data: bytes) -> dict[str, bytes]:
 
 
 def test_structured_export_validates_and_omits_sensitive_evidence_by_default():
-    reset_db()
+    _reset()
     with client:
         assessment_id, _, before = _create_export_fixture()
         response = client.get(f"/api/assessments/{assessment_id}/export")
@@ -141,6 +179,12 @@ def test_structured_export_validates_and_omits_sensitive_evidence_by_default():
         assert payload["evidence"][0]["has_file"] is True
         assert payload["evidence"][0]["has_content_excerpt"] is True
         assert "content_excerpt" not in payload["evidence"][0]
+        assert len(payload["llm_proposal_reviews"]) == 1
+        review = payload["llm_proposal_reviews"][0]
+        assert review["decision"] == "accepted"
+        assert review["question_id"] == "DK-03"
+        assert review["evidence_ids"] == [payload["evidence"][0]["id"]]
+        assert review["answer_id"] in {item["id"] for item in payload["answers"]}
         serialized = json.dumps(payload, ensure_ascii=False)
         assert EXCERPT_SENTINEL not in serialized
         assert RAW_SENTINEL not in serialized
@@ -153,7 +197,7 @@ def test_structured_export_validates_and_omits_sensitive_evidence_by_default():
 
 
 def test_consultant_report_does_not_embed_sensitive_evidence_content():
-    reset_db()
+    _reset()
     with client:
         assessment_id, _, before = _create_export_fixture()
         response = client.get(f"/api/assessments/{assessment_id}/report")
@@ -163,6 +207,7 @@ def test_consultant_report_does_not_embed_sensitive_evidence_content():
         assert "# Souveränitäts-Radar – Consultant Report" in report
         assert "HG-01" in report and "HG-03" in report and "HG-04" in report
         assert "keine automatische Risikoakzeptanz" in report
+        assert "Human-geprüfte LLM-Antwortvorschläge: **1**" in report
         assert EXCERPT_SENTINEL not in report
         assert RAW_SENTINEL not in report
         after = {
@@ -173,7 +218,7 @@ def test_consultant_report_does_not_embed_sensitive_evidence_content():
 
 
 def test_structured_backup_excludes_raw_files_and_full_backup_requires_opt_in():
-    reset_db()
+    _reset()
     with client:
         assessment_id, evidence_id, _ = _create_export_fixture()
 
@@ -183,6 +228,8 @@ def test_structured_backup_excludes_raw_files_and_full_backup_requires_opt_in():
         structured_files = _zip_files(structured.content)
         assert {"assessment.json", "consultant-report.md", "manifest.json"}.issubset(structured_files)
         assert not any(name.startswith("evidence/") for name in structured_files)
+        structured_payload = json.loads(structured_files["assessment.json"].decode("utf-8"))
+        assert len(structured_payload["llm_proposal_reviews"]) == 1
         assert EXCERPT_SENTINEL not in structured_files["assessment.json"].decode("utf-8")
         assert RAW_SENTINEL.encode("utf-8") not in b"".join(structured_files.values())
 
@@ -198,16 +245,18 @@ def test_structured_backup_excludes_raw_files_and_full_backup_requires_opt_in():
 
 
 def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_files():
-    reset_db()
+    _reset()
     with client:
         assessment_id, evidence_id, before = _create_export_fixture()
         payload = client.get(f"/api/assessments/{assessment_id}/export").json()
+        source_review = payload["llm_proposal_reviews"][0]
 
         restored = client.post("/api/assessments/import", json=payload)
-        assert restored.status_code == 201
+        assert restored.status_code == 201, restored.text
         result = restored.json()
         assert result["assessment_id"] != assessment_id
         assert result["evidence_id_map"][evidence_id] != evidence_id
+        assert result["restored_llm_proposal_review_count"] == 1
         assert result["gate_semantic_drift"] is False
         assert evidence_id in result["missing_raw_file_source_evidence_ids"]
         assert all(item["matches"] for item in result["gate_comparison"])
@@ -219,6 +268,19 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         assert restored_id in assessment_ids
         assert len(assessment_ids) == 2
 
+        restored_reviews = client.get(
+            f"/api/assessments/{restored_id}/llm-bridge/proposal-reviews"
+        ).json()
+        assert len(restored_reviews) == 1
+        restored_review = restored_reviews[0]
+        assert restored_review["decision"] == source_review["decision"]
+        assert restored_review["question_id"] == source_review["question_id"]
+        assert restored_review["final_answer_value"] == source_review["final_answer_value"]
+        assert restored_review["reviewer_note"] == source_review["reviewer_note"]
+        assert restored_review["evidence_ids"] == [result["evidence_id_map"][evidence_id]]
+        assert restored_review["llm_import_id"] == result["llm_import_id_map"][source_review["llm_import_id"]]
+        assert restored_review["answer_id"] == result["answer_id_map"][source_review["answer_id"]]
+
         restored_states = {
             item["gate_id"]: item["final_state"]
             for item in client.get(f"/api/assessments/{restored_id}/gates").json()
@@ -226,11 +288,31 @@ def test_structured_restore_remaps_ids_and_preserves_gate_semantics_without_raw_
         assert restored_states == before
         restored_export = client.get(f"/api/assessments/{restored_id}/export").json()
         assert restored_export["evidence"][0]["has_file"] is False
+        assert len(restored_export["llm_proposal_reviews"]) == 1
         assert restored_export["warnings"]
 
 
+def test_restore_accepts_legacy_v1_export_without_proposal_reviews():
+    _reset()
+    with client:
+        assessment_id, _, _ = _create_export_fixture()
+        payload = client.get(f"/api/assessments/{assessment_id}/export").json()
+        payload.pop("llm_proposal_reviews")
+
+        schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        Draft202012Validator(schema).validate(payload)
+        restored = client.post("/api/assessments/import", json=payload)
+        assert restored.status_code == 201, restored.text
+        result = restored.json()
+        assert result["restored_llm_proposal_review_count"] == 0
+        reviews = client.get(
+            f"/api/assessments/{result['assessment_id']}/llm-bridge/proposal-reviews"
+        ).json()
+        assert reviews == []
+
+
 def test_full_backup_restore_recovers_raw_evidence_and_preserves_gate_semantics():
-    reset_db()
+    _reset()
     with client:
         assessment_id, _, before = _create_export_fixture()
         backup = client.get(f"/api/assessments/{assessment_id}/backup?include_evidence=true")
@@ -243,6 +325,7 @@ def test_full_backup_restore_recovers_raw_evidence_and_preserves_gate_semantics(
         assert restored.status_code == 201
         result = restored.json()
         assert result["gate_semantic_drift"] is False
+        assert result["restored_llm_proposal_review_count"] == 1
         assert len(result["restored_raw_evidence_ids"]) == 1
         assert result["missing_raw_file_source_evidence_ids"] == []
 
@@ -252,6 +335,11 @@ def test_full_backup_restore_recovers_raw_evidence_and_preserves_gate_semantics(
             for item in client.get(f"/api/assessments/{restored_id}/gates").json()
         }
         assert restored_states == before
+        restored_reviews = client.get(
+            f"/api/assessments/{restored_id}/llm-bridge/proposal-reviews"
+        ).json()
+        assert len(restored_reviews) == 1
         restored_export = client.get(f"/api/assessments/{restored_id}/export").json()
         assert restored_export["evidence"][0]["has_file"] is True
+        assert len(restored_export["llm_proposal_reviews"]) == 1
         assert restored_export["warnings"] == []
