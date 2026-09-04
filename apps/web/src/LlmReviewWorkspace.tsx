@@ -30,6 +30,21 @@ const reviewLabel=(review:LlmProposalReview)=>{
   return 'abgelehnt'
 }
 
+function validForQuestion(question:Question|undefined,value:string){
+  if(!question||!value.trim())return false
+  const control=question.answer_control
+  if(control.kind==='single_select')return control.options.some(option=>option.value===value)
+  if(control.kind==='date')return /^\d{4}-\d{2}-\d{2}$/.test(value)
+  return true
+}
+
+function ReviewAnswerInput({question,value,onChange}:{question:Question;value:string;onChange:(value:string)=>void}){
+  const control=question.answer_control
+  if(control.kind==='single_select')return <select value={value} onChange={event=>onChange(event.target.value)}><option value="">— auswählen —</option>{control.options.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>
+  if(control.kind==='date')return <input type="date" value={value} onChange={event=>onChange(event.target.value)}/>
+  return <textarea value={value} onChange={event=>onChange(event.target.value)} placeholder={control.placeholder||'Bearbeitete Antwort eingeben'}/>
+}
+
 function ProposalReviewCard({assessment,refRow,evidence,onChanged}:{assessment:Assessment;refRow:ProposalRef;evidence:Map<string,Evidence>;onChanged:()=>Promise<void>}){
   const{importRow,proposal,proposalIndex,question,review}=refRow
   const[editing,setEditing]=useState(false)
@@ -39,7 +54,11 @@ function ProposalReviewCard({assessment,refRow,evidence,onChanged}:{assessment:A
   const[busy,setBusy]=useState(false)
   const[message,setMessage]=useState('')
   useEffect(()=>{setEditedValue(proposal.proposed_answer);setSelectedEvidence(proposal.evidence_ids);setNote('');setEditing(false)},[importRow.id,proposalIndex,proposal.proposed_answer,proposal.evidence_ids])
-  const canAccept=question?.applicability_status==='applicable'&&!review
+  const applicabilityResolved=question?.applicability_status==='applicable'
+  const originalFormatValid=validForQuestion(question,proposal.proposed_answer)
+  const editedFormatValid=validForQuestion(question,editedValue)
+  const canAccept=applicabilityResolved&&!review&&originalFormatValid
+  const canEdit=applicabilityResolved&&!review
   const toggleEvidence=(id:string)=>setSelectedEvidence(current=>current.includes(id)?current.filter(item=>item!==id):[...current,id])
   const submit=async(decision:'accepted'|'edited'|'rejected')=>{
     setBusy(true);setMessage('')
@@ -61,10 +80,11 @@ function ProposalReviewCard({assessment,refRow,evidence,onChanged}:{assessment:A
     <p className="muted"><b>Modell-Selbsteinschätzung:</b> {Math.round(proposal.confidence*100)} % · Diese Zahl ist keine Belegstärke und kein Radar-Trust.</p>
     <fieldset><legend>Vom Modell referenzierte Nachweise</legend>{proposal.evidence_ids.map(id=>{const item=evidence.get(id);return <label className="check-row" key={id}><input type="checkbox" disabled={!!review||busy} checked={selectedEvidence.includes(id)} onChange={()=>toggleEvidence(id)}/><span><b>{item?.title||'Nachweis'}</b><small>{id}</small></span></label>})}</fieldset>
     {question?.applicability_status!=='applicable'&&!review&&<div className="warning">Die Anwendbarkeit dieser Frage ist noch nicht positiv geklärt. Übernehmen ist deshalb gesperrt. Bitte zuerst das Relevanzprofil bzw. die Anwendbarkeit klären. Ablehnen bleibt möglich.</div>}
+    {question&&applicabilityResolved&&!originalFormatValid&&!review&&<div className="warning">Der KI-Vorschlag passt nicht zum Antwortformat „{question.answer_type}“. Eine direkte Übernahme ist gesperrt. Bitte „Bearbeiten“ wählen und einen gültigen Wert festlegen.</div>}
     {review?<><p><b>Prüfergebnis:</b> {reviewLabel(review)}</p>{review.final_answer_value&&<p><b>Gespeicherte Radar-Antwort:</b> {review.final_answer_value}</p>}{review.reviewer_note&&<p><b>Prüfnotiz:</b> {review.reviewer_note}</p>}<p className="muted">Review-ID {review.id} · Import {review.llm_import_id} · Proposal #{review.proposal_index}</p></>:<>
-      {editing&&<label>Bearbeitete Antwort<textarea value={editedValue} onChange={event=>setEditedValue(event.target.value)} /></label>}
+      {editing&&question&&<label>Bearbeitete Antwort<ReviewAnswerInput question={question} value={editedValue} onChange={setEditedValue}/></label>}
       <label>Prüfnotiz (optional)<textarea value={note} onChange={event=>setNote(event.target.value)} placeholder="Warum wurde übernommen, geändert oder abgelehnt?" /></label>
-      <div className="action-row"><button className="primary" disabled={!canAccept||busy} onClick={()=>void submit('accepted')}>Übernehmen</button><button disabled={!canAccept||busy} onClick={()=>setEditing(value=>!value)}>{editing?'Bearbeiten schließen':'Bearbeiten'}</button>{editing&&<button className="primary" disabled={!canAccept||busy||!editedValue.trim()} onClick={()=>void submit('edited')}>Bearbeitet übernehmen</button>}<button className="danger-button" disabled={busy} onClick={()=>void submit('rejected')}>Ablehnen</button></div>
+      <div className="action-row"><button className="primary" disabled={!canAccept||busy} onClick={()=>void submit('accepted')}>Übernehmen</button><button disabled={!canEdit||busy} onClick={()=>setEditing(value=>!value)}>{editing?'Bearbeiten schließen':'Bearbeiten'}</button>{editing&&<button className="primary" disabled={!canEdit||busy||!editedFormatValid} onClick={()=>void submit('edited')}>Bearbeitet übernehmen</button>}<button className="danger-button" disabled={busy} onClick={()=>void submit('rejected')}>Ablehnen</button></div>
     </>}
     {message&&<p className={message.startsWith('Prüfung fehlgeschlagen')?'warning':'save-message'}>{message}</p>}
   </article>
