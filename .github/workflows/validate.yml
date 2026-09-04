@@ -16,7 +16,7 @@ jobs:
       - run: python tools/validate_repo.py
       - run: python -m pytest -q
       - run: python -m pytest -q apps/api/tests
-      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py tools/validation/synthetic_consultant_walkthrough.py tools/validation/progressive_workflow_validation.py src/sovradar/*.py apps/api/app/*.py
+      - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py tools/validation/synthetic_consultant_walkthrough.py tools/validation/progressive_workflow_validation.py tools/validation/export_restore_validation.py src/sovradar/*.py apps/api/app/*.py
       - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example
 
   frontend:
@@ -81,6 +81,12 @@ jobs:
             --base-url http://127.0.0.1:8080 \
             --output .runtime/exports/progressive-workflow-validation.json
           cp .runtime/exports/progressive-workflow-validation.json /tmp/sovradar-progressive-workflow.json
+      - name: Validate export restore and Consultant Report
+        run: |
+          python3 tools/validation/export_restore_validation.py \
+            --base-url http://127.0.0.1:8080 \
+            --output .runtime/exports/export-restore-validation.json
+          cp .runtime/exports/export-restore-validation.json /tmp/sovradar-export-restore.json
       - name: Validate stop and restart
         run: |
           ./stop.sh
@@ -88,14 +94,32 @@ jobs:
           ./test.sh
       - name: Validate complete uninstall
         run: |
+          set +e
           printf 'DELETE\nn\n' | ./uninstall.sh
-          test ! -e .runtime
-          test ! -e .env
+          uninstall_rc=$?
+          set -e
+          echo "uninstall exit code: ${uninstall_rc}"
+          if [[ -e .runtime ]]; then
+            echo '.runtime still exists after uninstall' >&2
+            ls -lad .runtime >&2 || true
+            find .runtime -maxdepth 3 -ls >&2 || true
+            exit 1
+          fi
+          if [[ -e .env ]]; then
+            echo '.env still exists after uninstall' >&2
+            ls -l .env >&2 || true
+            exit 1
+          fi
           if docker ps -a --format '{{.Names}}' | grep -Eqi 'souveraenitaetsradar|sovradar'; then
             echo 'Souveraenitaets-Radar container remained after uninstall' >&2
             docker ps -a
             exit 1
           fi
+          if [[ ${uninstall_rc} -ne 0 ]]; then
+            echo "uninstall.sh returned ${uninstall_rc} despite removing all generated resources" >&2
+            exit 1
+          fi
+          echo 'complete uninstall validation passed'
       - name: Upload validation reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -104,6 +128,7 @@ jobs:
           path: |
             /tmp/sovradar-synthetic-walkthrough.json
             /tmp/sovradar-progressive-workflow.json
+            /tmp/sovradar-export-restore.json
           if-no-files-found: warn
       - name: Logs on failure
         if: failure()

@@ -1,5 +1,5 @@
-version: 12
-updated: "2026-09-03"
+version: 14
+updated: "2026-09-04"
 priorities:
   - id: NEXT-110
     priority: P0
@@ -51,6 +51,28 @@ priorities:
     completion_note: "PR #21 CI Run 33794873133 vollständig grün. NEXT-114 Baseline blieb 128 total / 124 relevant / 83 applicable / 41 needs_review / 4 not_applicable. Komplexer KI-Agent wurde in 44 screening, 41 clarification, 39 deep_dive, 4 excluded gestuft; nach einer Antwort 43 screening + 1 completed. Public-Content-Fall: 84 relevant, 43 screening, 41 clarification, 0 deep_dive, 44 excluded. Alle Akzeptanzchecks bestanden. Verbleibende UX-Grenze der nahezu gleich großen unmittelbaren Work Queue wurde transparent als NEXT-116 / Issue #22 ausgelagert."
     validation_run: 33794873133
     validation_artifact: 9908787146
+  - id: NEXT-113
+    priority: P0
+    phase: MVP-01C
+    title: Assessment Backup, Export und Consultant Report implementieren
+    owner_role: developer
+    status: completed
+    github_issue: 23
+    github_pr: 24
+    branch: feature/next-113-backup-export-report
+    depends_on: [NEXT-112, NEXT-114, NEXT-115]
+    outputs: [versioned structured assessment export, JSON schema, consultant report, structured backup, explicit full evidence backup, structured restore, full backup restore, gate semantic drift comparison, consultant UI, end-to-end validation runner]
+    completion_note: "Merge-Gate CI Run 33834276156 vollständig grün: python, frontend, compose-smoke und consultant-walkthrough einschließlich Install/Stop/Restart/Test/Uninstall. NEXT-113 Export/Restore-Checks alle PASS; synthetische Gate-Semantik HG-01 PASS / HG-03 FAIL / HG-04 UNVERIFIED blieb erhalten. Artifact 9922749183. Security-Hardening für untrusted ZIP imports ist separat als NEXT-117 / Issue #25 erfasst."
+    validation_run: 33834276156
+    validation_artifact: 9922749183
+  - id: NEXT-101
+    priority: P0
+    phase: R6A
+    title: Providerneutrales Customer Evidence Pack pilotieren
+    owner_role: evidence-analyst
+    status: ready
+    inputs: [data/templates/evidence-pack-example/, schemas/evidence-pack.schema.json, data/method/evidence_request_catalog.csv]
+    next_primary_candidate: true
   - id: NEXT-116
     priority: P1
     phase: MVP-UX
@@ -61,20 +83,15 @@ priorities:
     depends_on: [NEXT-115]
     baseline: "NEXT-115: komplexer KI-Agent work_queue 85 (44 screening + 41 clarification); Public-Content work_queue 84 (43 + 41). Relevant gesamt bereits 124 vs 84."
     outputs: [smaller immediate screening queue, separate clarification workstream, deterministic gate/domain activation, improved simple-vs-complex differentiation]
-  - id: NEXT-113
-    priority: P0
-    phase: MVP-01C
-    title: Assessment Backup, Export und Consultant Report implementieren
+  - id: NEXT-117
+    priority: P1
+    phase: SECURITY-HARDENING
+    title: Backup-Import gegen ZIP-Decompression-Bombs härten
     owner_role: developer
-    status: ready
-    depends_on: [NEXT-112, NEXT-114, NEXT-115]
-  - id: NEXT-101
-    priority: P0
-    phase: R6A
-    title: Providerneutrales Customer Evidence Pack pilotieren
-    owner_role: evidence-analyst
-    status: ready
-    inputs: [data/templates/evidence-pack-example/, schemas/evidence-pack.schema.json, data/method/evidence_request_catalog.csv]
+    status: planned
+    github_issue: 25
+    depends_on: [NEXT-113]
+    outputs: [per-member uncompressed-size limits, archive total-size limit, ZIP entry-count limit, pre-read validation, regression tests]
   - id: NEXT-102
     priority: P0
     phase: R6A

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sovradar.local/schemas/assessment-export.schema.json",
+  "title": "Souveraenitaets-Radar Assessment Export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "export_meta",
+    "assessment",
+    "relevance_profile",
+    "answers",
+    "evidence",
+    "evidence_reviews",
+    "claims",
+    "gate_requirement_overrides",
+    "gate_results",
+    "llm_imports",
+    "warnings"
+  ],
+  "properties": {
+    "export_meta": {
+      "type": "object",
+      "required": [
+        "schema_name",
+        "schema_version",
+        "product_version",
+        "method_version",
+        "exported_at",
+        "source_assessment_id",
+        "includes_raw_evidence_files",
+        "includes_sensitive_evidence_fields"
+      ],
+      "properties": {
+        "schema_name": {"const": "sovradar.assessment-export"},
+        "schema_version": {"const": "1.0"},
+        "product_version": {"type": "string"},
+        "method_version": {"type": "string"},
+        "exported_at": {"type": "string"},
+        "source_assessment_id": {"type": "string", "minLength": 1},
+        "includes_raw_evidence_files": {"const": false},
+        "includes_sensitive_evidence_fields": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "assessment": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "customer",
+        "description",
+        "workload_type",
+        "criticality",
+        "confidentiality",
+        "integrity",
+        "availability",
+        "control_region",
+        "regulatory_context",
+        "status"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "customer": {"type": "string"},
+        "description": {"type": "string"},
+        "workload_type": {"type": "string"},
+        "criticality": {"type": "string"},
+        "confidentiality": {"type": "string"},
+        "integrity": {"type": "string"},
+        "availability": {"type": "string"},
+        "control_region": {"type": "string"},
+        "regulatory_context": {"type": "string"},
+        "status": {"type": "string"},
+        "created_at": {"type": ["string", "null"]},
+        "updated_at": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "relevance_profile": {"type": "object"},
+    "answers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "question_id", "answer_value", "comment", "evidence_ids", "review_state"],
+        "properties": {
+          "id": {"type": "string"},
+          "question_id": {"type": "string"},
+          "answer_value": {"type": "string"},
+          "comment": {"type": "string"},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "review_state": {"type": "string"},
+          "updated_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "evidence_type",
+          "description",
+          "source",
+          "source_date",
+          "file_name",
+          "has_file",
+          "has_content_excerpt"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "evidence_type": {"type": "string"},
+          "description": {"type": "string"},
+          "source": {"type": "string"},
+          "source_date": {"type": "string"},
+          "file_name": {"type": "string"},
+          "has_file": {"type": "boolean"},
+          "has_content_excerpt": {"type": "boolean"},
+          "content_excerpt": {"type": "string"},
+          "created_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "evidence_id",
+          "applied_state",
+          "base_trust",
+          "scope_fit",
+          "freshness_fit",
+          "effective_trust",
+          "review_status"
+        ],
+        "properties": {
+          "evidence_id": {"type": "string"},
+          "applied_state": {"type": "string"},
+          "base_trust": {"type": "integer", "minimum": 0, "maximum": 5},
+          "scope_fit": {"type": "integer", "minimum": 0, "maximum": 5},
+          "freshness_fit": {"type": "integer", "minimum": 0, "maximum": 5},
+          "effective_trust": {"type": "integer", "minimum": 0, "maximum": 5},
+          "review_status": {"type": "string"},
+          "updated_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "gate_id",
+          "statement",
+          "review_status",
+          "capability_level",
+          "evidence_ids",
+          "question_ids",
+          "notes"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "gate_id": {"type": "string", "pattern": "^HG-0[1-8]$"},
+          "statement": {"type": "string"},
+          "review_status": {"type": "string"},
+          "capability_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 4},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "question_ids": {"type": "array", "items": {"type": "string"}},
+          "notes": {"type": "string"},
+          "created_at": {"type": ["string", "null"]},
+          "updated_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "gate_requirement_overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gate_id", "requirement_level", "source"],
+        "properties": {
+          "gate_id": {"type": "string", "pattern": "^HG-0[1-8]$"},
+          "requirement_level": {"type": "integer", "minimum": 0, "maximum": 4},
+          "source": {"type": "string"},
+          "updated_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "gate_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gate_id",
+          "name",
+          "requirement_level",
+          "requirement_source",
+          "capability_level",
+          "effective_trust",
+          "technical_state",
+          "evidence_state",
+          "final_state",
+          "claim_ids",
+          "evidence_ids",
+          "reasons",
+          "source_ids",
+          "provenance"
+        ],
+        "properties": {
+          "gate_id": {"type": "string", "pattern": "^HG-0[1-8]$"},
+          "name": {"type": "string"},
+          "subject": {"type": "string"},
+          "requirement_level": {"type": "integer", "minimum": 0, "maximum": 4},
+          "requirement_source": {"type": "string"},
+          "capability_level": {"type": ["integer", "null"], "minimum": 0, "maximum": 4},
+          "effective_trust": {"type": ["integer", "null"], "minimum": 0, "maximum": 5},
+          "technical_state": {"enum": ["PASS", "FAIL", "UNVERIFIED", "N/A"]},
+          "evidence_state": {"enum": ["VERIFIED", "UNVERIFIED", "N/A"]},
+          "final_state": {"enum": ["PASS", "FAIL", "UNVERIFIED", "N/A"]},
+          "claim_ids": {"type": "array", "items": {"type": "string"}},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "reasons": {"type": "array", "items": {"type": "string"}},
+          "source_ids": {"type": "array", "items": {"type": "string"}},
+          "provenance": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "llm_imports": {"type": "array", "items": {"type": "object"}},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  }
+}
