@@ -94,14 +94,32 @@ jobs:
           ./test.sh
       - name: Validate complete uninstall
         run: |
+          set +e
           printf 'DELETE\nn\n' | ./uninstall.sh
-          test ! -e .runtime
-          test ! -e .env
+          uninstall_rc=$?
+          set -e
+          echo "uninstall exit code: ${uninstall_rc}"
+          if [[ -e .runtime ]]; then
+            echo '.runtime still exists after uninstall' >&2
+            ls -lad .runtime >&2 || true
+            find .runtime -maxdepth 3 -ls >&2 || true
+            exit 1
+          fi
+          if [[ -e .env ]]; then
+            echo '.env still exists after uninstall' >&2
+            ls -l .env >&2 || true
+            exit 1
+          fi
           if docker ps -a --format '{{.Names}}' | grep -Eqi 'souveraenitaetsradar|sovradar'; then
             echo 'Souveraenitaets-Radar container remained after uninstall' >&2
             docker ps -a
             exit 1
           fi
+          if [[ ${uninstall_rc} -ne 0 ]]; then
+            echo "uninstall.sh returned ${uninstall_rc} despite removing all generated resources" >&2
+            exit 1
+          fi
+          echo 'complete uninstall validation passed'
       - name: Upload validation reports
         if: always()
         uses: actions/upload-artifact@v4
