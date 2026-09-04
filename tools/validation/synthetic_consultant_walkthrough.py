@@ -190,15 +190,29 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         "HG-07": 0,
         "HG-08": 0,
     }
+    current_requirements = {
+        item["gate_id"]: item
+        for item in _json_request(base_url, "GET", f"/api/assessments/{assessment_id}/gate-requirements")
+    }
+    requirement_changes = 0
     for gate_id, level in requirement_plan.items():
+        current = current_requirements[gate_id]
+        if current["requirement_level"] == level:
+            continue
         result = _json_request(
             base_url,
             "PUT",
             f"/api/assessments/{assessment_id}/gate-requirements/{gate_id}",
-            {"requirement_level": level},
+            {
+                "requirement_level": level,
+                "reason": "Synthetischer Validierungsplan zur reproduzierbaren Gate-Semantik.",
+            },
         )
         _assert(result["requirement_level"] == level, f"requirement override failed for {gate_id}")
         _assert(result["source"] == "consultant-override", f"override provenance missing for {gate_id}")
+        requirement_changes += 1
+    audit = _json_request(base_url, "GET", f"/api/assessments/{assessment_id}/gate-requirement-changes")
+    _assert(len(audit) == requirement_changes, "governed requirement changes were not audited")
 
     claims_payload = [
         {
@@ -316,6 +330,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
             "draft_negative_control_claims": 1,
         },
         "gate_requirements": requirement_plan,
+        "gate_requirement_audit_count": len(audit),
         "gate_states": state_after,
         "expected_gate_states": expected_states,
         "llm_bridge": {
@@ -328,6 +343,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
         "acceptance_checks": {
             "guided_questions_available": len(relevant_questions) > 0,
             "evidence_reviewed": True,
+            "governed_requirement_changes_audited": len(audit) == requirement_changes,
             "pass_demonstrated": "PASS" in state_after.values(),
             "fail_demonstrated": "FAIL" in state_after.values(),
             "unverified_demonstrated": "UNVERIFIED" in state_after.values(),
