@@ -2,8 +2,8 @@ project:
   name: Souveraenitaetsradar
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
-  current_phase: R6A
-  current_phase_name: customer-evidence-pilot
+  current_phase: MVP-VALIDATION
+  current_phase_name: first-manual-consultant-evaluation
   method_version: "1.0"
   product_version: "0.4.0-dev"
   updated: "2026-09-04"
@@ -26,35 +26,35 @@ current_truth:
   - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung mit lokalem Dokument-Speicher.
   - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
   - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
-  - "NEXT-112 ist auf main: Evidence Review, Human-reviewed Claims, Gate Requirements und alle acht Hard Gates sind in API und Consultant-UI integriert."
   - Evidence wird vor Gate-Nutzung mit Applied State, Trust-Dimensionen und Review Status bewertet.
   - Human-reviewed Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
   - "Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
   - Gate-Requirements werden aus internen Kritikalitäts-Templates vorbelegt und bleiben pro Gate als Consultant-Override editierbar.
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
-  - "NEXT-114 ist auf main und validierte den vollständigen Consultant-Lifecycle inklusive PASS/FAIL/UNVERIFIED und LLM-Negativkontrolle."
-  - "NEXT-114 Baseline: komplexer KI-Agent = 128 total, 124 relevant, 83 applicable, 41 needs_review, 4 not_applicable."
-  - "NEXT-115 ist auf main und validiert: CI Run 33794873133 vollständig grün; Artifact 9908787146."
   - Applicability und Workflow-Priorisierung sind getrennte Zustände; Workflow Stage ersetzt keine fachliche Applicability.
   - "NEXT-115 Stufen: screening, clarification, deep_dive, completed, excluded."
   - needs_review wird vollständig in einer sichtbaren clarification-Queue geführt und niemals still ausgeblendet.
   - answered questions wechseln in completed und bleiben in der All-Questions-/Audit-Ansicht sichtbar.
   - deterministisch not_applicable Fragen liegen in excluded und bleiben vollständig inspizierbar.
-  - "NEXT-115 komplexer KI-Agent: 44 screening, 41 clarification, 39 deep_dive, 0 completed, 4 excluded; Public-Content-Fall: 43 screening, 41 clarification, 0 deep_dive, 44 excluded."
   - "NEXT-116 / Issue #22 adressiert die noch zu große unmittelbare work_queue und bleibt P1."
-  - "NEXT-113 / Issue #23 / PR #24 hat Implementierung und Merge-Gate-Validierung abgeschlossen: Structured Export, Consultant Report, strukturierte/full Backups, Restore, Gate-Semantikvergleich und Consultant-UI sind vorhanden."
-  - "NEXT-113 Merge-Gate Run 33834276156 ist vollständig grün; Artifact 9922749183. Python, Frontend, Compose Smoke und Consultant Walkthrough inklusive Install/Stop/Restart/Test/Uninstall bestanden."
-  - "NEXT-113 Export/Restore erhält die synthetische Gate-Semantik HG-01 PASS / HG-03 FAIL / HG-04 UNVERIFIED und verändert den Source-Gate-Zustand nicht."
+  - "NEXT-113 ist auf main: Structured Export, Consultant Report, strukturierte/full Backups, Restore und Gate-Semantikvergleich sind implementiert und validiert."
+  - "NEXT-113 Merge-Gate Run 33834276156 ist vollständig grün; Artifact 9922749183."
   - "Standardexport und Consultant Report enthalten keine sensitiven Evidence-Inhalte; Full Backup ist explizites Opt-in."
   - "Restore erzeugt immer ein neues Assessment, remappt Referenzen und berechnet Gates neu."
-  - "Export-Routen werden explizit in main.py registriert; die frühere Router-Registrierung als LLM-Bridge-Import-Side-Effect wurde entfernt."
-  - "Der vollständige Linux-Lifecycle ist nach Härtung von uninstall.sh grün; Container-Root-Dateien im Bind-Mount und Dialog-stdin sind reproduzierbar behandelt."
-  - "Security-Hardening-Finding NEXT-117 / Issue #25: ZIP-Import soll vor nicht vertrauenswürdiger Nutzung um unkomprimierte Member-/Gesamtgrößenlimits ergänzt werden."
+  - "NEXT-101 ist implementiert und validiert: providerneutrales Customer Evidence Pack ohne Cloud-Credentials, explizites Mapping auf Evidence Requests und konservative Coverage-Analyse."
+  - "NEXT-101 Coverage-Baseline: 5 Evidence-Klassen, 11 erforderliche Requests, 3 VERIFIED, 4 REVIEW_REQUIRED, 1 INSUFFICIENT, 3 MISSING."
+  - "NEXT-101 Live-Webapp-Pilot: nur ein explizit human-reviewed synthetischer Claim wirkt auf Hard Gates; HG-01 PASS, HG-02 bis HG-08 UNVERIFIED."
+  - "Öffentliche Provider-Dokumentation mit applied_state=available wird nicht als configured Applied Capability behandelt."
+  - "NEXT-101 CI Run 33837372041 vollständig grün; Artifact 9923731562; Python, Frontend, Compose, Live-Webapp-Pilot und kompletter Lifecycle bestanden."
+  - "Der erste reale Mensch-im-Loop-Nutzertest ist NEXT-118 / Issue #28; Runbook: docs/validation/FIRST_INSTALL_EVALUATION.md."
+  - "Security-Hardening-Finding NEXT-117 / Issue #25: ZIP-Import benötigt vor untrusted Nutzung Limits für unkomprimierte Member-/Gesamtgrößen und Entry Count."
+  - "Issue #26: Structured Restore soll vor untrusted Nutzung serverseitig vollständig gegen das versionierte Export-Schema validieren."
   - LLM darf weder Applicability noch Workflow Stage deterministisch entscheiden.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
 primary_artifacts:
   product_mvp: docs/product/MVP_01_CONSULTANT_WEBAPP.md
+  first_install_evaluation: docs/validation/FIRST_INSTALL_EVALUATION.md
   web_app: apps/web/
   api_app: apps/api/
   gate_api: apps/api/app/gate_api.py
@@ -66,6 +66,10 @@ primary_artifacts:
   gate_catalog_engine: src/sovradar/gate_catalog.py
   gate_evaluation_engine: src/sovradar/gate_evaluation.py
   evidence_intake: src/sovradar/intake.py
+  evidence_coverage_engine: src/sovradar/evidence_coverage.py
+  evidence_pack_pilot_plan: data/pilots/next-101/requirement-plan.json
+  evidence_pack_offline_validation: tools/validation/customer_evidence_pack_pilot.py
+  evidence_pack_webapp_validation: tools/validation/customer_evidence_pack_webapp.py
   synthetic_walkthrough: tools/validation/synthetic_consultant_walkthrough.py
   progressive_workflow_validation: tools/validation/progressive_workflow_validation.py
   export_restore_validation: tools/validation/export_restore_validation.py
@@ -98,6 +102,8 @@ quality_gates:
   all_questions_audit_view_required: true
   report_may_embed_raw_evidence_by_default: false
   structured_restore_may_overwrite_existing_assessment: false
+  evidence_coverage_status_may_equal_gate_decision: false
+  public_provider_capability_may_imply_applied_configuration: false
 
 blockers: []
 
@@ -118,24 +124,28 @@ open_method_questions:
     text: Die einfache MVP-Regel Basis/Scope→Screening und sonst applicable→Deep Dive muss nach realen Consultant-Durchläufen weiter kalibriert werden.
   - id: OMQ-008
     text: Die aktuelle work_queue fasst Screening und Clarification zusammen und differenziert einfache vs. komplexe Workloads noch nicht ausreichend; NEXT-116 / Issue #22 adressiert das.
+  - id: OMQ-009
+    text: Evidence-Request-Coverage und Hard-Gate-Auswertung sind bewusst getrennt; reale Piloten müssen zeigen, ob zusätzliche deterministische Coverage-Holds pro Gate benötigt werden.
 
 open_security_questions:
   - id: OSQ-001
     text: Backup-ZIP-Import benötigt vor nicht vertrauenswürdiger Nutzung Vorablimits für unkomprimierte Membergrößen, Gesamtgröße und Eintragsanzahl; siehe NEXT-117 / Issue #25.
+  - id: OSQ-002
+    text: Structured Restore soll vor nicht vertrauenswürdiger Nutzung vollständig serverseitig gegen das versionierte Export-Schema validieren; siehe Issue #26.
 
 next_milestone:
-  id: NEXT-101
-  name: providerneutral-customer-evidence-pack-pilot
+  id: NEXT-118
+  name: first-manual-consultant-install-evaluation
   priority: P0
   status: ready
+  github_issue: 28
   intent: >-
-    Den bisher synthetisch und technisch validierten Methoden-/MVP-Kern erstmals mit einem
-    providerneutralen, realitätsnahen Customer-mediated Evidence Pack durchlaufen und dabei
-    Evidence Intake, Mapping, Trust, Claims, Gates, offene Gaps und Consultant-Aufwand messen.
+    Die technisch grüne Installation und den synthetischen Evidence-Pilot erstmals aus echter
+    Beraterperspektive manuell bedienen und fachlich/UX-seitig evaluieren.
   exit_criteria:
-    - Ein vollständiges Evidence Pack kann ohne Cloud-Credentials aufgenommen und validiert werden.
-    - Evidence-Metadaten und Dateien werden nachvollziehbar auf generische Evidence Requests und Claims gemappt.
-    - PASS/FAIL/UNVERIFIED bleiben aus Evidence, Requirement und Human Review reproduzierbar erklärbar.
-    - Fehlende oder unzureichende Evidence erzeugt explizite Gaps statt implizite Annahmen.
-    - Ein Consultant kann den Fall mit Webapp, Export und Report end-to-end bearbeiten.
-    - Findings zur Methodik, UX, Inter-Rater-Fähigkeit und Providerneutralität werden als Issues/Decisions erfasst.
+    - Installation auf dem Zielsystem ist erfolgreich oder ein reproduzierbarer Blocker dokumentiert.
+    - Mindestens ein manueller synthetischer End-to-End-Fall wurde durchgeführt.
+    - Evidence, Claims, Requirements und Gate-Ergebnisse wurden aus Beratersicht auf Verständlichkeit geprüft.
+    - Export, Report, Backup und Restore wurden manuell ausprobiert.
+    - Methodik- und UX-Findings sind als Issues/Decisions dokumentiert.
+    - Danach ist die Priorisierung zwischen NEXT-116, Security-Hardening und erstem realen Customer-mediated Pilot entschieden.
