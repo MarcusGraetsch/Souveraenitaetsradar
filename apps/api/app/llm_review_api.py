@@ -14,10 +14,12 @@ from sqlalchemy.orm import Session
 from sovradar.applicability import apply_to_questions, default_profile
 
 from .database import get_db
+from .llm_claim_review_api import router as llm_claim_review_router
 from .method_catalog import load_questions
 from .models import Answer, Assessment, AssessmentProfile, Evidence, LlmImport, LlmProposalReview
 
 router = APIRouter()
+router.include_router(llm_claim_review_router)
 
 
 class LlmProposalReviewCreate(BaseModel):
