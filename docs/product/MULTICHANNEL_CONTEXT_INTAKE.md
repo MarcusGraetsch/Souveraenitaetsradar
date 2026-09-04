@@ -192,3 +192,16 @@ Nach Abschluss von NEXT-118 sollte ein kleiner Referenzpilot definiert werden, d
 3. ein ergänzendes technisches oder tabellarisches Artefakt (z. B. Kubernetes YAML, Cloud-Export oder Excel-Inventar).
 
 Erfolg ist nicht maximale Automatisierung, sondern nachvollziehbare **Informationswiederverwendung** mit klarer Provenienz, Datenschutzgrenze und Human Review.
+
+## 10. Verifizierte externe Referenzen für ADOIT-Exportmöglichkeiten
+
+Diese Quellen stützen ausschließlich die Aussagen zu konkreten ADOIT-Import-/Exportmöglichkeiten; die Radar-Architektur selbst ist interne Projektmethodik.
+
+- BOC Group, **ADOIT 18.2 – ArchiMate Model Exchange-Datei importieren/exportieren**: https://docs.boc-group.com/adoit/de/docs/18.2/user_manual/ammodex-000000/
+  - bestätigt Import/Export des ArchiMate Model Exchange File Format; Elemente, Beziehungen und Views werden berücksichtigt.
+- BOC Group, **ADOIT 19.0 – Repositorys / Repository exportieren**: https://docs.boc-group.com/adoit/de/docs/19.0/admin_page/remwc-000000/
+  - bestätigt vollständigen Repository-Export im AXR-Format inklusive Modelle, Objekte und Beziehungen.
+- BOC Group, **ADOIT – Objekte importieren/exportieren / Excel-Schnittstelle**: https://docs.boc-group.com/adoit/de/docs/18.0/user_manual/impexpobj-00000/
+  - bestätigt konfigurierbare Excel-Schnittstelle für Objekte/Attribute und zugehörige Mapping-Konfiguration.
+
+Für produktive Adapter wird die konkret beim Kunden bzw. im BOC-Showcase verwendete ADOIT-Version nochmals explizit geprüft.
