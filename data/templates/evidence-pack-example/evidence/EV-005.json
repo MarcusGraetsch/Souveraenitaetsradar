@@ -1,3 +1,21 @@
 {
-  "evidence_id":"EV-005","evidence_type":"public_provider","title":"Provider service capability documentation","producer":"Provider-A","source_ref":"https://example.invalid/provider-doc","locator":"capabilities 4.1","claim_ids":["CL-CAP-01"],"gate_ids":["HG-02","HG-08"],"scope":{"workload_id":"WL-001","service":"Service-X"},"valid_at":"2026-09-01T00:00:00Z","version":"public-doc-1","applied_state":"available","base_trust":2,"scope_fit":3,"freshness_fit":5,"sensitivity":"public","review_status":"normalized","notes":"Shows service availability only, not customer configuration."
+  "evidence_id": "EV-005",
+  "evidence_type": "public_provider",
+  "title": "Provider service capability documentation",
+  "producer": "Provider-A",
+  "source_ref": "https://example.invalid/provider-doc",
+  "locator": "capabilities 4.1",
+  "claim_ids": ["CL-CAP-01"],
+  "gate_ids": ["HG-02", "HG-08"],
+  "request_ids": ["ER-003", "ER-011"],
+  "scope": {"workload_id": "WL-001", "service": "Service-X"},
+  "valid_at": "2026-09-01T00:00:00Z",
+  "version": "public-doc-1",
+  "applied_state": "available",
+  "base_trust": 2,
+  "scope_fit": 3,
+  "freshness_fit": 5,
+  "sensitivity": "public",
+  "review_status": "normalized",
+  "notes": "Shows service availability only, not customer configuration. It may support request discovery but cannot substitute for applied-capability evidence."
 }
