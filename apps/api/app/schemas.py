@@ -171,7 +171,7 @@ class LlmProposal(BaseModel):
     question_id: str
     proposed_answer: str
     rationale: str
-    evidence_ids: list[str] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(min_length=1)
     confidence: float = Field(ge=0, le=1)
 
 

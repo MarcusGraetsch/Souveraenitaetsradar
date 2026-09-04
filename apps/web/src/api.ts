@@ -27,6 +27,16 @@ async function request<T>(path:string,init?:RequestInit):Promise<T>{
   return response.json() as Promise<T>
 }
 
+function validateLlmAssessmentId(expectedId:string,raw:string):void{
+  let parsed:unknown
+  try{parsed=JSON.parse(raw)}catch{return}
+  if(typeof parsed!=='object'||parsed===null)return
+  const received=(parsed as {assessment_id?:unknown}).assessment_id
+  if(typeof received==='string'&&received!==expectedId){
+    throw new Error(`Assessment-ID stimmt nicht überein. Erwartet: ${expectedId}; erhalten: ${received}. Bitte die LLM-Ausgabe korrigieren oder neu erzeugen. IDs werden aus Sicherheitsgründen nicht automatisch verändert.`)
+  }
+}
+
 export const api={
   assessments:()=>request<Assessment[]>('/api/assessments'),
   createAssessment:(payload:Partial<Assessment>&{name:string})=>
@@ -108,11 +118,13 @@ export const api={
     request<void>(`/api/assessments/${assessmentId}/claims/${claimId}`,{method:'DELETE'}),
   gates:(id:string)=>request<GateEvaluation[]>(`/api/assessments/${id}/gates`),
   prompt:(id:string)=>request<{prompt:string}>(`/api/assessments/${id}/llm-bridge/prompt`),
-  importLlm:(id:string,raw:string)=>
-    request<LlmImport>(`/api/assessments/${id}/llm-bridge/import`,{
+  importLlm:(id:string,raw:string)=>{
+    validateLlmAssessmentId(id,raw)
+    return request<LlmImport>(`/api/assessments/${id}/llm-bridge/import`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:raw,
-    }),
+    })
+  },
   llmImports:(id:string)=>request<LlmImport[]>(`/api/assessments/${id}/llm-bridge/imports`),
 }

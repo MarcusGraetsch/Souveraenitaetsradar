@@ -5,18 +5,19 @@ import json
 from .method_catalog import load_questions
 
 
-RESPONSE_SCHEMA = {
-    "assessment_id": "<must match>",
-    "proposals": [{
-        "question_id": "DK-03",
-        "proposed_answer": "<answer proposal>",
-        "rationale": "<short reasoning based only on supplied material>",
-        "evidence_ids": ["<existing evidence id>"],
-        "confidence": 0.0,
-    }],
-    "evidence_gaps": [{"question_id": "TE-04", "missing": "<what is missing>"}],
-    "warnings": ["<contradiction, ambiguity or caveat>"],
-}
+def response_schema(assessment_id: str) -> dict:
+    return {
+        "assessment_id": assessment_id,
+        "proposals": [{
+            "question_id": "DK-03",
+            "proposed_answer": "<answer proposal>",
+            "rationale": "<short reasoning based only on supplied Evidence>",
+            "evidence_ids": ["<existing Evidence-ID>"],
+            "confidence": 0.0,
+        }],
+        "evidence_gaps": [{"question_id": "TE-04", "missing": "<what is missing>"}],
+        "warnings": ["<contradiction, ambiguity or caveat>"],
+    }
 
 
 def build_prompt(
@@ -69,9 +70,12 @@ HARTE REGELN
 2. Erfinde keine Fakten, Anbietermerkmale, Vertragsbedingungen oder technischen Einstellungen.
 3. Fehlende Information ist fehlende Information – nicht PASS und nicht FAIL.
 4. Trenne Beobachtung, Annahme und Ableitung.
-5. Verweise in jedem Vorschlag auf vorhandene Evidence-IDs, sofern Evidence die Aussage stützt.
+5. Dieser Bridge-Modus erzeugt ausschließlich **Evidence-getragene Antwortvorschläge**. Jedes Proposal MUSS mindestens eine unten aufgeführte Evidence-ID referenzieren. Assessment-Header, Relevanzprofil und bereits erfasste Antworten dienen nur als Kontext und dürfen ein Proposal in diesem Modus nicht allein tragen.
 6. Fragen mit Applicability `needs_review` sind bewusst sichtbar: behandle sie nicht automatisch als anwendbar oder nicht anwendbar.
-7. Gib ausschließlich valides JSON im unten beschriebenen Format zurück. Keine Markdown-Codeblöcke und keine Einleitung.
+7. Behandle Assessment-ID, Question-IDs und Evidence-IDs als **OPAQUE IDENTIFIERS**. Kopiere sie zeichenidentisch. Füge keine Zeichen hinzu, entferne keine Zeichen, ändere keine Bindestriche/Unterstriche und normalisiere nichts.
+8. Bewahre den Status einer Aussage: geplant/gewünscht/behauptet ist nicht implementiert/beobachtet/getestet. Stufe den Evidenzstatus sprachlich nicht hoch.
+9. Verwende confidence konservativ. `1.0` nur, wenn die Evidence die vorgeschlagene Aussage explizit und vollständig trägt; partielle oder interpretationsbedürftige Evidence erhält einen niedrigeren Wert.
+10. Gib ausschließlich valides JSON im unten beschriebenen Format zurück. Keine Markdown-Codeblöcke und keine Einleitung.
 
 ASSESSMENT
 Assessment-ID: {assessment['id']}
@@ -98,11 +102,14 @@ OFFENE RELEVANTE / ZU PRÜFENDE FRAGEN
 
 AUFGABE
 - Schlage Antworten nur dort vor, wo die bereitgestellte Evidence dies trägt.
+- Jedes Proposal muss mindestens eine existierende Evidence-ID enthalten.
+- Nutze Assessment-/Profilwerte nicht als Ersatz für Evidence.
 - Nenne die Evidence-IDs und eine knappe Begründung.
+- Formuliere geplante, behauptete, beobachtete und getestete Zustände entsprechend ihrer tatsächlichen Evidenzlage.
 - Führe fehlende Informationen als evidence_gaps auf.
 - Führe Widersprüche/Unsicherheiten als warnings auf.
 - confidence ist eine Hilfsgröße 0..1 und ersetzt keinen Radar-Trust-Level.
 
 JSON-FORMAT
-{json.dumps(RESPONSE_SCHEMA, ensure_ascii=False, indent=2)}
+{json.dumps(response_schema(assessment['id']), ensure_ascii=False, indent=2)}
 """
