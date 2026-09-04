@@ -1,5 +1,5 @@
-version: 8
-updated: "2026-09-03"
+version: 9
+updated: "2026-09-04"
 decisions:
   - id: DEC-001
     status: accepted
@@ -151,4 +151,9 @@ decisions:
     status: accepted
     title: LLM-Bridge-Importe bleiben beim Export eine Auditspur
     rationale: Export und Restore dürfen den Human-Review-Boundary nicht umgehen. LLM-Proposals werden nachvollziehbar gesichert und referenziert, aber niemals beim Restore automatisch zu reviewed Answers, Claims oder Gate-Entscheidungen aufgewertet.
+    source: INT-03
+  - id: DEC-031
+    status: accepted
+    title: Enterprise-CA-Vertrauen wird als Build-Trust konfiguriert, TLS-Verifikation bleibt aktiv
+    rationale: Unternehmensnetze mit TLS-Inspection oder eigener CA sind ein realistischer Installationsfall. Zusätzliche Trust Anchors werden deshalb explizit als lokaler CA-Bundle über BuildKit Secrets an pip/npm übergeben; unsichere Bypässe wie trusted-host oder deaktivierte Zertifikatsprüfung sind keine unterstützte Lösung.
     source: INT-03
