@@ -11,7 +11,7 @@
     "portfolio_scope": false
   },
   "provenance": "INT-02/INT-03 pilot operationalization; request IDs reference data/method/evidence_request_catalog.csv",
-  "notes": "Assessment-specific evidence thresholds are pilot assumptions, not external normative requirements.",
+  "notes": "Assessment-specific evidence thresholds, gate requirements and synthetic claims are internal pilot assumptions, not external normative requirements.",
   "required_requests": [
     {"request_id": "ER-001", "min_trust": 3, "min_applied_state": "documented", "reason": "Contracting entity and effective-control scope must be evidenced for a high-criticality cloud workload."},
     {"request_id": "ER-002", "min_trust": 4, "min_applied_state": "documented", "reason": "Legal/extraterritorial exposure is treated as a high-confidence review topic in this synthetic case."},
@@ -29,5 +29,36 @@
     {"request_id": "ER-010", "reason": "Portfolio concentration is outside this single-workload pilot."},
     {"request_id": "ER-013", "reason": "No AI workload in this pilot."},
     {"request_id": "ER-014", "reason": "No agentic AI in this pilot."}
-  ]
+  ],
+  "gate_requirements": {
+    "HG-01": 3,
+    "HG-02": 3,
+    "HG-03": 3,
+    "HG-04": 3,
+    "HG-05": 2,
+    "HG-06": 3,
+    "HG-07": 2,
+    "HG-08": 3
+  },
+  "human_reviewed_claims": [
+    {
+      "claim_id": "PILOT-CL-HG01-01",
+      "gate_id": "HG-01",
+      "statement": "Synthetischer Pilot: Jurisdiktion und Effective Control erreichen für den definierten Testfall Applied Capability Level 3.",
+      "review_status": "reviewed",
+      "capability_level": 3,
+      "evidence_ids": ["EV-001"],
+      "notes": "Explizit vorgegebene Consultant-Entscheidung im synthetischen Pilot. Keine automatische Ableitung aus Evidence."
+    }
+  ],
+  "expected_gate_states": {
+    "HG-01": "PASS",
+    "HG-02": "UNVERIFIED",
+    "HG-03": "UNVERIFIED",
+    "HG-04": "UNVERIFIED",
+    "HG-05": "UNVERIFIED",
+    "HG-06": "UNVERIFIED",
+    "HG-07": "UNVERIFIED",
+    "HG-08": "UNVERIFIED"
+  }
 }
