@@ -2,13 +2,7 @@
 
 ## Kurzfassung
 
-Der Souveränitätsradar hat einen cloud-agnostischen Methodenkern und eine lokal installierbare Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI.
-
-NEXT-112 und NEXT-114 sind auf `main`. NEXT-115 / Issue #20 ist jetzt implementiert und durch GitHub Actions Run `33794873133` vollständig grün validiert. PR #21 enthält die progressive Fragenpriorisierung.
-
-Die bisherige Fachbaseline bleibt unverändert: beim komplexen KI-Agenten 128 Fragen gesamt, 124 relevant, 83 `applicable`, 41 `needs_review`, 4 `not_applicable`. Neu ist, dass diese Fragen nicht mehr als eine einzige Arbeitsliste behandelt werden, sondern in getrennte Workflow-Stufen fallen.
-
-## Consultant-Workflow
+Der Souveränitäts-Radar besteht aus einem cloud-agnostischen Methodenkern und einer lokal installierbaren Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI. Die produktive Arbeitskette lautet aktuell:
 
 ```text
 Assessment
@@ -27,12 +21,26 @@ Assessment
   -> Gate Requirements prüfen/überschreiben
   -> Hard Gates PASS / FAIL / UNVERIFIED / N/A
   -> Ergebnis
-  -> Export / Consultant Report  [NEXT-113]
+  -> Structured Export / Consultant Report / Backup / Restore
 ```
 
-## NEXT-115 – verbindliche Workflow-Regeln
+NEXT-112, NEXT-114 und NEXT-115 sind auf `main`. NEXT-113 / Issue #23 befindet sich in PR #24 im finalen Review.
 
-Applicability und Workflow Stage sind **zwei getrennte Zustände**.
+## Verbindliche Methodenregeln
+
+- Security Capability, Sovereignty Capability, Workload Sovereignty Risk und Evidence Confidence bleiben getrennte Achsen.
+- Gate first, score second.
+- Provider/Service Capability ist nicht Applied Capability.
+- Fehlende Evidence ist `UNVERIFIED`, kein erfundenes PASS oder FAIL.
+- Human-reviewed/approved Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
+- Raw Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
+- Gate-Requirement-Defaults sind interne Startkonfigurationen und keine Normvorgaben.
+- Radar Capability Level 0–4 ist interne Operationalisierung und kein offizieller EU-SEAL.
+- Customer-mediated Evidence ist Standard; Kunden-Cloud-Credentials sind keine Voraussetzung.
+
+## Guided Workflow
+
+Applicability und Workflow Stage bleiben getrennt.
 
 Applicability:
 
@@ -48,114 +56,117 @@ Workflow Stage:
 - `completed`
 - `excluded`
 
-Interne MVP-Operationalisierung `INT-03`:
+`needs_review` darf niemals still verschwinden. Alle 128 Methodenfragen bleiben über die All-Questions-/Audit-Ansicht inspizierbar. Ein LLM entscheidet weder Applicability noch Workflow Stage.
 
-1. `not_applicable` → `excluded`; bleibt in der Audit-Ansicht sichtbar.
-2. Bereits beantwortete Frage → `completed`; bleibt in der Audit-Ansicht sichtbar.
-3. `needs_review` → immer `clarification`; keine stille Filterung.
-4. `applicable` + Pflichtgrad Basis bzw. Scope-Domäne → `screening`.
-5. übrige `applicable` Fragen → `deep_dive`.
+NEXT-115 Baseline komplexer KI-Agent:
 
-Die Stage ist Arbeitsreihenfolge/UX, keine Risikologik und keine normative Vorgabe. Ein LLM darf weder Applicability noch Stage deterministisch entscheiden.
+- 128 total
+- 124 relevant
+- 83 applicable
+- 41 needs_review
+- 4 not_applicable
+- 44 screening
+- 41 clarification
+- 39 deep_dive
+- 4 excluded
 
-## NEXT-115 – validierte Zahlen
+Der Public-Content-Fall ist mit 84 relevanten Fragen kürzer, besitzt aber aufgrund der aktuellen Definition von `work = screening + clarification` fast dieselbe unmittelbare Queue. NEXT-116 / Issue #22 bleibt dafür als P1-UX-Follow-up offen.
 
-CI Run: `33794873133`
-Artifact: `consultant-validation-reports`, ID `9908787146`
+## NEXT-113 – implementierter Stand
 
-### Komplexer KI-Agent
+PR #24 enthält jetzt:
 
-Vor einer Testantwort:
+### Structured Export
 
-- total: 128
-- relevant: 124
-- applicable: 83
-- needs_review: 41
-- not_applicable: 4
-- screening: 44
-- clarification: 41
-- deep_dive: 39
-- completed: 0
-- excluded: 4
-- aktuelle work_queue: 85
+- versioniertes Schema `sovradar.assessment-export` v1.0
+- JSON-Schema `schemas/assessment-export.schema.json`
+- Scope und Assessment-Metadaten
+- Relevanzprofil
+- Answers inkl. Review State und Evidence-Links
+- Evidence-Metadaten und Evidence Reviews
+- Applied State sowie Base/Scope/Freshness Trust
+- Claims inkl. Review Status und Referenzen
+- Gate-Requirement-Overrides
+- deterministisch neu berechnete Gate Results
+- LLM-Bridge-Importe als Auditspur
+- Exportwarnungen
 
-Nach Beantwortung einer Screening-Frage:
+Standardexport enthält keine Raw-Evidence-Dateien und keine `content_excerpt`-Inhalte.
 
-- screening: 43
-- completed: 1
-- clarification: 41
-- deep_dive: 39
-- excluded: 4
+### Consultant Report
 
-Die beantwortete Frage `OA-01` wechselte deterministisch nach `completed`; die Audit-Ansicht blieb bei 128 Fragen.
+Der Markdown-Bericht enthält Scope, Evidenzlage, Hard-Gate-Ergebnisse, UNVERIFIED/Evidence Gaps, technische Mindestabweichungen, Governance-Hinweise und Provenienz. Raw Evidence und freigegebene Evidence-Auszüge werden nicht automatisch eingebettet. Der Bericht ist keine Rechtsfeststellung und keine automatische Risikoakzeptanz.
 
-### Öffentliche Inhaltswebsite
+### Backup / Restore
 
-- total: 128
-- relevant: 84
-- applicable: 43
-- needs_review: 41
-- not_applicable: 44
-- screening: 43
-- clarification: 41
-- deep_dive: 0
-- completed: 0
-- excluded: 44
-- aktuelle work_queue: 84
+- Structured Backup ist Default und enthält keine Raw Evidence.
+- Full Backup mit Raw Evidence ist explizites Opt-in.
+- Restore überschreibt kein bestehendes Assessment, sondern erzeugt ein neues.
+- Evidence-IDs und Referenzen werden remapped.
+- Hard Gates werden nach Restore neu berechnet.
+- Source- und Restored-Gate-Zustand werden semantisch verglichen.
+- Structured Restore meldet fehlende Raw Evidence transparent.
+- Full Restore kann ausdrücklich eingebettete Raw Evidence wiederherstellen.
+- LLM-Proposals bleiben nach Restore reine Vorschläge/Auditspur.
 
-Der relevante Gesamtpfad ist damit deutlich kürzer als beim komplexen KI-Agenten (84 vs. 124). Die unmittelbare Arbeitsqueue ist allerdings noch fast gleich groß (84 vs. 85), weil `work` aktuell Screening und Clarification zusammenfasst. Dieses Finding wurde **nicht verdeckt**, sondern als NEXT-116 / Issue #22 dokumentiert.
+### UI
 
-## NEXT-115 – technische Ergebnisse
+Im Ergebnis-Tab stehen Structured JSON, Consultant Report, Structured Backup, Full Backup mit Warnung sowie JSON-/ZIP-Restore zur Verfügung.
 
-Implementiert:
+## NEXT-113 – validierte Fachchecks
 
-- `WorkflowStage` und `WorkflowStageResult` im Applicability-Core
-- getrennte `evaluate_workflow_stage(...)`-Logik
-- Questions-API mit `work`, `screening`, `clarification`, `deep_dive`, `completed`, `relevant`, `all`
-- `/api/assessments/{id}/question-workflow` mit Stage-, Applicability- und Domänenzahlen
-- Consultant-UI mit progressiver Navigation und sichtbarer Klärungsqueue
-- Completed- und vollständige Audit-Ansicht
-- Unit-/API-/Real-Method-Bank-Regressionschecks
-- End-to-End-Runner `tools/validation/progressive_workflow_validation.py`
-- CI führt NEXT-114 weiter als Regressionstest und NEXT-115 zusätzlich aus
+Der installierte E2E-Runner `tools/validation/export_restore_validation.py` hat wiederholt erfolgreich geprüft:
 
-Alle Jobs des Validierungslaufs waren grün:
+- Default Export omits sensitive Evidence
+- Consultant Report omits sensitive Evidence
+- Default Backup has no Raw Evidence
+- Full Backup requires explicit opt-in
+- Structured Restore creates a new Assessment
+- Structured Restore preserves Gate Semantics
+- Structured Restore reports missing Raw Evidence
+- Full Restore restores Raw Evidence
+- Full Restore preserves Gate Semantics
+- Source Gate States remain unchanged
 
-- Python/Core/API
-- Frontend Build
-- Docker Compose Smoke
-- NEXT-114 Consultant Walkthrough
-- NEXT-115 Progressive Workflow
-- Stop/Restart/Test/Uninstall
+Synthetischer Testzustand:
 
-## Verbindliche Gate-Regeln bleiben unverändert
+- HG-01 = PASS
+- HG-03 = FAIL
+- HG-04 = UNVERIFIED
+- übrige Gates = N/A
 
-- Roh-Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
-- Nur `reviewed`/`approved` Claims wirken.
-- Capability-Claims nutzen das interne Radar-Level 0–4.
-- Jeder Capability-Claim benötigt reviewed/approved Evidence für eine verifizierte Aussage.
-- Mehrere Claims werden konservativ aggregiert: schwächste bestätigte Capability begrenzt das Gate.
-- Fehlende/unzureichende Evidence bleibt `UNVERIFIED`.
-- Requirement 0 ergibt `N/A`.
-- Technische Unterschreitung ergibt `FAIL`, auch bei starker Evidence.
-- Gate-Requirement-Defaults bleiben interne Startkonfigurationen und keine Normvorgaben.
+## Lifecycle-Finding und Fix
 
-## Offenes UX-Finding – NEXT-116 / Issue #22
+Die Full-Restore-Validierung deckte unter Linux ein reales Berechtigungsproblem auf: Evidence-Dateien im Bind-Mount konnten dem Container-Root gehören und hostseitig eine vollständige Deinstallation verhindern.
 
-NEXT-115 löst die fehlende Stufung. Es löst noch nicht vollständig die Größe der unmittelbaren ersten Arbeitsqueue. Der Public-Content-Fall hat zwar deutlich weniger relevante Fragen, aber fast dieselbe `work_queue`, weil 41 `needs_review`-Fragen und viele Basisfragen sofort sichtbar bleiben.
+`uninstall.sh` wurde deshalb gehärtet:
 
-NEXT-116 soll deshalb insbesondere prüfen:
+1. Runtime-Inhalte werden vor `docker compose down` innerhalb des API-Containers entfernt.
+2. Der Mountpoint wird für die Host-Löschung wieder beschreibbar gemacht.
+3. Nach der Löschung prüft das Script explizit, dass `.runtime` und `.env` nicht mehr existieren.
+4. Ein erfolgreicher Nicht-Repository-Löschpfad endet explizit mit `exit 0`.
 
-- `work` nur aus einer kleineren Screening-Queue bilden
-- Clarification separat sichtbar halten
-- weitere Basis-/Domänenfragen erst durch Scope, Answers, Evidence Gaps oder Gate State aktivieren
-- einfache und komplexe Workloads bereits in der ersten Consultant-Arbeitsstufe deutlicher unterscheiden
+Der finale vollständige CI-Lauf nach dieser Korrektur ist das letzte technische Merge-Gate von NEXT-113.
 
-Das ist eine Produkt-/Methodenverbesserung, keine externe Normanforderung.
+## Security-Hardening-Finding – NEXT-117 / Issue #25
 
-## Regeln für andere Agents
+Der Backup-Import extrahiert keine fremden ZIP-Pfade auf das Dateisystem und begrenzt die komprimierte Uploadgröße. Einzelne ZIP-Member werden aktuell jedoch mit `archive.read(...)` gelesen, bevor für alle Member die unkomprimierte Größe geprüft ist.
+
+Vor Nutzung nicht vertrauenswürdiger Backup-Dateien müssen daher ergänzt werden:
+
+- Vorabprüfung von `ZipInfo.file_size`
+- kleine Limits für `assessment.json` und `manifest.json`
+- per-Evidence-Limit vor Dekompression
+- Limit der gesamten unkomprimierten Archivgröße
+- Limit der ZIP-Eintragsanzahl
+- negative Tests für Oversize-/Decompression-Bomb-Fälle
+
+Das ist als Issue #25 dokumentiert. Es ist kein bereits gelöster Schutz und keine Methodenanforderung.
+
+## Agent-Regeln
 
 - `AGENTS.md` zuerst lesen.
+- Danach `project/PROJECT_STATE.yaml`, dieses Handoff und `project/NEXT_ACTIONS.yaml` lesen.
 - Keine Kunden-Cloud-Credentials anfordern.
 - Keine LLM API im MVP ohne neue Decision.
 - Keine Provider-spezifische Logik in Gate-/Rule-Core.
@@ -164,23 +175,12 @@ Das ist eine Produkt-/Methodenverbesserung, keine externe Normanforderung.
 - Fehlende Evidence niemals automatisch als FAIL interpretieren.
 - `needs_review` niemals still ausblenden.
 - Workflow Stage niemals als Ersatz für Applicability verwenden.
-- beantwortete oder ausgeschlossene Fragen aus der Audit-Ansicht nicht entfernen.
-- LLM niemals zum deterministischen Applicability-/Stage-Entscheider machen.
-- alle 128 Fragen müssen über die Audit-/All-Questions-View inspizierbar bleiben.
-- substantielle Änderungen via Issue/Branch/PR/CI/Agent-Log.
+- substantielle Änderungen über Issue/Branch/PR/CI/Agent-Log dokumentieren.
 
-## Nächster P0-Schritt – NEXT-113
+## Unmittelbar nächste Schritte
 
-Nach Merge von PR #21 ist der nächste P0-Produktbaustein **Assessment Backup, Export und Consultant Report**.
-
-Ziel:
-
-1. Assessment vollständig und reproduzierbar sichern/exportieren.
-2. Scope, Relevanzprofil, Antworten, Evidence-Metadaten/Reviews, Claims, Gate Requirements und Gate Results exportieren.
-3. Raw Evidence nicht unbeabsichtigt in Reports einbetten.
-4. Consultant Report strukturiert trennen in Fakten/Evidence, Capability/Gates, Risiken, Unsicherheit und Management-Entscheidungen.
-5. Provenienz sichtbar halten.
-6. Backup/Restore gegen synthetische Daten testen.
-7. Export/Report darf keine Gate States verändern.
-
-NEXT-116 / Issue #22 bleibt als P1-UX-Verbesserung parallel im Backlog.
+1. Vollständigen CI-Lauf von PR #24 nach dem letzten Uninstall-Fix abwarten und prüfen.
+2. PR #24 aktualisieren, Self-Review durchführen und aus Draft nehmen.
+3. Bei grüner CI NEXT-113 mergen und Issue #23 schließen.
+4. Danach Projektstatus/NEXT_ACTIONS auf `completed` aktualisieren.
+5. Nächste Produktentscheidung zwischen NEXT-101 (realer Customer-Evidence-Pack-Pilot), NEXT-116 (UX-Reduktion) und NEXT-117 (Backup-Import-Hardening) anhand P0/P1 und Pilotbedarf treffen.
