@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import pytest
+from fastapi import HTTPException
 from sqlalchemy import delete
 
 from apps.api.app.database import SessionLocal
+from apps.api.app.llm_review_api import _validate_answer_value
 from apps.api.app.models import LlmProposalReview
 from apps.api.tests.test_api import client, reset_db
 
@@ -177,3 +180,31 @@ def test_review_cannot_add_evidence_not_present_in_proposal() -> None:
             json={"decision": "accepted", "evidence_ids": [other["id"]]},
         )
         assert response.status_code == 422
+
+
+def test_single_select_review_requires_machine_readable_method_value() -> None:
+    question = {
+        "answer_type": "Boolean",
+        "answer_control": {
+            "kind": "single_select",
+            "options": [
+                {"value": "yes", "label": "Ja"},
+                {"value": "no", "label": "Nein"},
+            ],
+        },
+    }
+    _validate_answer_value(question, "yes")
+    with pytest.raises(HTTPException) as exc:
+        _validate_answer_value(question, "Ja")
+    assert exc.value.status_code == 422
+
+
+def test_date_review_requires_iso_date() -> None:
+    question = {
+        "answer_type": "Datum",
+        "answer_control": {"kind": "date", "options": []},
+    }
+    _validate_answer_value(question, "2026-09-04")
+    with pytest.raises(HTTPException) as exc:
+        _validate_answer_value(question, "04.09.2026")
+    assert exc.value.status_code == 422
