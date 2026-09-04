@@ -41,6 +41,9 @@ class Assessment(Base):
     )
     claims: Mapped[list[AssessmentClaim]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     gate_requirements: Mapped[list[GateRequirement]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
+    gate_requirement_changes: Mapped[list[GateRequirementChange]] = relationship(
+        back_populates="assessment", cascade="all, delete-orphan"
+    )
     evidence_reviews: Mapped[list[EvidenceReview]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
 
 
@@ -134,6 +137,23 @@ class GateRequirement(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     assessment: Mapped[Assessment] = relationship(back_populates="gate_requirements")
+
+
+class GateRequirementChange(Base):
+    __tablename__ = "gate_requirement_changes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), index=True)
+    gate_id: Mapped[str] = mapped_column(String(16), index=True)
+    change_type: Mapped[str] = mapped_column(String(32))
+    previous_level: Mapped[int] = mapped_column(Integer)
+    new_level: Mapped[int] = mapped_column(Integer)
+    previous_source: Mapped[str] = mapped_column(String(64))
+    new_source: Mapped[str] = mapped_column(String(64))
+    reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="gate_requirement_changes")
 
 
 class LlmImport(Base):
