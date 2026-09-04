@@ -31,7 +31,7 @@ def test_prompt_embeds_exact_assessment_id_and_evidence_contract() -> None:
                 "evidence_type": "customer-statement",
                 "source": "Workshop",
                 "source_date": "2026-09-04",
-                "description": "Geplante Audio-Interviews.",
+                "description": "INTERNAL-DESCRIPTION-MUST-NOT-LEAK",
                 "content_excerpt": "Es sollen Audio-Interviews geführt werden.",
             }
         ],
@@ -53,6 +53,44 @@ def test_prompt_embeds_exact_assessment_id_and_evidence_contract() -> None:
     assert "OPAQUE IDENTIFIERS" in prompt
     assert "Jedes Proposal MUSS mindestens eine" in prompt
     assert "geplant/gewünscht/behauptet ist nicht implementiert/beobachtet/getestet" in prompt
+    assert "Es sollen Audio-Interviews geführt werden." in prompt
+    assert "INTERNAL-DESCRIPTION-MUST-NOT-LEAK" not in prompt
+    assert "Interne Evidence-Beschreibung: [nicht an LLM freigegeben]" in prompt
+
+
+def test_prompt_with_no_approved_excerpt_does_not_leak_internal_description() -> None:
+    prompt = build_prompt(
+        {
+            "id": "assessment-1",
+            "name": "Pilot",
+            "customer": "Musterbehörde",
+            "workload_type": "ai-agent",
+            "description": "Geplanter KI-Agent",
+            "criticality": "high",
+            "confidentiality": "high",
+            "integrity": "high",
+            "availability": "medium",
+            "control_region": "Deutschland/EU",
+            "regulatory_context": "DSGVO",
+        },
+        answers=[],
+        evidence=[
+            {
+                "id": "ev-456",
+                "title": "Interne Notiz",
+                "evidence_type": "customer-statement",
+                "source": "Workshop",
+                "source_date": "2026-09-04",
+                "description": "SENSITIVE-INTERNAL-NOTE",
+                "content_excerpt": "",
+            }
+        ],
+        questions=[],
+        profile={},
+    )
+
+    assert "SENSITIVE-INTERNAL-NOTE" not in prompt
+    assert "Freigegebener Auszug: [kein Textauszug für LLM freigegeben]" in prompt
 
 
 def test_llm_answer_proposal_requires_evidence_reference() -> None:
