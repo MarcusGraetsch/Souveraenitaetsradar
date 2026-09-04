@@ -1,4 +1,4 @@
-version: 14
+version: 15
 updated: "2026-09-04"
 priorities:
   - id: NEXT-110
@@ -70,8 +70,25 @@ priorities:
     phase: R6A
     title: Providerneutrales Customer Evidence Pack pilotieren
     owner_role: evidence-analyst
-    status: ready
+    status: completed
+    github_issue: 2
+    github_pr: 27
+    branch: feature/next-101-customer-evidence-pilot
     inputs: [data/templates/evidence-pack-example/, schemas/evidence-pack.schema.json, data/method/evidence_request_catalog.csv]
+    outputs: [explicit Evidence Request mappings, assessment-specific evidence requirement plan, evidence coverage engine, offline pilot runner, live Webapp pilot runner, CI regression, first-install evaluation runbook]
+    completion_note: "PR #27 CI Run 33837372041 vollständig grün. Evidence Pack ohne Cloud-Credentials: 5 Evidence-Klassen, 11 erforderliche Requests, 3 VERIFIED / 4 REVIEW_REQUIRED / 1 INSUFFICIENT / 3 MISSING. Live-Webapp-Pilot PASS: nur expliziter human-reviewed Claim wirkt auf Gates; HG-01 PASS, HG-02..HG-08 UNVERIFIED. Provider-Dokumentation mit applied_state=available wurde nicht zu Applied Configuration hochgestuft. Export/Report-Minimierung sowie Install/Stop/Restart/Test/Uninstall bestanden. Artifact 9923731562."
+    validation_run: 33837372041
+    validation_artifact: 9923731562
+  - id: NEXT-118
+    priority: P0
+    phase: MVP-VALIDATION
+    title: Erste manuelle Consultant-Installation und Evaluation durchführen
+    owner_role: evidence-analyst
+    status: ready
+    github_issue: 28
+    depends_on: [NEXT-101, NEXT-113, NEXT-115]
+    inputs: [docs/validation/FIRST_INSTALL_EVALUATION.md]
+    outputs: [manual install result, consultant UX findings, method findings, follow-up issues/decisions]
     next_primary_candidate: true
   - id: NEXT-116
     priority: P1
