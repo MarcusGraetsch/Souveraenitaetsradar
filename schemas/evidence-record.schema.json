@@ -12,6 +12,7 @@
     "source_ref": {"type": "string"}, "attachment_ref": {"type": "string"}, "locator": {"type": "string"},
     "claim_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
     "gate_ids": {"type": "array", "items": {"type": "string", "pattern": "^(HG-[0-9]{2}|KI)$"}, "uniqueItems": true},
+    "request_ids": {"type": "array", "items": {"type": "string", "pattern": "^ER-[0-9]{3}$"}, "uniqueItems": true},
     "scope": {
       "type": "object", "required": ["workload_id"],
       "properties": {"workload_id":{"type":"string"},"service":{"type":"string"},"provider":{"type":"string"},"location":{"type":"string"},"resource":{"type":"string"},"contract":{"type":"string"},"notes":{"type":"string"}},
