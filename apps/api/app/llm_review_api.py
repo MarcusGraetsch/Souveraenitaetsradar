@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -69,7 +69,7 @@ def _profile_dict(assessment: Assessment, db: Session) -> dict:
     return {**base, **saved}
 
 
-def _question_state(assessment: Assessment, question_id: str, db: Session) -> str:
+def _question_context(assessment: Assessment, question_id: str, db: Session) -> dict:
     evaluated = apply_to_questions(
         load_questions(),
         _assessment_payload(assessment),
@@ -77,8 +77,27 @@ def _question_state(assessment: Assessment, question_id: str, db: Session) -> st
     )
     for question in evaluated:
         if question["id"] == question_id:
-            return str(question["applicability_status"])
+            return question
     raise HTTPException(422, f"unknown question_id: {question_id}")
+
+
+def _validate_answer_value(question: dict, value: str) -> None:
+    if not value.strip():
+        raise HTTPException(422, "reviewed answer must not be empty")
+    control = question.get("answer_control") or {}
+    kind = control.get("kind")
+    if kind == "single_select":
+        allowed = {str(item.get("value", "")) for item in control.get("options", [])}
+        if value not in allowed:
+            raise HTTPException(
+                422,
+                f"answer value is not valid for method answer type {question.get('answer_type', '')}: {value}",
+            )
+    elif kind == "date":
+        try:
+            date.fromisoformat(value)
+        except ValueError as exc:
+            raise HTTPException(422, "date answer must use YYYY-MM-DD") from exc
 
 
 def _as_review(row: LlmProposalReview) -> LlmProposalReviewOut:
@@ -164,7 +183,8 @@ def review_llm_proposal(
     selected_evidence: list[str] = []
 
     if payload.decision != "rejected":
-        applicability = _question_state(assessment, question_id, db)
+        question = _question_context(assessment, question_id, db)
+        applicability = str(question["applicability_status"])
         if applicability != "applicable":
             raise HTTPException(
                 409,
@@ -177,6 +197,7 @@ def review_llm_proposal(
             final_answer_value = payload.answer_value.strip()
             if not final_answer_value:
                 raise HTTPException(422, "edited review requires a non-empty answer_value")
+        _validate_answer_value(question, final_answer_value)
 
         selected_evidence = proposed_evidence if payload.evidence_ids is None else payload.evidence_ids
         if not set(selected_evidence).issubset(set(proposed_evidence)):
