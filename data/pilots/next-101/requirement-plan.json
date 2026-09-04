@@ -1,0 +1,33 @@
+{
+  "pilot_id": "NEXT-101-PILOT-01",
+  "assessment_id": "SYNTH-R6A-001",
+  "title": "Provider-neutral Customer Evidence Pack Pilot",
+  "workload": {
+    "workload_id": "WL-001",
+    "type": "cloud-application",
+    "criticality": "high",
+    "control_region": "EU/EWR",
+    "ai_used": false,
+    "portfolio_scope": false
+  },
+  "provenance": "INT-02/INT-03 pilot operationalization; request IDs reference data/method/evidence_request_catalog.csv",
+  "notes": "Assessment-specific evidence thresholds are pilot assumptions, not external normative requirements.",
+  "required_requests": [
+    {"request_id": "ER-001", "min_trust": 3, "min_applied_state": "documented", "reason": "Contracting entity and effective-control scope must be evidenced for a high-criticality cloud workload."},
+    {"request_id": "ER-002", "min_trust": 4, "min_applied_state": "documented", "reason": "Legal/extraterritorial exposure is treated as a high-confidence review topic in this synthetic case."},
+    {"request_id": "ER-003", "min_trust": 3, "min_applied_state": "configured", "reason": "Applied data-location configuration is required; provider capability alone is insufficient."},
+    {"request_id": "ER-004", "min_trust": 3, "min_applied_state": "configured", "reason": "Key-control evaluation requires evidence of the applied key-management configuration."},
+    {"request_id": "ER-005", "min_trust": 3, "min_applied_state": "documented", "reason": "Exit requires documented usable export of data, metadata, configuration and policy."},
+    {"request_id": "ER-006", "min_trust": 4, "min_applied_state": "tested", "reason": "High-criticality exit confidence requires an end-to-end test in this pilot."},
+    {"request_id": "ER-007", "min_trust": 3, "min_applied_state": "tested", "reason": "Operational autonomy is in scope and requires a tested degraded-mode/continuity assumption."},
+    {"request_id": "ER-008", "min_trust": 3, "min_applied_state": "configured", "reason": "Identity and trust anchors must be evidenced at applied configuration level."},
+    {"request_id": "ER-009", "min_trust": 2, "min_applied_state": "documented", "reason": "Critical workload dependencies and subproviders must at least be documented."},
+    {"request_id": "ER-011", "min_trust": 3, "min_applied_state": "configured", "reason": "Security-minimum evaluation requires evidence that controls are actually configured."},
+    {"request_id": "ER-012", "min_trust": 4, "min_applied_state": "tested", "reason": "For this high-criticality pilot, security effectiveness needs tested or attested evidence."}
+  ],
+  "not_required_requests": [
+    {"request_id": "ER-010", "reason": "Portfolio concentration is outside this single-workload pilot."},
+    {"request_id": "ER-013", "reason": "No AI workload in this pilot."},
+    {"request_id": "ER-014", "reason": "No agentic AI in this pilot."}
+  ]
+}
