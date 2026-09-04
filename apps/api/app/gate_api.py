@@ -13,6 +13,7 @@ from sovradar.gate_evaluation import evaluate_gate
 from sovradar.models import AppliedState, Claim as CoreClaim, EvidenceRecord
 
 from .database import get_db
+from .llm_review_api import router as llm_review_router
 from .method_catalog import question_ids
 from .models import Assessment, AssessmentClaim, Evidence, EvidenceReview, GateRequirement
 from .schemas import (
@@ -29,6 +30,9 @@ from .schemas import (
 from .settings import settings
 
 router = APIRouter()
+# API composition: main.py already mounts this router. Keep the LLM answer-review
+# router separate in implementation while exposing it through the existing API mount.
+router.include_router(llm_review_router)
 
 CRITICALITY_TEMPLATE = {
     "low": "basis",

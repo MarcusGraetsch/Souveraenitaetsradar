@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -36,6 +36,9 @@ class Assessment(Base):
     answers: Mapped[list[Answer]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     evidence: Mapped[list[Evidence]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     llm_imports: Mapped[list[LlmImport]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
+    llm_proposal_reviews: Mapped[list[LlmProposalReview]] = relationship(
+        back_populates="assessment", cascade="all, delete-orphan"
+    )
     claims: Mapped[list[AssessmentClaim]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     gate_requirements: Mapped[list[GateRequirement]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     evidence_reviews: Mapped[list[EvidenceReview]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
@@ -146,3 +149,24 @@ class LlmImport(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     assessment: Mapped[Assessment] = relationship(back_populates="llm_imports")
+
+
+class LlmProposalReview(Base):
+    __tablename__ = "llm_proposal_reviews"
+    __table_args__ = (
+        UniqueConstraint("llm_import_id", "proposal_index", name="uq_llm_proposal_review_once"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), index=True)
+    llm_import_id: Mapped[str] = mapped_column(ForeignKey("llm_imports.id", ondelete="CASCADE"), index=True)
+    proposal_index: Mapped[int] = mapped_column(Integer)
+    question_id: Mapped[str] = mapped_column(String(64), index=True)
+    decision: Mapped[str] = mapped_column(String(32))
+    final_answer_value: Mapped[str] = mapped_column(Text, default="")
+    evidence_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    answer_id: Mapped[str] = mapped_column(String(36), default="")
+    reviewer_note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="llm_proposal_reviews")

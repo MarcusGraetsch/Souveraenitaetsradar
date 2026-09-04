@@ -206,3 +206,18 @@ export type LlmImport={
   warnings:string[]
   created_at:string
 }
+
+export type LlmProposalReviewDecision='accepted'|'edited'|'rejected'
+export type LlmProposalReview={
+  id:string
+  assessment_id:string
+  llm_import_id:string
+  proposal_index:number
+  question_id:string
+  decision:LlmProposalReviewDecision
+  final_answer_value:string
+  evidence_ids:string[]
+  answer_id:string|null
+  reviewer_note:string
+  created_at:string
+}

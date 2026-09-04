@@ -10,6 +10,8 @@ import type {
   GateEvaluation,
   GateRequirement,
   LlmImport,
+  LlmProposalReview,
+  LlmProposalReviewDecision,
   Question,
   QuestionView,
   QuestionWorkflowSummary,
@@ -127,4 +129,15 @@ export const api={
     })
   },
   llmImports:(id:string)=>request<LlmImport[]>(`/api/assessments/${id}/llm-bridge/imports`),
+  llmProposalReviews:(id:string)=>request<LlmProposalReview[]>(`/api/assessments/${id}/llm-bridge/proposal-reviews`),
+  reviewLlmProposal:(assessmentId:string,importId:string,proposalIndex:number,payload:{
+    decision:LlmProposalReviewDecision
+    answer_value?:string
+    evidence_ids?:string[]
+    reviewer_note?:string
+  })=>request<LlmProposalReview>(`/api/assessments/${assessmentId}/llm-bridge/imports/${importId}/proposals/${proposalIndex}/review`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),
+  }),
 }
