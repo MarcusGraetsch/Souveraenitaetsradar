@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { api } from './api'
 import { requirementSourceLabel } from './consultantTerminology'
 import type { GateDefinition, GateRequirement, GateRequirementChange } from './types'
+import './GateRequirementGovernance.css'
 
 export function GateRequirementGovernance({
   assessmentId,
