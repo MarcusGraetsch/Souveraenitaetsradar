@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from typing import Any
 
 
@@ -140,6 +139,10 @@ def answer_control_for(answer_type: str) -> dict[str, Any]:
         "anzahl",
         "datum+",
         "+datum",
+        "sov1-8",
+        "graph/",
+        "dokument+",
+        "prozent/",
     )
     if any(marker in lowered for marker in complex_markers):
         return _control(
