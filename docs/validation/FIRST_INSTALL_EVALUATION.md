@@ -13,6 +13,18 @@ Dieses Runbook ist für den ersten manuellen Test des Souveränitäts-Radars ged
 
 Die Anwendung besitzt im MVP noch keine Authentisierung. Für den ersten Test deshalb die Standardbindung `127.0.0.1` verwenden.
 
+### Unternehmensnetz / TLS-Inspection / eigene CA
+
+Docker-Buildcontainer übernehmen zusätzliche Root-/Intermediate-CAs des Hosts nicht automatisch. Der Installer bereitet deshalb einen lokalen Build-CA-Bundle vor und gibt ihn API- und Web-Build ausschließlich als BuildKit-Secret weiter. TLS-Verifikation bei `pip` und `npm` bleibt aktiviert.
+
+Wenn die benötigte Enterprise-CA bereits im System-Truststore des Hosts liegt, ist keine zusätzliche Option erforderlich. Falls ein eigener PEM-Nachweis explizit angegeben werden muss:
+
+```bash
+SOVRADAR_CA_CERT=/pfad/zur/enterprise-ca.pem ./install.sh
+```
+
+Der Installer prüft vor dem Docker-Build HTTPS-Zugriff auf PyPI und die npm Registry. Unsichere Workarounds wie `pip --trusted-host`, `NODE_TLS_REJECT_UNAUTHORIZED=0` oder deaktivierte Zertifikatsprüfung gehören nicht zum unterstützten Installationsweg.
+
 ## 2. Installation
 
 ```bash
@@ -171,4 +183,4 @@ Vollständig entfernen:
 ./uninstall.sh
 ```
 
-Die vollständige Deinstallation löscht PostgreSQL-Daten, `.runtime/`, lokale Evidence-Dateien, `.env`, Container, Netzwerk, Volume und lokal gebaute Images. Das Git-Repository bleibt standardmäßig bestehen.
+Die vollständige Deinstallation löscht PostgreSQL-Daten, `.runtime/`, das lokale `.build/`-Verzeichnis mit Build-CA-Bundle, lokale Evidence-Dateien, `.env`, Container, Netzwerk, Volume und lokal gebaute Images. Das Git-Repository bleibt standardmäßig bestehen.
