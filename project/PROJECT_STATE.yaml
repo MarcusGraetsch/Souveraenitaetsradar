@@ -2,8 +2,8 @@ project:
   name: Souveraenitaetsradar
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
-  current_phase: MVP-01C
-  current_phase_name: assessment-reporting-export
+  current_phase: R6A
+  current_phase_name: customer-evidence-pilot
   method_version: "1.0"
   product_version: "0.4.0-dev"
   updated: "2026-09-04"
@@ -42,11 +42,13 @@ current_truth:
   - deterministisch not_applicable Fragen liegen in excluded und bleiben vollständig inspizierbar.
   - "NEXT-115 komplexer KI-Agent: 44 screening, 41 clarification, 39 deep_dive, 0 completed, 4 excluded; Public-Content-Fall: 43 screening, 41 clarification, 0 deep_dive, 44 excluded."
   - "NEXT-116 / Issue #22 adressiert die noch zu große unmittelbare work_queue und bleibt P1."
-  - "NEXT-113 / Issue #23 / PR #24 ist implementiert und im finalen Review: Structured Export, Consultant Report, strukturierte/full Backups, Restore, Gate-Semantikvergleich und Consultant-UI sind vorhanden."
-  - "NEXT-113 Fachvalidierung ist erfolgreich: Standardexport/Report enthalten keine sensitiven Evidence-Inhalte, Full Backup ist Opt-in, Structured und Full Restore erhalten die synthetische Gate-Semantik HG-01 PASS / HG-03 FAIL / HG-04 UNVERIFIED."
-  - "Export, Report und Backup verändern den Source-Gate-Zustand nicht; Restore erzeugt immer ein neues Assessment und berechnet Gates neu."
+  - "NEXT-113 / Issue #23 / PR #24 hat Implementierung und Merge-Gate-Validierung abgeschlossen: Structured Export, Consultant Report, strukturierte/full Backups, Restore, Gate-Semantikvergleich und Consultant-UI sind vorhanden."
+  - "NEXT-113 Merge-Gate Run 33834276156 ist vollständig grün; Artifact 9922749183. Python, Frontend, Compose Smoke und Consultant Walkthrough inklusive Install/Stop/Restart/Test/Uninstall bestanden."
+  - "NEXT-113 Export/Restore erhält die synthetische Gate-Semantik HG-01 PASS / HG-03 FAIL / HG-04 UNVERIFIED und verändert den Source-Gate-Zustand nicht."
+  - "Standardexport und Consultant Report enthalten keine sensitiven Evidence-Inhalte; Full Backup ist explizites Opt-in."
+  - "Restore erzeugt immer ein neues Assessment, remappt Referenzen und berechnet Gates neu."
   - "Export-Routen werden explizit in main.py registriert; die frühere Router-Registrierung als LLM-Bridge-Import-Side-Effect wurde entfernt."
-  - "Der Linux-Lifecycle-Test deckte Root-owned Bind-Mount-Dateien auf; uninstall.sh bereinigt Runtime nun containerseitig, prüft Host-Reste und beendet einen erfolgreichen Lauf explizit mit Exit 0."
+  - "Der vollständige Linux-Lifecycle ist nach Härtung von uninstall.sh grün; Container-Root-Dateien im Bind-Mount und Dialog-stdin sind reproduzierbar behandelt."
   - "Security-Hardening-Finding NEXT-117 / Issue #25: ZIP-Import soll vor nicht vertrauenswürdiger Nutzung um unkomprimierte Member-/Gesamtgrößenlimits ergänzt werden."
   - LLM darf weder Applicability noch Workflow Stage deterministisch entscheiden.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
@@ -67,8 +69,6 @@ primary_artifacts:
   synthetic_walkthrough: tools/validation/synthetic_consultant_walkthrough.py
   progressive_workflow_validation: tools/validation/progressive_workflow_validation.py
   export_restore_validation: tools/validation/export_restore_validation.py
-  validation_runbook: docs/validation/NEXT_114_SYNTHETIC_WALKTHROUGH.md
-  validation_result: docs/validation/NEXT_114_RESULT_2026-09-03.md
   workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
   question_bank: data/method/question_bank/
   risk_taxonomy: data/method/risk_taxonomy.csv
@@ -76,6 +76,8 @@ primary_artifacts:
   hard_gates: data/method/r4_hard_gates.csv
   factor_rules: data/method/r4_factor_rules.csv
   evidence_request_catalog: data/method/evidence_request_catalog.csv
+  evidence_pack_example: data/templates/evidence-pack-example/
+  evidence_pack_schema: schemas/evidence-pack.schema.json
 
 quality_gates:
   provenance_required: true
@@ -122,16 +124,18 @@ open_security_questions:
     text: Backup-ZIP-Import benötigt vor nicht vertrauenswürdiger Nutzung Vorablimits für unkomprimierte Membergrößen, Gesamtgröße und Eintragsanzahl; siehe NEXT-117 / Issue #25.
 
 next_milestone:
-  id: NEXT-113
-  name: assessment-backup-export-consultant-report
+  id: NEXT-101
+  name: providerneutral-customer-evidence-pack-pilot
   priority: P0
-  status: in_review
+  status: ready
+  intent: >-
+    Den bisher synthetisch und technisch validierten Methoden-/MVP-Kern erstmals mit einem
+    providerneutralen, realitätsnahen Customer-mediated Evidence Pack durchlaufen und dabei
+    Evidence Intake, Mapping, Trust, Claims, Gates, offene Gaps und Consultant-Aufwand messen.
   exit_criteria:
-    - Ein Assessment kann vollständig und reproduzierbar exportiert/gesichert werden.
-    - Der Export enthält Scope, Relevanzprofil, Antworten, Evidence-Metadaten/Reviews, Claims, Gate Requirements und Gate Results.
-    - Raw Evidence wird nicht unbeabsichtigt in einen Report eingebettet.
-    - Ein Consultant Report trennt Scope/Evidence, Capability/Gates, Unsicherheit und Management-Entscheidungen.
-    - Provenienz und interne vs. externe Anforderungen bleiben sichtbar.
-    - Backup/Restore wird gegen einen synthetischen Assessment-Datensatz getestet.
-    - Report-/Exportfunktionen verändern keine deterministischen Gate States.
-    - Vollständiger PR-CI-Lauf einschließlich Install/Stop/Restart/Uninstall ist grün.
+    - Ein vollständiges Evidence Pack kann ohne Cloud-Credentials aufgenommen und validiert werden.
+    - Evidence-Metadaten und Dateien werden nachvollziehbar auf generische Evidence Requests und Claims gemappt.
+    - PASS/FAIL/UNVERIFIED bleiben aus Evidence, Requirement und Human Review reproduzierbar erklärbar.
+    - Fehlende oder unzureichende Evidence erzeugt explizite Gaps statt implizite Annahmen.
+    - Ein Consultant kann den Fall mit Webapp, Export und Report end-to-end bearbeiten.
+    - Findings zur Methodik, UX, Inter-Rater-Fähigkeit und Providerneutralität werden als Issues/Decisions erfasst.
