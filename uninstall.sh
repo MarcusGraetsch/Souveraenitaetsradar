@@ -16,17 +16,34 @@ Dieser Vorgang löscht unwiderruflich:
 Git-Repository und Quellcode werden standardmäßig NICHT gelöscht.
 WARN
 read -rp "Tippe DELETE, um fortzufahren: " CONFIRM;[[ "$CONFIRM" == "DELETE" ]]||{ echo "Abgebrochen.";exit 0; }
-# Evidence-Dateien werden vom API-Container erzeugt und können auf Linux dem
-# Container-Root gehören. Lösche Runtime-Inhalte deshalb vor `compose down`
-# einmal innerhalb des API-Images; anschließend kann der Host den leeren
-# Mountpoint zuverlässig entfernen. Fehler hier werden nicht verschluckt,
-# wenn danach die Host-Löschung ebenfalls scheitert.
+
+# Die API schreibt in einen Bind-Mount. Auf Linux können dadurch Runtime-Dateien
+# und Unterverzeichnisse dem Container-Root gehören. Vor dem Entfernen der
+# Container werden daher alle Inhalte innerhalb des Containers gelöscht und der
+# Mountpoint für die abschließende Host-Löschung wieder beschreibbar gemacht.
 if [[ -d .runtime ]];then
-  docker compose run --rm --no-deps api sh -c 'rm -rf /app/.runtime/* /app/.runtime/.[!.]* /app/.runtime/..?*' || true
+  docker compose run --rm --no-deps api sh -c '
+    find /app/.runtime -mindepth 1 -depth -delete 2>/dev/null || true
+    chmod 0777 /app/.runtime 2>/dev/null || true
+  ' || true
 fi
+
 docker compose down -v --remove-orphans --rmi local||true
 rm -rf -- .runtime
 rm -f -- .env
+
+if [[ -e .runtime ]];then
+  echo "✖ .runtime konnte nicht vollständig entfernt werden." >&2
+  ls -ld .runtime >&2 || true
+  find .runtime -maxdepth 3 -ls >&2 || true
+  exit 1
+fi
+if [[ -e .env ]];then
+  echo "✖ .env konnte nicht entfernt werden." >&2
+  ls -l .env >&2 || true
+  exit 1
+fi
+
 echo "✔ Anwendung und alle durch sie erzeugten Daten wurden entfernt."
 read -rp "Auch den geklonten Repository-Ordner löschen? [j/N]: " REMOVE_REPO
 if [[ "$REMOVE_REPO" =~ ^[jJyY]$ ]];then PARENT="$(dirname "$ROOT")";NAME="$(basename "$ROOT")";cd "$PARENT";rm -rf -- "$NAME";echo "✔ Repository-Ordner gelöscht.";fi
