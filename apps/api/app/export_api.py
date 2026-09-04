@@ -27,6 +27,7 @@ from .models import (
     EvidenceReview,
     GateRequirement,
     LlmImport,
+    LlmProposalReview,
 )
 from .settings import settings
 
@@ -36,7 +37,7 @@ EXPORT_SCHEMA_NAME = "sovradar.assessment-export"
 EXPORT_SCHEMA_VERSION = "1.0"
 BACKUP_SCHEMA_NAME = "sovradar.assessment-backup"
 BACKUP_SCHEMA_VERSION = "1.0"
-PRODUCT_VERSION = "0.4.0"
+PRODUCT_VERSION = "0.5.0"
 METHOD_VERSION = "1.0"
 
 CRITICALITY_TEMPLATE = {
@@ -57,6 +58,15 @@ def _iso(value: Any) -> str | None:
     if hasattr(value, "isoformat"):
         return value.isoformat()
     return str(value)
+
+
+def _parse_datetime(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 def _json_loads(raw: str | None, fallback: Any) -> Any:
@@ -202,6 +212,11 @@ def build_structured_export(
     claims = db.scalars(select(AssessmentClaim).where(AssessmentClaim.assessment_id == assessment_id).order_by(AssessmentClaim.created_at)).all()
     overrides = db.scalars(select(GateRequirement).where(GateRequirement.assessment_id == assessment_id).order_by(GateRequirement.gate_id)).all()
     llm_imports = db.scalars(select(LlmImport).where(LlmImport.assessment_id == assessment_id).order_by(LlmImport.created_at)).all()
+    llm_proposal_reviews = db.scalars(
+        select(LlmProposalReview)
+        .where(LlmProposalReview.assessment_id == assessment_id)
+        .order_by(LlmProposalReview.created_at)
+    ).all()
 
     warnings: list[str] = []
     evidence_payload: list[dict[str, Any]] = []
@@ -301,6 +316,21 @@ def build_structured_export(
             }
             for row in llm_imports
         ],
+        "llm_proposal_reviews": [
+            {
+                "id": row.id,
+                "llm_import_id": row.llm_import_id,
+                "proposal_index": row.proposal_index,
+                "question_id": row.question_id,
+                "decision": row.decision,
+                "final_answer_value": row.final_answer_value,
+                "evidence_ids": _json_loads(row.evidence_ids_json, []),
+                "answer_id": row.answer_id or "",
+                "reviewer_note": row.reviewer_note,
+                "created_at": _iso(row.created_at),
+            }
+            for row in llm_proposal_reviews
+        ],
         "warnings": warnings,
     }
 
@@ -330,6 +360,8 @@ def validate_export_payload(payload: dict[str, Any]) -> None:
         expected = dict if field == "relevance_profile" else list
         if not isinstance(payload.get(field), expected):
             raise HTTPException(422, f"invalid or missing field: {field}")
+    if "llm_proposal_reviews" in payload and not isinstance(payload["llm_proposal_reviews"], list):
+        raise HTTPException(422, "invalid field: llm_proposal_reviews")
 
 
 def _decision_label(gates: list[dict[str, Any]]) -> str:
@@ -350,6 +382,7 @@ def render_consultant_report(export: dict[str, Any]) -> str:
     reviews = {item["evidence_id"]: item for item in export["evidence_reviews"]}
     claims = export["claims"]
     llm_imports = export["llm_imports"]
+    proposal_reviews = export.get("llm_proposal_reviews", [])
 
     reviewed_evidence = sum(
         1 for item in reviews.values() if item.get("review_status") in {"reviewed", "approved"}
@@ -452,7 +485,8 @@ def render_consultant_report(export: dict[str, Any]) -> str:
         "",
         "## 8. LLM-Bridge-Auditspur",
         "",
-        f"Importierte LLM-Ergebnisobjekte: **{len(llm_imports)}**. Diese bleiben Vorschläge und ändern ohne Human Review weder Claims noch Hard Gates.",
+        f"Importierte LLM-Ergebnisobjekte: **{len(llm_imports)}**. Human-geprüfte LLM-Antwortvorschläge: **{len(proposal_reviews)}**.",
+        "LLM-Ausgaben bleiben Vorschläge. Erst eine dokumentierte menschliche Prüfung kann eine Radar-Antwort erzeugen; Claims und Hard Gates bleiben davon getrennt.",
         "",
         "---",
         f"Schema: `{export['export_meta']['schema_name']}` v{export['export_meta']['schema_version']} · Produkt {export['export_meta']['product_version']} · Methode {export['export_meta']['method_version']}",
@@ -492,6 +526,8 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
     )
 
     evidence_map: dict[str, str] = {}
+    answer_map: dict[str, str] = {}
+    llm_import_map: dict[str, str] = {}
     missing_raw_files: list[str] = []
     for item in payload["evidence"]:
         old_id = str(item.get("id"))
@@ -533,9 +569,13 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         )
 
     for item in payload["answers"]:
+        old_answer_id = str(item.get("id") or "")
+        new_answer_id = str(uuid.uuid4())
+        if old_answer_id:
+            answer_map[old_answer_id] = new_answer_id
         db.add(
             Answer(
-                id=str(uuid.uuid4()),
+                id=new_answer_id,
                 assessment_id=new_assessment_id,
                 question_id=str(item.get("question_id") or "")[:64],
                 answer_value=str(item.get("answer_value") or ""),
@@ -578,6 +618,10 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         )
 
     for item in payload["llm_imports"]:
+        old_import_id = str(item.get("id") or "")
+        new_import_id = str(uuid.uuid4())
+        if old_import_id:
+            llm_import_map[old_import_id] = new_import_id
         proposals = []
         for proposal in list(item.get("proposals") or []):
             normalized = dict(proposal)
@@ -595,7 +639,7 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         }
         db.add(
             LlmImport(
-                id=str(uuid.uuid4()),
+                id=new_import_id,
                 assessment_id=new_assessment_id,
                 raw_json=json.dumps(raw, ensure_ascii=False),
                 proposals_json=json.dumps(proposals, ensure_ascii=False),
@@ -604,6 +648,42 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
                 validation_status=str(item.get("validation_status") or "valid")[:32],
             )
         )
+
+    restored_review_count = 0
+    for item in list(payload.get("llm_proposal_reviews") or []):
+        old_import_id = str(item.get("llm_import_id") or "")
+        new_import_id = llm_import_map.get(old_import_id)
+        if not new_import_id:
+            continue
+        decision = str(item.get("decision") or "")
+        if decision not in {"accepted", "edited", "rejected"}:
+            raise HTTPException(422, f"invalid LLM proposal review decision: {decision!r}")
+        try:
+            proposal_index = int(item.get("proposal_index"))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(422, "invalid LLM proposal review proposal_index") from exc
+        if proposal_index < 0:
+            raise HTTPException(422, "invalid LLM proposal review proposal_index")
+        old_answer_id = str(item.get("answer_id") or "")
+        created_at = _parse_datetime(item.get("created_at")) or datetime.now(timezone.utc)
+        db.add(
+            LlmProposalReview(
+                id=str(uuid.uuid4()),
+                assessment_id=new_assessment_id,
+                llm_import_id=new_import_id,
+                proposal_index=proposal_index,
+                question_id=str(item.get("question_id") or "")[:64],
+                decision=decision,
+                final_answer_value=str(item.get("final_answer_value") or ""),
+                evidence_ids_json=json.dumps(
+                    _remap_evidence_ids(list(item.get("evidence_ids") or []), evidence_map)
+                ),
+                answer_id=answer_map.get(old_answer_id, ""),
+                reviewer_note=str(item.get("reviewer_note") or ""),
+                created_at=created_at,
+            )
+        )
+        restored_review_count += 1
 
     db.commit()
     db.refresh(assessment)
@@ -640,6 +720,9 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         "assessment_id": new_assessment_id,
         "restored_from_assessment_id": payload["export_meta"].get("source_assessment_id"),
         "evidence_id_map": evidence_map,
+        "answer_id_map": answer_map,
+        "llm_import_id_map": llm_import_map,
+        "restored_llm_proposal_review_count": restored_review_count,
         "missing_raw_file_source_evidence_ids": missing_raw_files,
         "gate_semantic_drift": drift,
         "gate_comparison": comparisons,
