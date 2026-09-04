@@ -10,6 +10,7 @@ Dieser Vorgang löscht unwiderruflich:
   • alle lokal hochgeladenen Evidence-Dateien
   • alle LLM-Bridge-Imports
   • .runtime/ inklusive Exporte/Temp-Daten
+  • .build/ inklusive lokalem Build-CA-Bundle
   • Docker-Container, Netzwerk, DB-Volume und lokal gebaute Images
   • die lokale .env
 
@@ -31,13 +32,19 @@ if [[ -d .runtime ]];then
 fi
 
 docker compose down -v --remove-orphans --rmi local||true
-rm -rf -- .runtime
+rm -rf -- .runtime .build
 rm -f -- .env
 
 if [[ -e .runtime ]];then
   echo "✖ .runtime konnte nicht vollständig entfernt werden." >&2
   ls -ld .runtime >&2 || true
   find .runtime -maxdepth 3 -ls >&2 || true
+  exit 1
+fi
+if [[ -e .build ]];then
+  echo "✖ .build konnte nicht vollständig entfernt werden." >&2
+  ls -ld .build >&2 || true
+  find .build -maxdepth 2 -ls >&2 || true
   exit 1
 fi
 if [[ -e .env ]];then
