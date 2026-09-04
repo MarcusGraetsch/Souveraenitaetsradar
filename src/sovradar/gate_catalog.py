@@ -38,12 +38,22 @@ def load_hard_gates(path: str | Path) -> list[GateDefinition]:
                 raise GateCatalogError(f"invalid requirement level for {gate_id}") from exc
             if any(level not in range(0, 5) for level in requirements.values()):
                 raise GateCatalogError(f"requirement level outside 0..4 for {gate_id}")
+            capability_levels = {
+                level: (row.get(f"Capability {level}") or "").strip()
+                for level in range(0, 5)
+            }
+            missing_descriptions = [level for level, text in capability_levels.items() if not text]
+            if missing_descriptions:
+                raise GateCatalogError(
+                    f"missing capability descriptions for {gate_id}: {missing_descriptions}"
+                )
             gates.append(
                 GateDefinition(
                     gate_id=gate_id,
                     name=(row.get("Gate") or "").strip(),
                     subject=(row.get("Prüfgegenstand") or "").strip(),
                     requirements=requirements,
+                    capability_levels=capability_levels,
                     source_ids=_split_sources(row.get("Source IDs") or ""),
                     provenance=(row.get("Provenienz / Herleitung") or "").strip(),
                 )
