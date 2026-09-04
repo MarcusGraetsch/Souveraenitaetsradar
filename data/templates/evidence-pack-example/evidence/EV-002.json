@@ -1,3 +1,21 @@
 {
-  "evidence_id":"EV-002","evidence_type":"architecture","title":"Workload dependency diagram","producer":"Synthetic Customer Architecture","source_ref":"secure://arch-001","locator":"diagram nodes WL-001/IDP-01/KMS-01","claim_ids":["CL-DEP-01"],"gate_ids":["HG-05","HG-06","HG-07"],"scope":{"workload_id":"WL-001","service":"Service-X"},"valid_at":"2026-09-02T00:00:00Z","version":"2026-09","applied_state":"documented","base_trust":2,"scope_fit":5,"freshness_fit":5,"sensitivity":"internal","review_status":"normalized"
+  "evidence_id": "EV-002",
+  "evidence_type": "architecture",
+  "title": "Workload dependency diagram",
+  "producer": "Synthetic Customer Architecture",
+  "source_ref": "secure://arch-001",
+  "locator": "diagram nodes WL-001/IDP-01/KMS-01",
+  "claim_ids": ["CL-DEP-01"],
+  "gate_ids": ["HG-05", "HG-06", "HG-07"],
+  "request_ids": ["ER-008", "ER-009"],
+  "scope": {"workload_id": "WL-001", "service": "Service-X"},
+  "valid_at": "2026-09-02T00:00:00Z",
+  "version": "2026-09",
+  "applied_state": "documented",
+  "base_trust": 2,
+  "scope_fit": 5,
+  "freshness_fit": 5,
+  "sensitivity": "internal",
+  "review_status": "normalized",
+  "notes": "Dependency map supports trust-anchor and dependency discovery. It does not by itself prove an operational-autonomy test or portfolio concentration."
 }
