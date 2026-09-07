@@ -37,6 +37,14 @@ Danach:
 ./uninstall.sh   # Anwendung + alle erzeugten Daten löschen
 ```
 
+`./install.sh` kann für Reparatur oder Konfigurationsänderungen erneut ausgeführt
+werden und verwendet dabei das bestehende lokale Datenbankpasswort weiter. Existiert
+das Compose-Datenbank-Volume ohne die zugehörige `.env`, bricht die Installation zum
+Schutz vorhandener Daten mit einer konkreten Wiederherstellungs-/Löschanweisung ab,
+statt die API mit unpassenden Zugangsdaten in eine Neustartschleife zu schicken.
+`./test.sh` beendet sich bei einem abgestürzten oder neu startenden API-Container
+frühzeitig und gibt Status sowie die letzten API-Logzeilen aus.
+
 Default: `http://localhost:8080`
 
 > MVP-01 hat noch keine Authentisierung. Die Installation bindet deshalb standardmäßig nur an `127.0.0.1`. Netzwerkfreigabe nur in vertrauenswürdigen Testumgebungen verwenden.

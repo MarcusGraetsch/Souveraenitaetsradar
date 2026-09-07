@@ -11,6 +11,14 @@ command -v curl >/dev/null 2>&1||fail "curl wird für den Healthcheck benötigt.
 command -v python3 >/dev/null 2>&1||fail "python3 wird für den Healthcheck benötigt."
 ok "Docker: $(docker --version)";ok "Compose: $(docker compose version --short)"
 
+EXISTING_DB_PASSWORD=""
+if [[ -f .env ]];then
+  EXISTING_DB_PASSWORD="$(sed -n 's/^POSTGRES_PASSWORD=//p' .env | tail -n 1)"
+  [[ -n "$EXISTING_DB_PASSWORD" ]]||fail "Die vorhandene .env enthält kein POSTGRES_PASSWORD. Bitte Konfiguration reparieren oder mit ./uninstall.sh zurücksetzen."
+elif docker volume inspect sovradar_sovradar_db_data >/dev/null 2>&1;then
+  fail "Es existiert bereits ein Souveränitäts-Radar-Datenbank-Volume, aber keine passende .env. Das Datenbankpasswort kann nicht sicher rekonstruiert werden. Stelle die ursprüngliche .env wieder her oder lösche die lokale Installation bewusst mit: docker compose down --volumes"
+fi
+
 read -rp "Port [8080]: " APP_PORT;APP_PORT="${APP_PORT:-8080}";[[ "$APP_PORT" =~ ^[0-9]+$ ]]||fail "Ungültiger Port"
 printf "Nur lokal erreichbar (empfohlen) oder im Netzwerk?\n  [1] 127.0.0.1\n  [2] 0.0.0.0\n";read -rp "Auswahl [1]: " BIND_CHOICE
 if [[ "${BIND_CHOICE:-1}" == "2" ]];then BIND_HOST="0.0.0.0";warn "MVP-01 hat noch keine Authentisierung. Netzwerkfreigabe nur im vertrauenswürdigen Testnetz.";else BIND_HOST="127.0.0.1";fi
@@ -57,7 +65,14 @@ else
   ok "Host-CA-Bundle für den Docker-Build vorbereitet"
 fi
 
-if command -v openssl >/dev/null 2>&1;then DB_PASSWORD="$(openssl rand -hex 24)";else DB_PASSWORD="$(python3 -c 'import secrets;print(secrets.token_hex(24))')";fi
+if [[ -n "$EXISTING_DB_PASSWORD" ]];then
+  DB_PASSWORD="$EXISTING_DB_PASSWORD"
+  ok "Vorhandene Datenbank-Konfiguration wird weiterverwendet"
+elif command -v openssl >/dev/null 2>&1;then
+  DB_PASSWORD="$(openssl rand -hex 24)"
+else
+  DB_PASSWORD="$(python3 -c 'import secrets;print(secrets.token_hex(24))')"
+fi
 cat >.env <<EOF
 APP_PORT=$APP_PORT
 BIND_HOST=$BIND_HOST
@@ -78,7 +93,7 @@ if ./test.sh;then
   echo;ok "Souveränitäts-Radar ist bereit: http://localhost:${APP_PORT}"
 else
   docker compose ps
-  fail "Healthcheck fehlgeschlagen. Prüfe docker compose logs"
+  fail "Healthcheck fehlgeschlagen. Die API-Diagnose steht unmittelbar oberhalb."
 fi
 
 echo
