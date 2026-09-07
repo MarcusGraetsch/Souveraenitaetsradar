@@ -1,5 +1,5 @@
-version: 11
-updated: "2026-09-04"
+version: 12
+updated: "2026-09-07"
 decisions:
   - id: DEC-001
     status: accepted
@@ -182,3 +182,18 @@ decisions:
     title: Gate-Requirement-Overrides erfordern Begründung und Auditspur
     rationale: Eine manuelle Änderung der internen Gate-Mindeststufe kann die deterministische PASS-/FAIL-Grenze verändern. Abweichungen vom Kritikalitäts-Standard werden deshalb nur mit expliziter Begründung gespeichert; vorheriger und neuer Wert, Quellen und Zeitpunkt bleiben auditierbar. Die Rückkehr zum Standard ist ein eigener dokumentierter Vorgang. Die Gate-Formel und die internen 0-4-Stufen selbst werden dadurch nicht verändert.
     source: INT-03
+  - id: DEC-037
+    status: accepted
+    title: Vergleichende Beratungsentscheidungen werden als DecisionCase mit ArchitectureOptions modelliert
+    rationale: Dieselben Organisations- und Workload-Fakten sollen für mehrere Zielarchitekturen wiederverwendet werden, während jede Option mit demselben Methodenkern ein eigenes Assessment-Ergebnis erhält. Bestehende Standalone-Assessments bleiben zulässig und können später optional einer ArchitectureOption zugeordnet werden.
+    source: INT-04
+  - id: DEC-038
+    status: accepted
+    title: Öffentliche Provider-Evidence erhält eine wiederverwendbare Provider-Intelligence-Schicht
+    rationale: Provider-Dokumentation, Assurance-Nachweise und Service-Capabilities sollen zentral versioniert und wiederverwendet werden, damit sie nicht je Kundenassessment neu erhoben werden. Diese Schicht belegt weiterhin nur Provider/Service Capability im dokumentierten Scope und darf niemals ohne kundenspezifische Evidence zu Applied Capability hochgestuft werden.
+    source: INT-04
+  - id: DEC-039
+    status: accepted
+    title: Empfehlungen entstehen aus transparentem Variantenvergleich und nicht aus einem einzelnen Wahrheitsscore
+    rationale: Der Radar darf eine bevorzugte ArchitectureOption empfehlen, muss dabei aber Hard Gates, getrennte Risiko-/Souveränitätsachsen, Evidence Confidence, Trade-offs und Behandlungsmaßnahmen offenlegen. Ein Hard-Gate-Fail darf nicht durch Scores kompensiert werden; die finale Entscheidung und Risikoakzeptanz bleiben beim Kunden.
+    source: INT-04
