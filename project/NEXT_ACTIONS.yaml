@@ -1,4 +1,4 @@
-version: 18
+version: 19
 updated: "2026-09-08"
 
 priorities:
@@ -191,3 +191,13 @@ completed_baseline:
       - docs/method/C3A_V1_0_REVIEW.md
       - data/method/c3a_v1_0_crosswalk.csv
       - C3A-bedingte Question-Library- und Provenienzkorrekturen
+  - id: NEXT-121
+    title: Post-Merge-Hygiene nach C3A-Integration und CI reparieren
+    status: completed
+    github_issue: 69
+    github_pr: 71
+    outputs:
+      - konsolidiertes internes Quellenregister
+      - robuste, zählwertunabhängige Workflow-Regressionsprüfungen
+      - bereinigte NEXT-120-Issue-Kennung
+      - vollständig grüner PR-Validierungsworkflow vor Merge
