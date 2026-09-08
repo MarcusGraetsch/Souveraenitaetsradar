@@ -1,75 +1,43 @@
-version: 17
+version: 18
 updated: "2026-09-08"
 
 priorities:
-  - id: NEXT-120
-    priority: P0
-    phase: METHOD-ALIGNMENT
-    title: C3A-Volltext gegen Methodenkern v0.4 und Provider Intelligence prüfen
-    owner_role: methodologist
-    status: waiting_input
-    github_issue: 68
-    inputs:
-      - vollständiger BSI-C3A-Kriterienkatalog vom Projektinhaber
-      - docs/method/METHOD_CORE_V0_4_DE.md
-      - docs/method/GLOSSARY_DE.md
-      - docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md
-      - docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md
-      - docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md
-      - docs/method/SOURCE_GUIDE.md
-      - data/method/risk_taxonomy.csv
-      - data/method/r4_hard_gates.csv
-      - data/method/question_bank/
-    outputs:
-      - C3A-v0.4 Gap/Crosswalk mit Fundstellen
-      - Prüfung Provider-/Service-Layer vs. Workload-/Organisationsrisiko
-      - Prüfung der sieben Decision Dimensions
-      - Prüfung Hard Gates und G-z.S-Risiken
-      - notwendige Glossar-/Source-/Decision-/Methodenänderungen
-      - explizite Freigabe oder Anpassung der nachfolgenden Validierungs-/Runtime-Schritte
-    exit_criteria:
-      - C3A-Volltext und Version sind eindeutig erfasst.
-      - Direkte C3A-Aussagen, Ableitungen und interne Methodik sind getrennt gekennzeichnet.
-      - Keine C3A-Lücke wird still durch Annahmen geschlossen.
-      - Notwendige Änderungen sind umgesetzt oder als Folge-Issues erfasst.
-      - NEXT-118 und NEXT-119 sind anschließend explizit freigegeben oder angepasst.
-    next_primary_candidate: true
-
   - id: NEXT-118
     priority: P0
     phase: MVP-VALIDATION
     title: Erste manuelle Consultant-Installation und Evaluation durchführen
     owner_role: evidence-analyst
-    status: blocked
-    blocked_by: [NEXT-120]
+    status: planned
     github_issue: 28
     depends_on: [NEXT-101, NEXT-113, NEXT-115]
     inputs:
       - docs/validation/FIRST_INSTALL_EVALUATION.md
       - docs/method/METHOD_CORE_V0_4_DE.md
+      - docs/method/C3A_V1_0_REVIEW.md
     outputs:
       - manual install result
       - consultant UX findings
       - method findings
       - v0.4 UI-gap findings
       - follow-up issues/decisions
-    note: >-
-      Die Runtime ist technisch testbar, die fachliche Evaluation wird jedoch bewusst
-      erst nach dem C3A-Volltextreview fortgesetzt, damit keine UI-/Methodenentscheidung
-      auf einem möglicherweise noch anzupassenden Souveränitätslayer basiert.
+    exit_criteria:
+      - Installation und Runtime-Tests auf einem frischen Zielsystem sind dokumentiert.
+      - UX- und Methodenlücken der pre-v0.4-Runtime sind erfasst.
+      - Keine C3A-Konformitätsaussage wird aus dem bisherigen Runtime-Scoring abgeleitet.
+    next_primary_candidate: true
 
   - id: NEXT-119
     priority: P0
     phase: METHOD-VALIDATION
     title: Methodenkern v0.4 an Referenzvarianten validieren und Screeningkern kalibrieren
     owner_role: methodologist
-    status: blocked
-    blocked_by: [NEXT-120]
+    status: planned
     github_issue: 67
     inputs:
       - docs/method/METHOD_CORE_V0_4_DE.md
       - docs/method/GLOSSARY_DE.md
-      - docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md
+      - docs/method/C3A_V1_0_REVIEW.md
+      - data/method/c3a_v1_0_crosswalk.csv
       - docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
       - data/method/question_bank/
     reference_variants:
@@ -82,6 +50,7 @@ priorities:
       - 15-25 core screening questions
       - adaptive deep-dive triggers
       - framework-overlay activation rules
+      - C3A requirement-profile activation rules
       - status-quo/opportunity comparison
       - recommendation-template findings
     exit_criteria:
@@ -91,6 +60,7 @@ priorities:
       - BSI-/C3A-/Compliance-Deep-Dives werden nur bei Bedarf aktiviert.
       - Business-/Innovationsnutzen und Status-quo-Risiken sind sichtbar, ohne Hard Gates zu kompensieren.
       - Evidence Gaps und Unsicherheit bleiben getrennt von Risikoeinstufung sichtbar.
+      - C3A Criteria/Additional Criteria werden als Anforderungen und nicht als Reifegradleiter behandelt.
 
   - id: NEXT-116
     priority: P1
@@ -124,7 +94,6 @@ priorities:
       - ZIP entry-count limit
       - pre-read validation
       - regression tests
-    may_run_while_next_120_waits: true
 
   - id: NEXT-104
     priority: P1
@@ -132,23 +101,23 @@ priorities:
     title: Ersten Provider Adapter als reine Übersetzung implementieren
     owner_role: architect
     status: blocked
-    blocked_by: [NEXT-120, NEXT-119]
+    blocked_by: [NEXT-119]
 
   - id: NEXT-105
     priority: P1
     phase: PROVIDER-INTELLIGENCE
     title: Vertrags-/Assurance-Dokument-Pipeline entwerfen
     owner_role: evidence-analyst
-    status: blocked
-    blocked_by: [NEXT-120]
+    status: planned
+    depends_on: [NEXT-119]
 
   - id: NEXT-106
     priority: P1
     phase: FRAMEWORK-DEPTH
     title: C5:2026 und regulatorische Crosswalks verfeinern
     owner_role: researcher
-    status: blocked
-    blocked_by: [NEXT-120]
+    status: planned
+    depends_on: [NEXT-119]
 
   - id: NEXT-107
     priority: P1
@@ -214,3 +183,11 @@ completed_baseline:
     status: completed
     github_issue: 20
     github_pr: 21
+  - id: NEXT-120
+    title: C3A-Volltext gegen Methodenkern v0.4 und Provider Intelligence prüfen
+    status: completed
+    github_issue: 68
+    outputs:
+      - docs/method/C3A_V1_0_REVIEW.md
+      - data/method/c3a_v1_0_crosswalk.csv
+      - C3A-bedingte Question-Library- und Provenienzkorrekturen
