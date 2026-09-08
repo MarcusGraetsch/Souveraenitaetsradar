@@ -1,5 +1,5 @@
-version: 15
-updated: "2026-09-04"
+version: 16
+updated: "2026-09-08"
 priorities:
   - id: NEXT-110
     priority: P0
@@ -87,9 +87,27 @@ priorities:
     status: ready
     github_issue: 28
     depends_on: [NEXT-101, NEXT-113, NEXT-115]
-    inputs: [docs/validation/FIRST_INSTALL_EVALUATION.md]
-    outputs: [manual install result, consultant UX findings, method findings, follow-up issues/decisions]
+    inputs: [docs/validation/FIRST_INSTALL_EVALUATION.md, docs/method/METHOD_CORE_V0_4_DE.md]
+    outputs: [manual install result, consultant UX findings, method findings, v0.4 UI-gap findings, follow-up issues/decisions]
     next_primary_candidate: true
+  - id: NEXT-119
+    priority: P0
+    phase: METHOD-VALIDATION
+    title: Methodenkern v0.4 an Referenzvarianten validieren und Screeningkern kalibrieren
+    owner_role: methodologist
+    status: planned
+    github_issue: 67
+    depends_on: [NEXT-118]
+    inputs: [docs/method/METHOD_CORE_V0_4_DE.md, docs/method/GLOSSARY_DE.md, docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md, data/method/question_bank/]
+    reference_variants: [bestehendes On-Prem, US-Hyperscaler in EU-Region, deutscher/europaeischer Provider, optional hypothetische Soll-Architektur]
+    outputs: [validated decision flow, 15-25 core screening questions, adaptive deep-dive triggers, framework-overlay activation rules, status-quo/opportunity comparison, recommendation-template findings]
+    exit_criteria:
+      - Derselbe Workload kann nachvollziehbar ueber mindestens drei sehr unterschiedliche Varianten verglichen werden.
+      - Das Screening bleibt im Zielkorridor von etwa 15-25 Fragen oder Abweichungen sind fachlich begruendet.
+      - Mindestens ein geopolitischer Sorge-Satz wurde in pruefbare Szenarien uebersetzt und providerneutral auf die Varianten angewendet.
+      - BSI-200-3-Deep-Dive und mindestens ein Compliance-Overlay wurden nur bei Bedarf aktiviert und nicht als Pflichtaudit ausgefuehrt.
+      - Business-/Innovationsnutzen und Status-quo-Risiken sind im Vergleich sichtbar, ohne Hard Gates zu kompensieren.
+      - Evidence Gaps und Unsicherheit bleiben getrennt von Risikoeinstufung sichtbar.
   - id: NEXT-116
     priority: P1
     phase: MVP-UX
@@ -97,9 +115,9 @@ priorities:
     owner_role: methodologist
     status: planned
     github_issue: 22
-    depends_on: [NEXT-115]
-    baseline: "NEXT-115: komplexer KI-Agent work_queue 85 (44 screening + 41 clarification); Public-Content work_queue 84 (43 + 41). Relevant gesamt bereits 124 vs 84."
-    outputs: [smaller immediate screening queue, separate clarification workstream, deterministic gate/domain activation, improved simple-vs-complex differentiation]
+    depends_on: [NEXT-115, NEXT-119]
+    baseline: "NEXT-115: komplexer KI-Agent work_queue 85 (44 screening + 41 clarification); Public-Content work_queue 84 (43 + 41). Relevant gesamt bereits 124 vs 84. Methodenkern v0.4 zielt auf etwa 15-25 sichtbare Screening-Fragen und adaptive Deep Dives."
+    outputs: [smaller immediate screening queue, separate clarification workstream, deterministic gate/domain activation, improved simple-vs-complex differentiation, v0.4 decision-relevance prioritization]
   - id: NEXT-117
     priority: P1
     phase: SECURITY-HARDENING
@@ -153,6 +171,7 @@ priorities:
     title: Inter-Rater-Kalibrierung mit zwei oder mehr Beratern durchführen
     owner_role: methodologist
     status: planned
+    depends_on: [NEXT-119]
   - id: NEXT-109
     priority: P2
     phase: MVP
