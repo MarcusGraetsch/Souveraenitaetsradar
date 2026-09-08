@@ -39,6 +39,12 @@ class Assessment(Base):
     llm_proposal_reviews: Mapped[list[LlmProposalReview]] = relationship(
         back_populates="assessment", cascade="all, delete-orphan"
     )
+    llm_claim_imports: Mapped[list[LlmClaimImport]] = relationship(
+        back_populates="assessment", cascade="all, delete-orphan"
+    )
+    llm_claim_proposal_reviews: Mapped[list[LlmClaimProposalReview]] = relationship(
+        back_populates="assessment", cascade="all, delete-orphan"
+    )
     claims: Mapped[list[AssessmentClaim]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     gate_requirements: Mapped[list[GateRequirement]] = relationship(back_populates="assessment", cascade="all, delete-orphan")
     gate_requirement_changes: Mapped[list[GateRequirementChange]] = relationship(
@@ -190,3 +196,47 @@ class LlmProposalReview(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     assessment: Mapped[Assessment] = relationship(back_populates="llm_proposal_reviews")
+
+
+class LlmClaimImport(Base):
+    __tablename__ = "llm_claim_imports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), index=True)
+    prompt_version: Mapped[str] = mapped_column(String(64))
+    method_version: Mapped[str] = mapped_column(String(32))
+    raw_json: Mapped[str] = mapped_column(Text)
+    proposals_json: Mapped[str] = mapped_column(Text, default="[]")
+    gaps_json: Mapped[str] = mapped_column(Text, default="[]")
+    warnings_json: Mapped[str] = mapped_column(Text, default="[]")
+    validation_status: Mapped[str] = mapped_column(String(32), default="valid")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="llm_claim_imports")
+
+
+class LlmClaimProposalReview(Base):
+    __tablename__ = "llm_claim_proposal_reviews"
+    __table_args__ = (
+        UniqueConstraint(
+            "llm_claim_import_id",
+            "proposal_index",
+            name="uq_llm_claim_proposal_review_once",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    assessment_id: Mapped[str] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), index=True)
+    llm_claim_import_id: Mapped[str] = mapped_column(ForeignKey("llm_claim_imports.id", ondelete="CASCADE"), index=True)
+    proposal_index: Mapped[int] = mapped_column(Integer)
+    gate_id: Mapped[str] = mapped_column(String(16), index=True)
+    decision: Mapped[str] = mapped_column(String(32))
+    final_statement: Mapped[str] = mapped_column(Text, default="")
+    final_capability_level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    evidence_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    question_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    claim_id: Mapped[str] = mapped_column(String(36), default="")
+    reviewer_note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    assessment: Mapped[Assessment] = relationship(back_populates="llm_claim_proposal_reviews")

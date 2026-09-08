@@ -27,6 +27,8 @@ from .models import (
     EvidenceReview,
     GateRequirement,
     GateRequirementChange,
+    LlmClaimImport,
+    LlmClaimProposalReview,
     LlmImport,
     LlmProposalReview,
 )
@@ -223,6 +225,16 @@ def build_structured_export(
         .where(LlmProposalReview.assessment_id == assessment_id)
         .order_by(LlmProposalReview.created_at)
     ).all()
+    llm_claim_imports = db.scalars(
+        select(LlmClaimImport)
+        .where(LlmClaimImport.assessment_id == assessment_id)
+        .order_by(LlmClaimImport.created_at)
+    ).all()
+    llm_claim_proposal_reviews = db.scalars(
+        select(LlmClaimProposalReview)
+        .where(LlmClaimProposalReview.assessment_id == assessment_id)
+        .order_by(LlmClaimProposalReview.created_at)
+    ).all()
 
     warnings: list[str] = []
     evidence_payload: list[dict[str, Any]] = []
@@ -351,6 +363,36 @@ def build_structured_export(
             }
             for row in llm_proposal_reviews
         ],
+        "llm_claim_imports": [
+            {
+                "id": row.id,
+                "prompt_version": row.prompt_version,
+                "method_version": row.method_version,
+                "validation_status": row.validation_status,
+                "proposals": _json_loads(row.proposals_json, []),
+                "evidence_gaps": _json_loads(row.gaps_json, []),
+                "warnings": _json_loads(row.warnings_json, []),
+                "created_at": _iso(row.created_at),
+            }
+            for row in llm_claim_imports
+        ],
+        "llm_claim_proposal_reviews": [
+            {
+                "id": row.id,
+                "llm_claim_import_id": row.llm_claim_import_id,
+                "proposal_index": row.proposal_index,
+                "gate_id": row.gate_id,
+                "decision": row.decision,
+                "final_statement": row.final_statement,
+                "final_capability_level": row.final_capability_level,
+                "evidence_ids": _json_loads(row.evidence_ids_json, []),
+                "question_ids": _json_loads(row.question_ids_json, []),
+                "claim_id": row.claim_id or "",
+                "reviewer_note": row.reviewer_note,
+                "created_at": _iso(row.created_at),
+            }
+            for row in llm_claim_proposal_reviews
+        ],
         "warnings": warnings,
     }
 
@@ -380,10 +422,14 @@ def validate_export_payload(payload: dict[str, Any]) -> None:
         expected = dict if field == "relevance_profile" else list
         if not isinstance(payload.get(field), expected):
             raise HTTPException(422, f"invalid or missing field: {field}")
-    if "gate_requirement_changes" in payload and not isinstance(payload["gate_requirement_changes"], list):
-        raise HTTPException(422, "invalid field: gate_requirement_changes")
-    if "llm_proposal_reviews" in payload and not isinstance(payload["llm_proposal_reviews"], list):
-        raise HTTPException(422, "invalid field: llm_proposal_reviews")
+    for field in (
+        "gate_requirement_changes",
+        "llm_proposal_reviews",
+        "llm_claim_imports",
+        "llm_claim_proposal_reviews",
+    ):
+        if field in payload and not isinstance(payload[field], list):
+            raise HTTPException(422, f"invalid field: {field}")
 
 
 def _decision_label(gates: list[dict[str, Any]]) -> str:
@@ -407,6 +453,8 @@ def render_consultant_report(export: dict[str, Any]) -> str:
     requirement_changes = export.get("gate_requirement_changes", [])
     llm_imports = export["llm_imports"]
     proposal_reviews = export.get("llm_proposal_reviews", [])
+    claim_imports = export.get("llm_claim_imports", [])
+    claim_proposal_reviews = export.get("llm_claim_proposal_reviews", [])
 
     reviewed_evidence = sum(
         1 for item in reviews.values() if item.get("review_status") in {"reviewed", "approved"}
@@ -522,8 +570,9 @@ def render_consultant_report(export: dict[str, Any]) -> str:
         "",
         "## 8. LLM-Bridge-Auditspur",
         "",
-        f"Importierte LLM-Ergebnisobjekte: **{len(llm_imports)}**. Human-geprüfte LLM-Antwortvorschläge: **{len(proposal_reviews)}**.",
-        "LLM-Ausgaben bleiben Vorschläge. Erst eine dokumentierte menschliche Prüfung kann eine Radar-Antwort erzeugen; Claims und Hard Gates bleiben davon getrennt.",
+        f"Importierte LLM-Antwortobjekte: **{len(llm_imports)}**. Human-geprüfte LLM-Antwortvorschläge: **{len(proposal_reviews)}**.",
+        f"Importierte LLM-Feststellungsobjekte: **{len(claim_imports)}**. Human-geprüfte LLM-Feststellungsvorschläge: **{len(claim_proposal_reviews)}**.",
+        "LLM-Ausgaben bleiben Vorschläge. Antwortvorschläge werden erst durch dokumentierte menschliche Prüfung zu Radar-Antworten; Feststellungsvorschläge werden erst durch dokumentierte menschliche Prüfung zu reviewed Claims. Gate-Ergebnisse werden weiterhin ausschließlich deterministisch aus den bestätigten Daten berechnet.",
         "",
         "---",
         f"Schema: `{export['export_meta']['schema_name']}` v{export['export_meta']['schema_version']} · Produkt {export['export_meta']['product_version']} · Methode {export['export_meta']['method_version']}",
@@ -564,7 +613,9 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
 
     evidence_map: dict[str, str] = {}
     answer_map: dict[str, str] = {}
+    claim_map: dict[str, str] = {}
     llm_import_map: dict[str, str] = {}
+    llm_claim_import_map: dict[str, str] = {}
     missing_raw_files: list[str] = []
     for item in payload["evidence"]:
         old_id = str(item.get("id"))
@@ -625,9 +676,13 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         )
 
     for item in payload["claims"]:
+        old_claim_id = str(item.get("id") or "")
+        new_claim_id = str(uuid.uuid4())
+        if old_claim_id:
+            claim_map[old_claim_id] = new_claim_id
         db.add(
             AssessmentClaim(
-                id=str(uuid.uuid4()),
+                id=new_claim_id,
                 assessment_id=new_assessment_id,
                 gate_id=str(item.get("gate_id") or "")[:16],
                 statement=str(item.get("statement") or ""),
@@ -757,6 +812,93 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         )
         restored_review_count += 1
 
+    for item in list(payload.get("llm_claim_imports") or []):
+        old_import_id = str(item.get("id") or "")
+        new_import_id = str(uuid.uuid4())
+        if old_import_id:
+            llm_claim_import_map[old_import_id] = new_import_id
+        proposals = []
+        for proposal in list(item.get("proposals") or []):
+            normalized = dict(proposal)
+            normalized["evidence_ids"] = _remap_evidence_ids(
+                list(normalized.get("evidence_ids") or []), evidence_map
+            )
+            proposals.append(normalized)
+        gaps = list(item.get("evidence_gaps") or [])
+        warnings = list(item.get("warnings") or [])
+        prompt_version = str(item.get("prompt_version") or "claim-proposals-v1")[:64]
+        method_version = str(item.get("method_version") or METHOD_VERSION)[:32]
+        raw = {
+            "assessment_id": new_assessment_id,
+            "prompt_version": prompt_version,
+            "method_version": method_version,
+            "proposals": proposals,
+            "evidence_gaps": gaps,
+            "warnings": warnings,
+        }
+        db.add(
+            LlmClaimImport(
+                id=new_import_id,
+                assessment_id=new_assessment_id,
+                prompt_version=prompt_version,
+                method_version=method_version,
+                raw_json=json.dumps(raw, ensure_ascii=False),
+                proposals_json=json.dumps(proposals, ensure_ascii=False),
+                gaps_json=json.dumps(gaps, ensure_ascii=False),
+                warnings_json=json.dumps(warnings, ensure_ascii=False),
+                validation_status=str(item.get("validation_status") or "valid")[:32],
+            )
+        )
+
+    restored_claim_review_count = 0
+    for item in list(payload.get("llm_claim_proposal_reviews") or []):
+        old_import_id = str(item.get("llm_claim_import_id") or "")
+        new_import_id = llm_claim_import_map.get(old_import_id)
+        if not new_import_id:
+            continue
+        decision = str(item.get("decision") or "")
+        if decision not in {"accepted", "edited", "rejected"}:
+            raise HTTPException(422, f"invalid LLM claim proposal review decision: {decision!r}")
+        try:
+            proposal_index = int(item.get("proposal_index"))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(422, "invalid LLM claim proposal review proposal_index") from exc
+        if proposal_index < 0:
+            raise HTTPException(422, "invalid LLM claim proposal review proposal_index")
+        gate_id = str(item.get("gate_id") or "")[:16]
+        if gate_id not in _gate_map():
+            raise HTTPException(422, f"invalid LLM claim proposal review gate_id: {gate_id!r}")
+        capability = item.get("final_capability_level")
+        if capability is not None:
+            try:
+                capability = int(capability)
+            except (TypeError, ValueError) as exc:
+                raise HTTPException(422, "invalid LLM claim proposal review capability level") from exc
+            if capability not in range(0, 5):
+                raise HTTPException(422, "LLM claim proposal review capability level outside 0..4")
+        old_claim_id = str(item.get("claim_id") or "")
+        created_at = _parse_datetime(item.get("created_at")) or datetime.now(timezone.utc)
+        db.add(
+            LlmClaimProposalReview(
+                id=str(uuid.uuid4()),
+                assessment_id=new_assessment_id,
+                llm_claim_import_id=new_import_id,
+                proposal_index=proposal_index,
+                gate_id=gate_id,
+                decision=decision,
+                final_statement=str(item.get("final_statement") or ""),
+                final_capability_level=capability,
+                evidence_ids_json=json.dumps(
+                    _remap_evidence_ids(list(item.get("evidence_ids") or []), evidence_map)
+                ),
+                question_ids_json=json.dumps(list(item.get("question_ids") or [])),
+                claim_id=claim_map.get(old_claim_id, ""),
+                reviewer_note=str(item.get("reviewer_note") or ""),
+                created_at=created_at,
+            )
+        )
+        restored_claim_review_count += 1
+
     db.commit()
     db.refresh(assessment)
     restored_gates = _gate_snapshot(assessment, db)
@@ -793,9 +935,12 @@ def restore_structured_export(payload: dict[str, Any], db: Session) -> dict[str,
         "restored_from_assessment_id": payload["export_meta"].get("source_assessment_id"),
         "evidence_id_map": evidence_map,
         "answer_id_map": answer_map,
+        "claim_id_map": claim_map,
         "llm_import_id_map": llm_import_map,
+        "llm_claim_import_id_map": llm_claim_import_map,
         "restored_gate_requirement_change_count": restored_requirement_change_count,
         "restored_llm_proposal_review_count": restored_review_count,
+        "restored_llm_claim_proposal_review_count": restored_claim_review_count,
         "missing_raw_file_source_evidence_ids": missing_raw_files,
         "gate_semantic_drift": drift,
         "gate_comparison": comparisons,

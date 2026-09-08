@@ -238,3 +238,48 @@ export type LlmProposalReview={
   reviewer_note:string
   created_at:string
 }
+
+export type LlmClaimProposal={
+  gate_id:string
+  statement:string
+  capability_level:number|null
+  evidence_ids:string[]
+  question_ids:string[]
+  rationale:string
+  confidence:number
+}
+
+export type LlmClaimGap={
+  gate_id:string
+  question_ids:string[]
+  missing:string
+}
+
+export type LlmClaimImport={
+  id:string
+  assessment_id:string
+  prompt_version:string
+  method_version:string
+  validation_status:string
+  proposals:LlmClaimProposal[]
+  evidence_gaps:LlmClaimGap[]
+  warnings:string[]
+  created_at:string
+}
+
+export type LlmClaimProposalReviewDecision='accepted'|'edited'|'rejected'
+export type LlmClaimProposalReview={
+  id:string
+  assessment_id:string
+  llm_claim_import_id:string
+  proposal_index:number
+  gate_id:string
+  decision:LlmClaimProposalReviewDecision
+  final_statement:string
+  final_capability_level:number|null
+  evidence_ids:string[]
+  question_ids:string[]
+  claim_id:string|null
+  reviewer_note:string
+  created_at:string
+}
