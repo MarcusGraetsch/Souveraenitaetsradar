@@ -1,209 +1,186 @@
 # Project Handoff
 
-## Kurzfassung
+## Kurzfassung – Stand 08.09.2026
 
-Der Souveränitäts-Radar besteht aus einem cloud-agnostischen Methodenkern und einer lokal installierbaren Consultant-Webanwendung. Excel v1.0 bleibt Methodenreferenz, nicht operative UI. Die aktuelle Arbeitskette lautet:
+Der Souveränitäts-Radar ist fachlich auf **Decision Support für digitale Souveränität** ausgerichtet. Der aktuelle Zielstand steht in `docs/method/METHOD_CORE_V0_4_DE.md`.
+
+Die technische Webapp ist vorhanden und validiert, bildet aber noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Questions-Workflows ab. Diese Abweichung ist bewusst dokumentiert: **Zielmethode und Runtime sind noch nicht vollständig migriert.**
+
+Der bisherige C3A-Review-Gate **NEXT-120 / Issue #68 ist fachlich abgeschlossen**. Der vollständige BSI-C3A-v1.0-Text wurde gegen Methodenkern v0.4, Provider Intelligence, Hard Gates, Risikotaxonomie und Question Library geprüft.
+
+Kanonische C3A-Artefakte:
+
+- `docs/method/C3A_V1_0_REVIEW.md`
+- `data/method/c3a_v1_0_crosswalk.csv`
+- `SRC-04` in `data/method/source_register.csv`
+
+## Wichtigste C3A-Konsequenzen
+
+- C3A ist ein nicht bindender Provider-/Service-Autonomie- und Evidence-Rahmen und ersetzt nicht den kunden-/workloadspezifischen Variantenvergleich.
+- C3A deckt SOV-1 bis SOV-6 ab; SOV-7 Security & Compliance wird insbesondere über C5/IT-Grundschutz adressiert, SOV-8 liegt außerhalb des BSI-Scope.
+- C3A setzt die Erfüllung der C5-Kriterien voraus. Eine formale C3A-Erfüllung darf daher nicht ohne belastbare C5-Scope-Evidence behauptet werden.
+- `Criterion` und `Additional Criterion` sind keine Reifegradstufen. EU-/Deutschlandvarianten sind alternative Anforderungen. Der Kunde wählt abhängig von Use Case und Souveränitätsbedarf ein Requirement Profile.
+- C3A-Datenklassen `Account Data`, `Cloud Service Customer Data`, `Cloud Service Derived Data` und `Cloud Service Provider Data` werden im C3A-/Provider-Intelligence-Scope getrennt betrachtet.
+- C3A SOV-6 beschreibt primär providerseitige Source-Code-, Build-, Entwicklungs- und Fortführungsautonomie. Kundenseitiger Exit/Portabilität bleibt primär bei Data Act, DORA, Bitkom und interner Radar-Methodik.
+- Mehrere frühere C3A-Fragenzuordnungen wurden quellengetreu korrigiert; Details im Crosswalk.
+
+## Aktueller fachlicher Zielstand
+
+### Beratungsziel
+
+Für einen konkreten Workload werden mehrere realistische Betriebs-/Architekturvarianten verglichen. Der Radar darf eine Empfehlung formulieren; finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
+
+Typische Optionen:
+
+- Status quo / heutiges On-Prem
+- modernisiertes On-Prem / Private Cloud
+- US-Hyperscaler in EU-Region
+- deutscher/europäischer Cloud-Provider
+- chinesischer Provider
+- Sovereign Cloud
+- Hybrid-/Multi-Cloud
+- hypothetische Sollarchitektur
+
+### Sichtbare Entscheidungsdimensionen
+
+1. Geschäft & Innovation
+2. Security & Resilienz
+3. Recht, Daten & Kontrolle
+4. Technologie & Exit
+5. Organisation & Skills
+6. Lieferkette & Geopolitik
+7. Wirtschaft & Vertrag
+
+Separat: **Evidence Confidence / Belastbarkeit der Erkenntnisse**.
+
+### Framework-Rollen
+
+Frameworks werden nicht als mehrere Vollprüfungen gestapelt:
+
+- Bitkom Cloud-Souveränität 2026: Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen, Exit
+- EU Cloud Sovereignty Framework: Provider-/Service-Souveränität und Evidence
+- BSI C3A: konkretisierender Provider-/Service-Autonomie- und Evidence-Layer für SOV-1 bis SOV-6
+- BSI 200-3 / IT-Grundschutz: Anschlussfähigkeit, Security-/Resilienz-Deep-Dive, Gefährdungs- und Vollständigkeitsreferenz
+- Data Act: Exit/Switching/Portabilität, soweit anwendbar
+- C5: Security-/Assurance-Evidence und C3A-Voraussetzung
+- NIS2, DORA, DSGVO/EDPB, AI Act usw.: nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay; sonst ggf. Methoden-/Fragenquelle
+
+### Fragenlogik
+
+Die Question Bank bleibt eine **adaptive Question Library**, kein Pflichtfragebogen.
+
+Zielbild:
 
 ```text
-Assessment
-  -> Scope / Kritikalität / CIA
-  -> Relevanzprofil
-  -> Progressive Questions
-       -> Screening
-       -> Klärung nötig
-       -> Deep Dive
-       -> Erledigt
-       -> Alle Fragen / Audit
-  -> Evidence erfassen
-  -> Evidence Review / Trust
-  -> Evidence-Request-Coverage prüfen
-  -> optional LLM Bridge
-  -> Human-reviewed Claims
-  -> Gate Requirements prüfen/überschreiben
-  -> Hard Gates PASS / FAIL / UNVERIFIED / N/A
-  -> Ergebnis
-  -> Structured Export / Consultant Report / Backup / Restore
+vorhandene Artefakte / Provider Intelligence
+  -> Vorbefüllung
+  -> ca. 15–25 Screening-Fragen
+  -> nur entscheidungsrelevante Deep Dives / ausgewählte Requirement Profiles
+  -> Evidence / Claims / Risiken / Gates
+  -> Variantenvergleich
+  -> Entscheidungsvorlage / Empfehlung
 ```
 
-NEXT-101, NEXT-112, NEXT-113, NEXT-114 und NEXT-115 sind technisch abgeschlossen bzw. für den Merge von PR #27 validiert. Der nächste P0-Schritt ist **NEXT-118 / Issue #28: erste manuelle Consultant-Installation und Evaluation**.
+Der Zielkorridor 15–25 ist eine interne Designhypothese und muss in NEXT-119 an Referenzfällen kalibriert werden.
 
-## Verbindliche Methodenregeln
+### Intake
 
-- Security Capability, Sovereignty Capability, Workload Sovereignty Risk und Evidence Confidence bleiben getrennte Achsen.
-- Gate first, score second.
-- Provider/Service Capability ist nicht Applied Capability.
-- Fehlende Evidence ist `UNVERIFIED`, kein erfundenes PASS oder FAIL.
-- Human-reviewed/approved Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
-- Raw Evidence oder LLM-Proposals wirken niemals direkt auf Gates.
-- Evidence-Request-Coverage ist ein Workflow-/Sufficiency-Zustand und **kein Hard-Gate-Ergebnis**.
-- Gate-Requirement-Defaults sind interne Startkonfigurationen und keine Normvorgaben.
-- Radar Capability Level 0–4 ist interne Operationalisierung und kein offizieller EU-SEAL.
-- Customer-mediated Evidence ist Standard; Kunden-Cloud-Credentials sind keine Voraussetzung.
+Optionale Quellen:
 
-## Guided Workflow
+- Interview / Workshop
+- Servicekatalog / CMDB
+- ArchiMate / EA-Modelle
+- Architekturdiagramme
+- BIA / BCM
+- ISMS / Risikoregister
+- Verträge / SLA / AVV / Exit-Klauseln
+- IaC / Terraform / OpenTofu / Bicep / CloudFormation
+- Kubernetes / Helm / Argo CD / GitOps
+- IAM / PKI / KMS
+- FinOps / Kosteninformationen
+- Backup-/Restore-/DR-/Exit-Tests
 
-Applicability und Workflow Stage bleiben getrennt.
+Keiner dieser Artefakttypen ist Voraussetzung. Kontextquelle ≠ automatisch ausreichende Evidence.
 
-Applicability:
+### Geopolitik
 
-- `applicable`
-- `needs_review`
-- `not_applicable`
+Providerherkunft ist kein Score. Politische oder geopolitische Sorgen werden in prüfbare Szenarien zerlegt, z. B.:
 
-Workflow Stage:
+- staatlich erzwungener Zugriff
+- Sanktionen / Exportkontrollen
+- Serviceentzug / Servicebeschränkung
+- Support-/Updateverlust
+- Change of Control
+- Preis-/Vertragsschock
 
-- `screening`
-- `clarification`
-- `deep_dive`
-- `completed`
-- `excluded`
+Die Szenarien werden auf alle relevanten Varianten angewandt, auch auf On-Prem-Lieferketten.
 
-`needs_review` darf niemals still verschwinden. Alle 128 Methodenfragen bleiben über die All-Questions-/Audit-Ansicht inspizierbar. Ein LLM entscheidet weder Applicability noch Workflow Stage.
+## Bestehende verbindliche Evidence-/Gate-Regeln
 
-NEXT-115 Baseline komplexer KI-Agent: 128 total, 124 relevant, 83 applicable, 41 needs_review, 4 not_applicable; Workflow 44 screening, 41 clarification, 39 deep_dive, 4 excluded. Der Public-Content-Fall ist mit 84 relevanten Fragen kürzer, besitzt aber wegen `work = screening + clarification` fast dieselbe unmittelbare Queue. NEXT-116 / Issue #22 bleibt dafür als P1-UX-Follow-up offen.
+- cloud-agnostischer Core
+- Customer-mediated Evidence; keine Cloud-Credentials als Voraussetzung
+- Provider Adapter = Translation only
+- Provider/Service Capability ≠ Applied Capability
+- Evidence Confidence ≠ Risikohöhe
+- Gate first, score second
+- fehlende Evidence = `UNVERIFIED`, nicht automatisch FAIL
+- Human-reviewed Claims sind die einzige Brücke von Evidence zu deterministischen Hard Gates
+- LLM-Proposals wirken ohne Human Review nicht auf Gates
+- Legal Conclusions, Risikoakzeptanz und Kundenentscheidung bleiben menschlich
+- Raw Kundenevidence wird nicht committed
+- aktuelle 0–4-Level und acht Gate-Domänen sind interne MVP-Operationalisierung, keine C3A-/EU-Skala
 
-## NEXT-101 – Customer Evidence Pack Pilot
+## Runtime-Stand
 
-PR #27 implementiert den ersten providerneutralen Customer-mediated-Evidence-Pilot ohne Cloud-Credentials.
+Vorhanden und technisch validiert:
 
-### Evidence Pack
+- React/Vite Consultant UI
+- FastAPI / PostgreSQL / Docker Compose
+- Assessment + Relevanzprofil
+- Applicability `applicable | needs_review | not_applicable`
+- Workflow `screening | clarification | deep_dive | completed | excluded`
+- Evidence Intake / Evidence Review
+- Evidence -> Claim -> Hard Gate
+- Copy/Paste LLM Bridge
+- Structured Export / Consultant Report / Backup / Restore
 
-Das synthetische Pack enthält fünf Evidence-Klassen:
+Die Runtime ist aktuell **pre-v0.4** hinsichtlich DecisionCase/ArchitectureOptions, Status-quo-/Business-Value-Vergleich, Requirement Profiles, sieben sichtbaren Decision Dimensions und stark verkleinertem Screeningkern.
 
-- contractual
-- architecture
-- provider_export
-- test_report
-- public_provider
+## Aktuelle Reihenfolge
 
-Evidence Records besitzen jetzt explizite `request_ids`, die auf `data/method/evidence_request_catalog.csv` verweisen. Das Mapping ist interne Methodenmetadaten und keine Normfeststellung.
+### 1. NEXT-118 / Issue #28 – erster operativer Schritt
 
-### Evidence-Coverage
+Manuelle Consultant-Installation und Evaluation der vorhandenen Runtime auf einem frischen Zielsystem. Dabei explizit die Differenz zwischen pre-v0.4-UI und Zielmethodik dokumentieren.
 
-`src/sovradar/evidence_coverage.py` bewertet assessment-spezifische Evidence Requests konservativ mit vier Zuständen:
+### 2. NEXT-119 / Issue #67 – Methodenvalidierung
 
-- `VERIFIED`: Scope, Trust und Applied State passen und Evidence ist reviewed/approved.
-- `REVIEW_REQUIRED`: Evidence passt technisch, Human Review fehlt noch.
-- `INSUFFICIENT`: gemappte Evidence verfehlt Scope, Trust oder Applied-State-Anforderung.
-- `MISSING`: keine Evidence ist dem Request zugeordnet.
+Methodenkern v0.4 an mehreren Referenzvarianten validieren; Screeningkern, Requirement-Profile-/Overlay-Aktivierung und Empfehlungsvorlage kalibrieren.
 
-Die Applied-State-Beziehung ist bewusst nicht als simple numerische Rangfolge implementiert. `observed` und `configured` sind beispielsweise nicht austauschbar.
+### 3. Erst danach größere Runtime-Migration
 
-Baseline des synthetischen High-Criticality-Falls:
+Schrittweise gemäß `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`. Insbesondere keine voreilige Übernahme der heutigen C3A-Crosswalk-Einträge als globale Hard Gates.
 
-- 11 erforderliche Evidence Requests
-- 3 VERIFIED
-- 4 REVIEW_REQUIRED
-- 1 INSUFFICIENT
-- 3 MISSING
-- 5 Evidence-Klassen
-- keine Scope-Mismatches
+## Parallel zulässig
 
-Öffentliche Provider-Dokumentation mit `applied_state=available` erfüllt eine Anforderung an `configured` Applied Capability ausdrücklich nicht.
+- Security-Hardening, insbesondere Issue #25 / NEXT-117 und Issue #26
+- Bugfixes
+- Repository-/CI-Hygiene
+- Provider-/Framework-Recherche ohne Vorwegnahme noch nicht validierter Scoringregeln
 
-### Live-Webapp-Pilot
+## Primäre Dokumente für den nächsten Agenten
 
-`tools/validation/customer_evidence_pack_webapp.py` führt das Pack durch die laufende Webanwendung:
+1. `AGENTS.md`
+2. `project/PROJECT_STATE.yaml`
+3. dieses Handoff
+4. `project/NEXT_ACTIONS.yaml`
+5. `project/DECISIONS.yaml`
+6. `docs/method/METHOD_CORE_V0_4_DE.md`
+7. `docs/method/GLOSSARY_DE.md`
+8. `docs/method/C3A_V1_0_REVIEW.md`
+9. `data/method/c3a_v1_0_crosswalk.csv`
+10. `docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md`
+11. `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`
+12. `docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md`
+13. `docs/method/SOURCE_GUIDE.md`
 
-1. Assessment und Relevanzprofil anlegen.
-2. fünf Evidence Records aufnehmen.
-3. Applied State, Trust und Review Status übernehmen.
-4. explizite interne Gate Requirements setzen.
-5. ausschließlich den im Pilotplan ausdrücklich vorgegebenen Human-Reviewed Claim anlegen.
-6. Hard Gates berechnen.
-7. Structured Export und Consultant Report prüfen.
-
-Erwarteter und validierter Zustand:
-
-- HG-01 = PASS
-- HG-02 bis HG-08 = UNVERIFIED
-
-Das ist absichtlich konservativ. Der Runner erzeugt **keine Claims automatisch aus Evidence-Coverage**. Nur der explizite synthetische Consultant-Claim darf Gate-Wirkung entfalten.
-
-### CI
-
-GitHub Actions Run `33837372041`, Artifact `9923731562`:
-
-- Python PASS
-- Core Tests PASS
-- API Tests PASS
-- Offline NEXT-101 Coverage Pilot PASS
-- Frontend PASS
-- Compose Smoke PASS
-- NEXT-114 Regression PASS
-- NEXT-115 Regression PASS
-- NEXT-113 Export/Restore Regression PASS
-- NEXT-101 Live-Webapp-Pilot PASS
-- Stop/Restart/Test PASS
-- vollständiger Uninstall PASS
-
-## NEXT-113 – Export / Report / Backup / Restore
-
-- Structured Export ist versioniert und enthält standardmäßig keine Raw Evidence.
-- Consultant Report minimiert Evidence-Inhalte.
-- Full Backup mit Raw Evidence ist explizites Opt-in.
-- Restore erzeugt ein neues Assessment, remappt Referenzen und berechnet Gates neu.
-- semantischer Gate-Vergleich nach Restore ist vorhanden.
-
-Merge-Gate Run: `33834276156`, Artifact `9922749183`.
-
-## Offene Security-Hardening-Punkte
-
-### Issue #25 / NEXT-117
-
-Vor Nutzung nicht vertrauenswürdiger ZIP-Backups fehlen noch Vorablimits für:
-
-- `ZipInfo.file_size`
-- unkomprimierte Gesamtgröße
-- per-Evidence-Größe
-- Anzahl ZIP-Einträge
-
-### Issue #26
-
-Structured JSON und `assessment.json` aus Backup-ZIPs sollen vor untrusted Nutzung vollständig serverseitig gegen das versionierte Export-Schema validiert werden.
-
-Diese Findings blockieren den lokalen Ersttest mit eigenen synthetischen Daten nicht, sind aber vor fremden/untrusted Importen zu schließen.
-
-## NEXT-118 – erste manuelle Consultant-Evaluation
-
-Runbook:
-
-`docs/validation/FIRST_INSTALL_EVALUATION.md`
-
-Ziel: Nicht erneut nur technische Automation testen, sondern die Anwendung als Berater selbst bedienen und bewerten.
-
-Prüfschwerpunkte:
-
-- Installation und lokaler Zugriff
-- Scope-/Assessment-Verständlichkeit
-- Guided Workflow und Fragenmenge
-- Evidence Intake, Applied State und Trust
-- Human-reviewed Claims
-- Requirement/Capability/Evidence-Logik der Hard Gates
-- Export, Consultant Report, Backup und Restore
-- Trennung fachlicher Methodikprobleme von reinen UX-Problemen
-
-Für Findings mindestens Stelle, Beobachtung, Erwartung, Schweregrad und Einordnung `Methodik` vs. `Produkt/UX` notieren.
-
-## Agent-Regeln
-
-- `AGENTS.md` zuerst lesen.
-- Danach `project/PROJECT_STATE.yaml`, dieses Handoff und `project/NEXT_ACTIONS.yaml` lesen.
-- Keine Kunden-Cloud-Credentials anfordern.
-- Keine LLM API im MVP ohne neue Decision.
-- Keine Provider-spezifische Logik in Gate-/Rule-Core.
-- Raw Kundenevidence nie committen.
-- LLM-Proposals niemals automatisch als reviewed Claim/Answer übernehmen.
-- Evidence-Coverage niemals automatisch in reviewed Claims umwandeln.
-- Fehlende Evidence niemals automatisch als FAIL interpretieren.
-- `needs_review` niemals still ausblenden.
-- Workflow Stage niemals als Ersatz für Applicability verwenden.
-- substantielle Änderungen über Issue/Branch/PR/CI/Agent-Log dokumentieren.
-
-## Unmittelbar nächste Schritte
-
-1. PR #27 nach finalem Self-Review mergen; Issue #2 schließen.
-2. Main-CI prüfen.
-3. NEXT-118 / Issue #28 auf einem frischen Zielsystem durchführen.
-4. Findings aus dem manuellen Test als konkrete Issues/Decisions erfassen.
-5. Danach Priorität zwischen NEXT-116, Security-Hardening (#25/#26) und erstem realen Customer-mediated Pilot festlegen.
+`docs/history/` und Agent-Logs sind historische Nachweise, nicht die aktuelle Fachquelle. Repo-State schlägt Chatgedächtnis.

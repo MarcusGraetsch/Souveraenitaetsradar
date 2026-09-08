@@ -1,95 +1,67 @@
-version: 15
-updated: "2026-09-04"
+version: 18
+updated: "2026-09-08"
+
 priorities:
-  - id: NEXT-110
-    priority: P0
-    phase: MVP-01A
-    title: Installierbaren Consultant-Webapp-Skeleton liefern
-    owner_role: developer
-    status: completed
-    github_issue: 11
-    outputs: [React/Vite Web UI, FastAPI Backend, PostgreSQL persistence, local evidence storage, Docker Compose, lifecycle scripts, Copy/Paste LLM Bridge]
-  - id: NEXT-111
-    priority: P0
-    phase: MVP-01B
-    title: Consultant Question Applicability und Guided Workflow implementieren
-    owner_role: methodologist
-    status: completed
-    github_issue: 13
-    outputs: [Relevanzprofil, deterministic applicability engine, guided question API, guided question UI, LLM Bridge filtering]
-  - id: NEXT-112
-    priority: P0
-    phase: MVP-01B
-    title: Evidence -> Claim -> Hard Gate in Webanwendung integrieren
-    owner_role: developer
-    status: completed
-    github_issue: 15
-    outputs: [typed gate catalog, claim model, evidence-to-gate mapping, deterministic gate evaluation, Evidence Review, Claim CRUD, Gate Requirement Override, API/UI gate cards]
-    completion_note: PR #17 wurde nach grüner CI in main gemerged; Merge-SHA 85caf27f091ed728585c1db969eb325695f7e1db.
-  - id: NEXT-114
-    priority: P0
-    phase: MVP-VALIDATION
-    title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
-    owner_role: evidence-analyst
-    status: completed
-    github_issue: 18
-    branch: feature/next-114-synthetic-walkthrough
-    depends_on: [NEXT-110, NEXT-111, NEXT-112]
-    outputs: [synthetic walkthrough runner, clean-install lifecycle CI, validation report artifact, documented findings]
-    completion_note: "CI Run 33789278423 vollständig grün: python, frontend, compose-smoke und consultant-walkthrough. Artifact 9906680972. Gate-Test: HG-01 PASS, HG-03 FAIL, HG-04 UNVERIFIED; LLM-Import änderte weder Claims noch Gate States; install/stop/start/test/uninstall erfolgreich. UX-Finding 124/128 aktive Fragen wurde als NEXT-115 / Issue #20 ausgelagert."
-  - id: NEXT-115
-    priority: P0
-    phase: MVP-01C
-    title: Guided Workflow progressiv priorisieren
-    owner_role: methodologist
-    status: completed
-    github_issue: 20
-    github_pr: 21
-    branch: feature/next-115-progressive-guided-workflow
-    depends_on: [NEXT-111, NEXT-114]
-    outputs: [deterministic workflow stages, clarification queue, deep-dive queue, completed/excluded audit states, workflow summary API, staged consultant UI, regression tests, progressive workflow validation runner]
-    completion_note: "PR #21 CI Run 33794873133 vollständig grün. NEXT-114 Baseline blieb 128 total / 124 relevant / 83 applicable / 41 needs_review / 4 not_applicable. Komplexer KI-Agent wurde in 44 screening, 41 clarification, 39 deep_dive, 4 excluded gestuft; nach einer Antwort 43 screening + 1 completed. Public-Content-Fall: 84 relevant, 43 screening, 41 clarification, 0 deep_dive, 44 excluded. Alle Akzeptanzchecks bestanden. Verbleibende UX-Grenze der nahezu gleich großen unmittelbaren Work Queue wurde transparent als NEXT-116 / Issue #22 ausgelagert."
-    validation_run: 33794873133
-    validation_artifact: 9908787146
-  - id: NEXT-113
-    priority: P0
-    phase: MVP-01C
-    title: Assessment Backup, Export und Consultant Report implementieren
-    owner_role: developer
-    status: completed
-    github_issue: 23
-    github_pr: 24
-    branch: feature/next-113-backup-export-report
-    depends_on: [NEXT-112, NEXT-114, NEXT-115]
-    outputs: [versioned structured assessment export, JSON schema, consultant report, structured backup, explicit full evidence backup, structured restore, full backup restore, gate semantic drift comparison, consultant UI, end-to-end validation runner]
-    completion_note: "Merge-Gate CI Run 33834276156 vollständig grün: python, frontend, compose-smoke und consultant-walkthrough einschließlich Install/Stop/Restart/Test/Uninstall. NEXT-113 Export/Restore-Checks alle PASS; synthetische Gate-Semantik HG-01 PASS / HG-03 FAIL / HG-04 UNVERIFIED blieb erhalten. Artifact 9922749183. Security-Hardening für untrusted ZIP imports ist separat als NEXT-117 / Issue #25 erfasst."
-    validation_run: 33834276156
-    validation_artifact: 9922749183
-  - id: NEXT-101
-    priority: P0
-    phase: R6A
-    title: Providerneutrales Customer Evidence Pack pilotieren
-    owner_role: evidence-analyst
-    status: completed
-    github_issue: 2
-    github_pr: 27
-    branch: feature/next-101-customer-evidence-pilot
-    inputs: [data/templates/evidence-pack-example/, schemas/evidence-pack.schema.json, data/method/evidence_request_catalog.csv]
-    outputs: [explicit Evidence Request mappings, assessment-specific evidence requirement plan, evidence coverage engine, offline pilot runner, live Webapp pilot runner, CI regression, first-install evaluation runbook]
-    completion_note: "PR #27 CI Run 33837372041 vollständig grün. Evidence Pack ohne Cloud-Credentials: 5 Evidence-Klassen, 11 erforderliche Requests, 3 VERIFIED / 4 REVIEW_REQUIRED / 1 INSUFFICIENT / 3 MISSING. Live-Webapp-Pilot PASS: nur expliziter human-reviewed Claim wirkt auf Gates; HG-01 PASS, HG-02..HG-08 UNVERIFIED. Provider-Dokumentation mit applied_state=available wurde nicht zu Applied Configuration hochgestuft. Export/Report-Minimierung sowie Install/Stop/Restart/Test/Uninstall bestanden. Artifact 9923731562."
-    validation_run: 33837372041
-    validation_artifact: 9923731562
   - id: NEXT-118
     priority: P0
     phase: MVP-VALIDATION
     title: Erste manuelle Consultant-Installation und Evaluation durchführen
     owner_role: evidence-analyst
-    status: ready
+    status: planned
     github_issue: 28
     depends_on: [NEXT-101, NEXT-113, NEXT-115]
-    inputs: [docs/validation/FIRST_INSTALL_EVALUATION.md]
-    outputs: [manual install result, consultant UX findings, method findings, follow-up issues/decisions]
+    inputs:
+      - docs/validation/FIRST_INSTALL_EVALUATION.md
+      - docs/method/METHOD_CORE_V0_4_DE.md
+      - docs/method/C3A_V1_0_REVIEW.md
+    outputs:
+      - manual install result
+      - consultant UX findings
+      - method findings
+      - v0.4 UI-gap findings
+      - follow-up issues/decisions
+    exit_criteria:
+      - Installation und Runtime-Tests auf einem frischen Zielsystem sind dokumentiert.
+      - UX- und Methodenlücken der pre-v0.4-Runtime sind erfasst.
+      - Keine C3A-Konformitätsaussage wird aus dem bisherigen Runtime-Scoring abgeleitet.
     next_primary_candidate: true
+
+  - id: NEXT-119
+    priority: P0
+    phase: METHOD-VALIDATION
+    title: Methodenkern v0.4 an Referenzvarianten validieren und Screeningkern kalibrieren
+    owner_role: methodologist
+    status: planned
+    github_issue: 67
+    inputs:
+      - docs/method/METHOD_CORE_V0_4_DE.md
+      - docs/method/GLOSSARY_DE.md
+      - docs/method/C3A_V1_0_REVIEW.md
+      - data/method/c3a_v1_0_crosswalk.csv
+      - docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
+      - data/method/question_bank/
+    reference_variants:
+      - bestehendes On-Prem
+      - US-Hyperscaler in EU-Region
+      - deutscher/europaeischer Provider
+      - optional hypothetische Soll-Architektur
+    outputs:
+      - validated decision flow
+      - 15-25 core screening questions
+      - adaptive deep-dive triggers
+      - framework-overlay activation rules
+      - C3A requirement-profile activation rules
+      - status-quo/opportunity comparison
+      - recommendation-template findings
+    exit_criteria:
+      - Derselbe Workload kann nachvollziehbar über mindestens drei sehr unterschiedliche Varianten verglichen werden.
+      - Das Screening bleibt im Zielkorridor von etwa 15-25 Fragen oder Abweichungen sind fachlich begründet.
+      - Mindestens ein geopolitischer Sorge-Satz wird in prüfbare Szenarien übersetzt und providerneutral angewendet.
+      - BSI-/C3A-/Compliance-Deep-Dives werden nur bei Bedarf aktiviert.
+      - Business-/Innovationsnutzen und Status-quo-Risiken sind sichtbar, ohne Hard Gates zu kompensieren.
+      - Evidence Gaps und Unsicherheit bleiben getrennt von Risikoeinstufung sichtbar.
+      - C3A Criteria/Additional Criteria werden als Anforderungen und nicht als Reifegradleiter behandelt.
+
   - id: NEXT-116
     priority: P1
     phase: MVP-UX
@@ -97,9 +69,17 @@ priorities:
     owner_role: methodologist
     status: planned
     github_issue: 22
-    depends_on: [NEXT-115]
-    baseline: "NEXT-115: komplexer KI-Agent work_queue 85 (44 screening + 41 clarification); Public-Content work_queue 84 (43 + 41). Relevant gesamt bereits 124 vs 84."
-    outputs: [smaller immediate screening queue, separate clarification workstream, deterministic gate/domain activation, improved simple-vs-complex differentiation]
+    depends_on: [NEXT-119]
+    baseline: >-
+      Die bestehende Runtime zeigt noch deutlich mehr unmittelbare Fragen als der
+      v0.4-Zielkorridor von etwa 15-25 sichtbaren Screening-Fragen.
+    outputs:
+      - smaller immediate screening queue
+      - separate clarification workstream
+      - deterministic gate/domain activation
+      - improved simple-vs-complex differentiation
+      - v0.4 decision-relevance prioritization
+
   - id: NEXT-117
     priority: P1
     phase: SECURITY-HARDENING
@@ -108,51 +88,53 @@ priorities:
     status: planned
     github_issue: 25
     depends_on: [NEXT-113]
-    outputs: [per-member uncompressed-size limits, archive total-size limit, ZIP entry-count limit, pre-read validation, regression tests]
-  - id: NEXT-102
-    priority: P0
-    phase: R6A
-    title: Generische Domain-Modelle und Evidence Intake in Python vervollständigen
-    owner_role: developer
-    status: completed
-    github_issue: 3
-  - id: NEXT-103
-    priority: P0
-    phase: R6A
-    title: Hard-Gate Mapping auf Evidence Request Catalog implementieren
-    owner_role: methodologist
-    status: completed
-    github_issue: 4
+    outputs:
+      - per-member uncompressed-size limits
+      - archive total-size limit
+      - ZIP entry-count limit
+      - pre-read validation
+      - regression tests
+
   - id: NEXT-104
     priority: P1
-    phase: R6B
+    phase: PROVIDER-INTELLIGENCE
     title: Ersten Provider Adapter als reine Übersetzung implementieren
     owner_role: architect
-    status: planned
+    status: blocked
+    blocked_by: [NEXT-119]
+
   - id: NEXT-105
     priority: P1
-    phase: R6B
+    phase: PROVIDER-INTELLIGENCE
     title: Vertrags-/Assurance-Dokument-Pipeline entwerfen
     owner_role: evidence-analyst
     status: planned
+    depends_on: [NEXT-119]
+
   - id: NEXT-106
     priority: P1
-    phase: R7
+    phase: FRAMEWORK-DEPTH
     title: C5:2026 und regulatorische Crosswalks verfeinern
     owner_role: researcher
     status: planned
+    depends_on: [NEXT-119]
+
   - id: NEXT-107
     priority: P1
-    phase: R7
+    phase: PORTFOLIO
     title: Portfolio-/Dependency-Graph für Konzentrationsrisiko implementieren
     owner_role: architect
     status: planned
+    depends_on: [NEXT-119]
+
   - id: NEXT-108
     priority: P1
     phase: VALIDATION
     title: Inter-Rater-Kalibrierung mit zwei oder mehr Beratern durchführen
     owner_role: methodologist
     status: planned
+    depends_on: [NEXT-119]
+
   - id: NEXT-109
     priority: P2
     phase: MVP
@@ -160,3 +142,52 @@ priorities:
     owner_role: developer
     status: deferred
     superseded_for_primary_ux_by: NEXT-110
+
+completed_baseline:
+  - id: NEXT-101
+    title: Providerneutrales Customer Evidence Pack pilotieren
+    status: completed
+    github_issue: 2
+    github_pr: 27
+  - id: NEXT-102
+    title: Generische Domain-Modelle und Evidence Intake in Python vervollständigen
+    status: completed
+    github_issue: 3
+  - id: NEXT-103
+    title: Hard-Gate Mapping auf Evidence Request Catalog implementieren
+    status: completed
+    github_issue: 4
+  - id: NEXT-110
+    title: Installierbaren Consultant-Webapp-Skeleton liefern
+    status: completed
+    github_issue: 11
+  - id: NEXT-111
+    title: Consultant Question Applicability und Guided Workflow implementieren
+    status: completed
+    github_issue: 13
+  - id: NEXT-112
+    title: Evidence -> Claim -> Hard Gate in Webanwendung integrieren
+    status: completed
+    github_issue: 15
+  - id: NEXT-113
+    title: Assessment Backup, Export und Consultant Report implementieren
+    status: completed
+    github_issue: 23
+    github_pr: 24
+  - id: NEXT-114
+    title: Ersten vollständigen synthetischen Consultant-Durchlauf in der Webapp testen
+    status: completed
+    github_issue: 18
+  - id: NEXT-115
+    title: Guided Workflow progressiv priorisieren
+    status: completed
+    github_issue: 20
+    github_pr: 21
+  - id: NEXT-120
+    title: C3A-Volltext gegen Methodenkern v0.4 und Provider Intelligence prüfen
+    status: completed
+    github_issue: 68
+    outputs:
+      - docs/method/C3A_V1_0_REVIEW.md
+      - data/method/c3a_v1_0_crosswalk.csv
+      - C3A-bedingte Question-Library- und Provenienzkorrekturen

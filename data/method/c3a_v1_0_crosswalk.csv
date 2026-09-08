@@ -1,0 +1,42 @@
+criterion_family;criterion_ids;kind;focus;radar_mapping;coverage;required_action;notes
+SOV-1-01;SOV-1-01-C1|SOV-1-01-C2;C;EU- bzw. DE-Jurisdiktion inkl. Vertragsgovernance/Streitbeilegung;LJ-01|LJ-03|GV-02|GV-09;partial;Requirement-Profil weiter operationalisieren;EU/DE sind alternative Kundenanforderungen, keine Reifegradleiter
+SOV-1-02;SOV-1-02-C1|SOV-1-02-C2;C;eingetragener Sitz EU bzw. DE;LJ-09|SP-02;partial;Subcontractor-Scope ergänzen;SI verlangt gleiche Anforderung auch für relevante Subcontractors
+SOV-1-03;SOV-1-03-C1|SOV-1-03-C2;C;effektive Kontrolle EU bzw. DE;LJ-04|LJ-10;covered;keine direkte Änderung;Effective Control als Fact, nicht Länder-Score
+SOV-1-04;SOV-1-04-C;C;Control Change mit Vorabinformation;LJ-05|SE-07;partial;90-Tage-Frist explizit prüfen;betrifft Ownership/Shareholding/Governance
+SOV-2-01;SOV-2-01-C;C;jährliche Prüfung extraterritorialer Gesetze und strukturierte Risikobewertung;LJ-11|LJ-02;partial;jährlich + Availability/C/I-Scope präzisieren;Providerprozess ist eigener Evidence-Gegenstand
+SOV-2-02;SOV-2-02-C1|SOV-2-02-C2;C;Auditrecht zuständiger Behörde bzw. Bundesverwaltung;LJ-12|SE-11;partial;Behörden-Auditrecht vom Kundenauditrecht trennen;bestehende Fragen sind breiter als C3A
+SOV-2-03;SOV-2-03-C1|SOV-2-03-C2;C;Übernahme betriebsnotwendiger Cloud-Fähigkeiten im Verteidigungsfall;LJ-13;partial;Provider-Capability/Evidence-Frage ergänzen;nur bei öffentlichem/verteidigungsrelevantem Kontext
+SOV-3-01;SOV-3-01-C1|SOV-3-01-C2|SOV-3-01-C3|SOV-3-01-C4|SOV-3-01-C5;C;Prüfbarkeit und EU/DE-Residence nach C3A-Datenklassen;DK-01|DK-02|DK-13;partial;Provider Service Option und Applied Configuration getrennt instanziieren;C3A-Datenklassen sind jetzt explizit im Intake enthalten
+SOV-3-02;SOV-3-02-C;C;externes Key Management außerhalb Providerumgebung für IaaS/PaaS;DK-03|DK-04|DK-05|DK-14;partial;externen KMS-Ort/Servicemodell als Provider Capability modellieren;nicht mit normalem CMK gleichsetzen
+SOV-3-02-AC;SOV-3-02-AC;AC;externes Key Management auch für SaaS;DK-03|DK-04|DK-14;partial;SaaS im Requirement Profile als Additional Criterion markieren;AC nur bei Kundenanforderung aktivieren
+SOV-3-03;SOV-3-03-C;C;standards-basierte externe IdP-Integration;DK-10;covered;Provider Capability vs. Applied Capability getrennt prüfen;Basisanforderung im Fragenkatalog präzisiert
+SOV-3-03-AC;SOV-3-03-AC1|SOV-3-03-AC2|SOV-3-03-AC3;AC;offene Standards, stateless Auth, dynamische Claims/Attribute;DK-17;covered;nur bei ausgewähltem Additional Criterion aktivieren;kein universelles Hard Gate
+SOV-3-04;SOV-3-04-C;C;Management-/Datenzugriffslogs mit Zeit, Identität, Kontext;DK-11|SE-05;covered;Retain/Review im Evidence-Check erhalten;Export allein genügt nicht
+SOV-3-04-AC;SOV-3-04-AC1|SOV-3-04-AC2;AC;Echtzeitzugriff über offene API und granulare Filterung;DK-18;covered;nur bei ausgewähltem Additional Criterion aktivieren;AC optional
+SOV-3-05;SOV-3-05-C;C;Client-Side Encryption mit kundenseitigem Private Key außerhalb Provider;DK-09;covered;Service-Scope im Provider Claim erhalten;stärker als CMK/HYOK
+SOV-4-01;SOV-4-01-C1|SOV-4-01-C2|SOV-4-01-C3;C/AC;Personal-Staatsangehörigkeit/Hauptwohnsitz und standalone EU-Organisation;OA-01;partial;Citizenship/Residency/Management-Control ergänzen;C3 ist Additional Criterion
+SOV-4-02;SOV-4-02-C1|SOV-4-02-C2;C;Admin-Zugriffspfade EU/DE und technische Sperre externer Zugriffe;OA-09;partial;Access-Path statt nur Arbeitsort prüfen;Ausnahmen mit Zusatzfreigabe/Monitoring
+SOV-4-03;SOV-4-03-C;C;redundante unabhängige Connectivity, mind. ein EU-Provider;OA-10;partial;EU-Bezug und SLA explizit ergänzen;Resilienz + Autonomie
+SOV-4-03-AC;SOV-4-03-AC;AC;mind. ein Connectivity Provider außerhalb CSP-Konzern;OA-10;partial;Corporate-independence ergänzen;AC optional
+SOV-4-04;SOV-4-04-C1|SOV-4-04-C2;C;SOC in EU/DE plus äquivalentes Stand-alone-SOC bei Disconnect;OA-11;partial;Disconnect-SOC ergänzen;Standort allein reicht nicht
+SOV-4-05;SOV-4-05-C;C;gesicherte Provider-Ingress-Zone für Updates/Betriebsdaten, Vulnerability Check, Change Mgmt;OA-12;covered;Provider-Evidence/Scope prüfen;frühere kundenseitige Fehlzuordnung korrigiert
+SOV-4-05-AC;SOV-4-05-AC1|SOV-4-05-AC2;AC;dedizierte physische Geräte und Behörden-Dokumentation;OA-12;gap;separate C3A-Deep-Dive-Frage bei gewähltem AC ergänzen;AC optional
+SOV-4-06;SOV-4-06-C;C;Security-Analyse von Third-Party-Software vor Deployment inkl. Malware-Risiken;OA-13;covered;Providerprozess als Evidence erfassen;Frage an Volltext präzisiert
+SOV-4-07;SOV-4-07-C;C;Monitoring/Kontrolle/Logging von Datenflüssen zu Dritten und jährliche Dokumentation;OA-14;partial;jährlichen Dokumentenreview explizit erfassen;Konzernunternehmen gelten als Dritte
+SOV-4-08;SOV-4-08-C;C;DFD und bekannte Gateways inkl. Origin/Destination/Protocol/DataType/Security;OA-14;partial;DFD/Gateway-Metadaten im C3A-Deep-Dive getrennt erfassen;nicht öffentlich zwingend
+SOV-4-08-AC;SOV-4-08-AC;AC;DFD auf Behördenanforderung bereitstellen;OA-14;gap;separate AC-Frage ergänzen;AC optional
+SOV-4-09;SOV-4-09-C;C;Disconnect aller non-EU Connections ohne CIA+A-Verlust, unabhängiger Prozess, jährlicher Test;OA-02|OA-15;covered;Scope/Customer-Verbindungsausnahme im Evidence Review erhalten;OA-15 an Volltext präzisiert
+SOV-4-09-AC;SOV-4-09-AC;AC;Disconnect-Dokumentation/Testnachweise an Behörde;OA-15;gap;separate AC-Frage ergänzen;AC optional
+SOV-4-10;SOV-4-10-C;C;Reconnect und getestete Update-Nachholung nach max. 90 Tagen Disconnect;OA-16;covered;Testdatum/Freshness als Evidence führen;90-Tage-Scope jetzt explizit
+SOV-5-01;SOV-5-01-C;C;Softwarekomponenten/Lieferanten/Herkunftsländer, möglichst SBOM;SP-05|SP-09;covered;SBOM-Qualität und Ausnahmen im Evidence-Scope führen;TR-03183 als Referenz in SI
+SOV-5-01-AC;SOV-5-01-AC;AC;Risikoprozess, Mitigation und Substitution kritischer Softwareabhängigkeiten;SP-14|SP-08;partial;Providerprozess expliziter von Kunden-Substitution trennen;Nicht-Substituierbarkeit transparent machen
+SOV-5-02;SOV-5-02-C;C;Hardwareinventar/Lieferanten/Herkunftsländer;SP-05|SP-10;covered;Provider-Service-Scope prüfen;Provider-Infrastruktur, nicht Kundenhardware
+SOV-5-02-AC;SOV-5-02-AC;AC;Mitigation/Substitution kritischer Hardwareabhängigkeiten;SP-14|SP-08;partial;Providerprozess expliziter erfassen;AC optional
+SOV-5-03;SOV-5-03-C;C;externe Cloud-Services inkl. Provider/Land, die funktional erforderlich sind;SP-11|SP-02;covered;Scope auf Serviceerbringung erhalten;nur zur Serviceerbringung notwendige externe Dienste
+SOV-5-03-AC;SOV-5-03-AC;AC;Management/Mitigation/Substitution externer Serviceabhängigkeiten;SP-14|SP-08;partial;Providerprozess expliziter erfassen;AC optional
+SOV-5-04;SOV-5-04-C;C;Prozess für Exportrestriktionen/Supply-Chain-Disruption und Kundeninformation;SP-12;covered;Providerprozess/Freshness als Evidence führen;Exposition und Mitigation jetzt gemeinsam erfasst
+SOV-5-05;SOV-5-05-C1|SOV-5-05-C2;C;Capacity Management in EU bzw. DE gemäß C5;SP-13;covered;C5-Scope als Voraussetzung prüfen;frühere Capacity-Availability-Fehlinterpretation korrigiert
+SOV-6-01;SOV-6-01-C;C;Source-Code-Backup EU max. 24h, >=5 Versionen inkl. IaC/Build/Deploy + Doku;TE-09;covered;Provider-Evidence/Scope/Freshness prüfen;Escrow-/Kundenzugangsinterpretation korrigiert
+SOV-6-02;SOV-6-02-C;C;Contingency für sicheren Weiterbetrieb bei Drittparteien-Disconnect;TE-10|OA-02;covered;Provider-Continuity getrennt von Kundenausstieg halten;Alternative Supplier/Compensating Controls möglich
+SOV-6-02-AC;SOV-6-02-AC;AC;eigene Vulnerability-Remediation, Engineering-Talent, lokale Build-Umgebung;TE-10;covered;nur bei gewähltem Additional Criterion aktivieren;AC optional
+SOV-6-03;SOV-6-03-C;C;Zugriff auf Dev-Tools/Umgebungen + Kontingenz bei deren Ausfall;TE-10|TE-11;covered;Provider-Fortführungsfähigkeit getrennt vom Kundenexit halten;Provider-Scope präzisiert

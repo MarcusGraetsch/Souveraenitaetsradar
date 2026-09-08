@@ -11,27 +11,67 @@ Vor Planung oder Änderung in dieser Reihenfolge lesen:
 3. `project/HANDOFF.md`
 4. `project/NEXT_ACTIONS.yaml`
 5. `project/DECISIONS.yaml`
-6. relevante Dateien unter `docs/`, `data/`, `config/`, `schemas/`
-7. offene Issues und PRs, sofern GitHub-Zugriff vorhanden ist
+6. `docs/method/METHOD_CORE_V0_4_DE.md` und `docs/method/GLOSSARY_DE.md`, sofern der Task die aktuelle Fachmethode betrifft
+7. bei C3A-Bezug zusätzlich `docs/method/C3A_V1_0_REVIEW.md` und `data/method/c3a_v1_0_crosswalk.csv`
+8. relevante Dateien unter `docs/`, `data/`, `config/`, `schemas/`
+9. offene Issues und PRs, sofern GitHub-Zugriff vorhanden ist
 
 Repo-State schlägt Chatgedächtnis. Nicht aus älteren Chats rekonstruieren, wenn das Repository eine aktuelle Aussage enthält.
 
 ## 2. Source of Truth
 
-Priorität bei Konflikten:
+Das Repository unterscheidet bewusst zwischen **externer Fachquelle**, **fachlichem Zielmodell** und **aktuell implementierter Runtime**.
 
-1. tatsächlich geprüfte externe Primärquellen / regulatorische Originaldokumente
+Priorität bei fachlichen Konflikten:
+
+1. tatsächlich geprüfte externe Primärquellen / regulatorische Originaldokumente – aber nur für Aussagen, die diese Quelle tatsächlich trägt
 2. akzeptierte ADRs und `project/DECISIONS.yaml`
-3. aktuelle maschinenlesbare Methodik unter `data/method/` und `config/`
-4. `project/PROJECT_STATE.yaml`
-5. Methodendokumentation
-6. Agenten-Session-Logs
+3. aktueller fachlicher Zielstand: `docs/method/METHOD_CORE_V0_4_DE.md` plus `docs/method/GLOSSARY_DE.md`
+4. `project/PROJECT_STATE.yaml` und `project/HANDOFF.md` für den aktuellen Projekt- und Migrationsstand
+5. maschinenlesbare Methodik unter `data/method/` und `config/` für die **aktuell implementierte Runtime-Semantik**
+6. weitere Methodendokumentation
+7. Agenten-Session-Logs und History-Dokumente
 
-Widersprüche nicht still auflösen: Konflikt dokumentieren und Review auslösen.
+Wichtig:
 
-## 3. Projektarchitektur – nicht verhandelbare Grundsätze
+- Ein neuerer akzeptierter Methodenentscheid kann älteren maschinenlesbaren Runtime-Regeln fachlich voraus sein. Das ist ein **Implementation Gap**, kein Anlass, die Abweichung still aufzulösen.
+- Umgekehrt darf ein Zieldokument nicht als bereits implementierte Runtime-Funktion beschrieben werden, solange Schema/Code/UI noch nicht migriert sind.
+- `docs/history/` und ältere Agenten-Logs sind historische Evidenz des Projektverlaufs, keine aktuelle Methodenquelle.
+- Widersprüche nicht still auflösen: Konflikt dokumentieren und Review auslösen.
+
+## 3. Aktueller Methoden- und Entwicklungsstand
+
+Der aktuelle fachliche Zielstand ist der **Decision-Support-Methodenkern v0.4**. Er versteht den Radar primär als vergleichende Entscheidungshilfe für Betriebs-/Architekturvarianten eines Workloads; nicht als universelles BSI-/NIS2-/DORA-Audit und nicht als Provider-Länderranking.
+
+Die vorhandene Webanwendung implementiert noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Questions-Workflows. Diese Runtime bleibt bis zur validierten Migration funktionsfähig und nachvollziehbar, ist aber nicht automatisch identisch mit dem fachlichen Zielbild v0.4.
+
+### C3A-Review abgeschlossen
+
+**NEXT-120 / Issue #68** ist fachlich abgeschlossen. C3A v1.0 wurde vollständig gegen Methodenkern v0.4, Provider Intelligence, Hard Gates, Risikotaxonomie und Question Library geprüft.
+
+Kanonische C3A-Referenzen im Repository:
+
+- `docs/method/C3A_V1_0_REVIEW.md`
+- `data/method/c3a_v1_0_crosswalk.csv`
+- `SRC-04`
+
+Leitplanken daraus:
+
+- C3A Criterion / Additional Criterion sind keine Reifegradstufen.
+- formale C3A-Erfüllung nicht ohne C5-Scope-Evidence behaupten.
+- C3A SOV-6 ist primär providerseitige Fortführungs-/Entwicklungsautonomie, nicht Kundenausstieg.
+- C3A-Anforderungen werden über ein kundenspezifisches Requirement Profile aktiviert, nicht pauschal als globale Gates.
+
+### Aktuelles Validierungs-Gate
+
+Vor **größerer v0.4-Schema-/DB-/API-/UI-Migration** muss NEXT-119 die Methode an Referenzvarianten validieren und insbesondere Screeningkern, Requirement Profiles, Decision Dimensions und Recommendation-Logik kalibrieren. NEXT-118 kann die bestehende Runtime bereits operativ aus Consultant-Sicht evaluieren.
+
+Erlaubt sind außerdem Repository-Hygiene, Bugfixes, Security-Hardening und quellengetreue Methoden-/Provider-Recherche.
+
+## 4. Projektarchitektur – nicht verhandelbare Grundsätze
 
 - **cloud-agnostischer Methodenkern**: keine AWS-/Azure-/GCP-spezifische Regel darf den Kern dominieren.
+- **Decision Support statt Provider-Ranking**: Varianten werden anhand konkreter Anforderungen, Szenarien, Capabilities, Risiken, Nutzen und Evidence verglichen.
 - **kein Credential-/Root-Zugang als Voraussetzung**: Standard ist Customer-mediated Evidence.
 - **Provider Adapter sind Übersetzer**, nicht Risk Engines.
 - **Security und Souveränität getrennt** bewerten.
@@ -39,9 +79,11 @@ Widersprüche nicht still auflösen: Konflikt dokumentieren und Review auslösen
 - **Evidence Confidence ≠ Risikohöhe**.
 - **Gate first, score second**.
 - fehlende Information = `UNVERIFIED`, nicht automatisch `FAIL`.
-- Risikoakzeptanz und Legal-Schlussfolgerungen bleiben menschliche Entscheidungen.
+- Risikoakzeptanz, rechtliche Würdigung und finale Entscheidung bleiben menschliche Entscheidungen des Kunden.
+- Providerherkunft/Jurisdiktion ist ein Fakt und kein pauschaler Souveränitätsscore.
+- die Question Bank ist Wissens-/Deep-Dive-Bibliothek, kein verpflichtender 128-Fragen-Standardablauf.
 
-## 4. Agentenrollen
+## 5. Agentenrollen
 
 Ein Agent nennt pro Task mindestens eine Rolle:
 
@@ -55,7 +97,7 @@ Ein Agent nennt pro Task mindestens eine Rolle:
 
 Implementierer und Reviewer desselben substantiellen Changes sollen nach Möglichkeit getrennt sein. Self-Review muss als solcher markiert werden.
 
-## 5. Planungsprotokoll
+## 6. Planungsprotokoll
 
 Vor substantiellen Änderungen dokumentieren:
 
@@ -70,7 +112,7 @@ Vor substantiellen Änderungen dokumentieren:
 
 Danach umsetzen. Große Umbauten ohne Issue/Plan vermeiden.
 
-## 6. Provenienzpflicht
+## 7. Provenienzpflicht
 
 Jede neue fachliche Regel, Frage, Risikokategorie, Formel oder Schwelle erhält eine Provenienzklasse:
 
@@ -80,9 +122,9 @@ Jede neue fachliche Regel, Frage, Risikokategorie, Formel oder Schwelle erhält 
 - `project-assumption`
 - `evidence-observation`
 
-Source-ID/Fundstelle referenzieren. Interne Schwellen tragen `INT-01`/`INT-02` oder eine spätere interne Decision-ID. Eigene Regeln niemals als Normtext ausgeben.
+Source-ID/Fundstelle referenzieren. Interne Regeln und Schwellen referenzieren die passende `INT-*`-/`DEC-*`-Quelle. Eigene Regeln niemals als Normtext ausgeben.
 
-## 7. Evidence-Regeln
+## 8. Evidence-Regeln
 
 Evidence-Zustände:
 
@@ -99,8 +141,9 @@ Pflichtprinzipien:
 - vom Kunden erzeugte Exporte sind erlaubt und bevorzugt, sofern redigiert/scope-klar.
 - Evidence enthält mindestens Quelle, Scope, Zeit/Version, Trust, Scope Fit, Applied State.
 - Raw Kundenevidence nicht in Git committen.
+- Kontextquellen wie Interview, CMDB, ArchiMate oder Diagramme dürfen Fragen vorbefüllen, werden aber nicht automatisch zu ausreichender Gate-/Risiko-Evidence.
 
-## 8. Provider-Agnostik
+## 9. Provider-Agnostik
 
 Der Methodenkern arbeitet mit generischen Objekten und Capabilities. Beispiele:
 
@@ -123,8 +166,9 @@ Provider Adapter dürfen **nicht**:
 - automatisch Kundenaccounts scannen
 - Credentials verlangen
 - Risikoakzeptanz treffen
+- aus Herkunft/Nationalität einen pauschalen Score erzeugen
 
-## 9. Softwareentwicklung
+## 10. Softwareentwicklung
 
 - deterministische Regeln in Code/Config, nicht nur Prompts
 - neue Regeln mit Unit-/Boundary-Tests
@@ -132,8 +176,11 @@ Provider Adapter dürfen **nicht**:
 - keine Secrets/Kundendaten
 - Evidence-Pack-Parser arbeitet lokal und dateibasiert
 - Parser dürfen keine externen Systeme kontaktieren, außer ausdrücklich als separater Research-/Adapter-Task
+- Zielmethodik und Runtime-Implementierung in PRs explizit unterscheiden
+- vor größerer v0.4-Runtime-Migration NEXT-119 und den aktuellen Projektstand in `PROJECT_STATE.yaml` beachten
+- C3A-Mappings immer gegen `C3A_V1_0_REVIEW.md`/Crosswalk prüfen und nicht aus Erinnerung ableiten
 
-## 10. Git- und Review-Workflow
+## 11. Git- und Review-Workflow
 
 - `main` stabil und handoff-fähig halten
 - Branches: `feature/`, `fix/`, `research/`, `method/`, `docs/`, `chore/`
@@ -143,7 +190,7 @@ Provider Adapter dürfen **nicht**:
 
 Reviewklassen stehen in `docs/project/REVIEW_PROCESS.md`.
 
-## 11. Multi-Agent-Koordination
+## 12. Multi-Agent-Koordination
 
 - ein Issue = eine primäre Outcome-Verantwortung
 - Agent schreibt vor Start kurz in Issue/Branch, welchen Scope er übernimmt
@@ -152,7 +199,7 @@ Reviewklassen stehen in `docs/project/REVIEW_PROCESS.md`.
 - Details in `project/agent-log/`
 - Handoff muss explizit sagen: erledigt, offen, Entscheidungen, nächste Dateien/Tests
 
-## 12. Abschluss eines Tasks
+## 13. Abschluss eines Tasks
 
 Vor Ende:
 
@@ -163,7 +210,7 @@ Vor Ende:
 5. Handoff/State/NEXT_ACTIONS nur bei echter Zustandsänderung aktualisieren.
 6. PR-Review-ready machen.
 
-## 13. Sicherheits-Stopps
+## 14. Sicherheits-Stopps
 
 Sofort stoppen/eskalieren bei:
 
@@ -174,7 +221,7 @@ Sofort stoppen/eskalieren bei:
 - automatischer Risikoakzeptanz
 - Kundendaten in GitHub/Issues/PRs
 
-## 14. Kommunikationsstandard
+## 15. Kommunikationsstandard
 
 Kennzeichne Aussagen als:
 
