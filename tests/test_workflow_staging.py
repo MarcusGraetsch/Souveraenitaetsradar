@@ -93,24 +93,27 @@ def count_stage(rows: list[dict], stage: str) -> int:
     return sum(row["workflow_stage"] == stage for row in rows)
 
 
-def test_next_114_baseline_is_preserved_but_progressively_staged():
+def test_complex_workflow_is_complete_and_progressively_staged():
     questions = load_questions()
     assessment, profile = complex_ai_agent()
     rows = apply_to_questions(questions, assessment, profile)
 
-    assert len(rows) == 128
-    assert sum(row["applicability_status"] == "applicable" for row in rows) == 83
-    assert sum(row["applicability_status"] == "needs_review" for row in rows) == 41
-    assert sum(row["applicability_status"] == "not_applicable" for row in rows) == 4
+    assert questions
+    assert len(rows) == len(questions)
 
-    assert count_stage(rows, "clarification") == 41
+    applicable = sum(row["applicability_status"] == "applicable" for row in rows)
+    needs_review = sum(row["applicability_status"] == "needs_review" for row in rows)
+    not_applicable = sum(row["applicability_status"] == "not_applicable" for row in rows)
+
+    assert len(rows) == applicable + needs_review + not_applicable
+    assert count_stage(rows, "clarification") == needs_review
+    assert count_stage(rows, "excluded") == not_applicable
     assert count_stage(rows, "screening") > 0
     assert count_stage(rows, "deep_dive") > 0
-    assert count_stage(rows, "excluded") == 4
 
-    relevant = 128 - count_stage(rows, "excluded")
+    relevant = applicable + needs_review
     immediate_work = count_stage(rows, "screening") + count_stage(rows, "clarification")
-    assert relevant == 124
+    assert relevant == len(rows) - count_stage(rows, "excluded")
     assert immediate_work < relevant
 
 

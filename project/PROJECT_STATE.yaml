@@ -38,7 +38,7 @@ current_truth:
   - Der Souveränitäts-Radar ist primär Decision Support für mehrere Betriebs-/Architekturvarianten eines konkreten Workloads und kein universelles Compliance-Audit.
   - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik gehört in Research-, Evidence- und Adapter-Layer.
   - Der Radar darf eine begründete Empfehlung formulieren; finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
-  - Die sichtbare Managementsicht nutzt sieben Entscheidungsdimensionen: Geschäft & Innovation, Security & Resilienz, Recht/Daten/Kontrolle, Technologie & Exit, Organisation & Skills, Lieferkette & Geopolitik sowie Wirtschaft & Vertrag.
+  - "Die sichtbare Managementsicht nutzt sieben Entscheidungsdimensionen: Geschäft & Innovation, Security & Resilienz, Recht/Daten/Kontrolle, Technologie & Exit, Organisation & Skills, Lieferkette & Geopolitik sowie Wirtschaft & Vertrag."
   - Evidence Confidence bleibt separat von Risiko, Capability und Business Value.
   - BSI 200-3 ist Anschluss-, Deep-Dive- und Vollständigkeitsreferenz; die 47 elementaren Gefährdungen sind kein verpflichtender sichtbarer Interviewkatalog.
   - Bitkom Cloud-Souveränität 2026 ist zentrale Orientierungsquelle für Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen und Exit.

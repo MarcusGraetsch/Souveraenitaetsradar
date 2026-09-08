@@ -5,6 +5,7 @@ import yaml
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
+REPORT = Path('/tmp/sovradar-repo-validator-errors.txt')
 errors = []
 
 for path in ROOT.rglob('*.json'):
@@ -42,5 +43,10 @@ for p in required:
     if not p.exists(): errors.append(f'missing required file: {p.relative_to(ROOT)}')
 
 if errors:
-    print('\n'.join(errors), file=sys.stderr); raise SystemExit(1)
+    report='\n'.join(errors) + '\n'
+    REPORT.write_text(report, encoding='utf-8')
+    print(report, file=sys.stderr, end='')
+    raise SystemExit(1)
+
+REPORT.write_text('repository validation OK\n', encoding='utf-8')
 print('repository validation OK')
