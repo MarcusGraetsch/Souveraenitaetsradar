@@ -1,6 +1,8 @@
 # Method Overview
 
-> Für die verständliche deutschsprachige Methodendarstellung gilt `docs/method/METHOD_CORE_V0_4_DE.md` als primäre Arbeitsreferenz. Terminologie: `docs/method/GLOSSARY_DE.md`.
+> Primäre verständliche Fachreferenz: `docs/method/METHOD_CORE_V0_4_DE.md`.  
+> Terminologie: `docs/method/GLOSSARY_DE.md` + `docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md`.  
+> Aktuelles Development Gate: **NEXT-120 / Issue #68 – C3A-Volltextreview**.
 
 ## 1. Purpose
 
@@ -13,7 +15,8 @@ Die Methode soll eine nachvollziehbare Empfehlung erzeugen dürfen; finale Entsc
 Der Radar ist **anschlussfähig** an etablierte Risiko- und Compliance-Verfahren, aber nicht auf ein einziges Framework reduziert.
 
 - Bitkom Cloud-Souveränität 2026: konzeptionelle Orientierung zu Handlungsfähigkeit, Chancen/Risiken, Skills, Interdependenzen und Exit.
-- EU Cloud Sovereignty Framework + BSI C3A: Provider-/Service-Souveränität und prüfbare Capability-/Evidence-Fragen.
+- EU Cloud Sovereignty Framework: Provider-/Service-Souveränität und Evidence-Fragen.
+- BSI C3A: wichtiger Provider-/Service-Souveränitätslayer; **Detailmapping bleibt bis Abschluss von NEXT-120 vorläufig**.
 - BSI 200-3: Scope-/Zielobjekt-, Gefährdungs-, Risikobehandlungs- und Risikoappetit-Referenz; zusätzlich Deep Dive und Vollständigkeitscheck.
 - Data Act: allgemeine Exit-/Switching-/Portabilitätsreferenz, soweit anwendbar.
 - C5: Assurance-/Control-Evidence.
@@ -56,21 +59,25 @@ What a service offers or contractually promises.
 ### Applied Capability
 What the customer actually uses or proves through supplied evidence.
 
-Recommended state model:
+Recommended state model in the current runtime:
 
-`asserted -> documented -> observed -> configured -> tested -> attested`
+`asserted -> documented -> observed/configured -> tested -> attested`
 
 `available` is a provider-side state and does not alone satisfy Applied Capability.
+
+These states are internal operationalization, not an official C3A/EU maturity scale.
 
 ## 6. Adaptive assessment instead of full questionnaire
 
 The existing question bank is a **Question Library**, not a mandatory questionnaire.
 
-Standard flow:
+Target flow:
 
 `existing artifacts -> prefill -> 15–25 core screening questions -> decision gaps -> targeted deep dives -> evidence -> comparison/recommendation`
 
 A question is deepened when it can materially change the recommendation, affects a non-compensable minimum requirement, clarifies a significant risk/benefit, differentiates options or closes an important evidence gap.
+
+The 15–25 range is an internal design hypothesis and must be calibrated after NEXT-120.
 
 ## 7. Input channels
 
@@ -88,20 +95,13 @@ Customer-mediated Evidence remains standard. Optional intake sources include:
 - FinOps / cost data
 - backup / restore / DR / exit tests
 
-No single artifact type is a prerequisite.
+No single artifact type is a prerequisite. Context Fact and Evidence remain distinct.
 
 ## 8. Hard Gates
 
-See `data/method/r4_hard_gates.csv`.
+The current runtime uses eight internal Hard Gates; see `data/method/r4_hard_gates.csv`.
 
-1. Jurisdiction & Effective Control
-2. Data Residence & Processing
-3. Key Control
-4. Exit & Portability
-5. Operational Autonomy
-6. Identity & Trust Anchors
-7. Supply Chain Critical Dependencies
-8. Security Minimum
+Their current structure is **internal method design**, not a BSI/EU/C3A gate catalog. NEXT-120 explicitly checks whether the complete C3A text suggests additions or boundary changes.
 
 ## 9. Gate first, score second
 
@@ -128,3 +128,5 @@ At least:
 ## 12. Provenance
 
 Every question/rule/threshold identifies whether it is external, externally derived, internal method design, project assumption or evidence observation.
+
+Direct C3A terminology or requirements must not be added from memory or secondary summaries while NEXT-120 is open; the supplied full text will be the basis for the next method review.
