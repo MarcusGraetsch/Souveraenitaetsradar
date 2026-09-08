@@ -1,4 +1,4 @@
-version: 13
+version: 14
 updated: "2026-09-08"
 decisions:
   - id: DEC-001
@@ -220,7 +220,7 @@ decisions:
   - id: DEC-044
     status: accepted
     title: Frameworks werden nach Funktion geschichtet und Compliance-Overlays nur bei Anwendbarkeit aktiviert
-    rationale: Bitkom dient primär als Orientierungs-/Handlungsfähigkeitsrahmen, EU-CSF/C3A als Provider-/Service-Souveränitätslayer, Data Act als allgemeiner Exit-/Switching-Layer, BSI/C5 als Security-/Assurance-Referenz und NIS2/DORA/DSGVO/AI-Act als kontextspezifische Overlays. Dadurch wird Framework-Stapeln vermieden.
+    rationale: Bitkom dient primär als Orientierungs-/Handlungsfähigkeitsrahmen, EU-CSF als breiter Provider-/Service-Souveränitätsrahmen, C3A als kriterienspezifischer Provider-/Service-Autonomie-Layer, Data Act als allgemeiner Exit-/Switching-Layer, BSI/C5 als Security-/Assurance-Referenz und NIS2/DORA/DSGVO/AI-Act als kontextspezifische Overlays. Dadurch wird Framework-Stapeln vermieden.
     sources: [SRC-03, SRC-04, SRC-05, SRC-06, SRC-08, SRC-12, SRC-17, INT-05]
   - id: DEC-045
     status: accepted
@@ -237,3 +237,33 @@ decisions:
     title: Die Managementsicht verwendet sieben Entscheidungsdimensionen plus separate Evidence Confidence
     rationale: Geschäft & Innovation, Security & Resilienz, Recht/Daten/Kontrolle, Technologie & Exit, Organisation & Skills, Lieferkette & Geopolitik sowie Wirtschaft & Vertrag bilden eine verständliche Entscheidungsoberfläche. Evidence Confidence bleibt separat, damit Unsicherheit nicht mit Risiko vermischt wird.
     source: INT-05
+  - id: DEC-048
+    status: accepted
+    title: C3A-Volltextreview ist ein verpflichtendes Gate vor fachlicher v0.4-Runtime-Migration
+    rationale: C3A ist eine zentrale externe Primärquelle für Cloud-Autonomie. Vor neuen Schema-, Rule-, Gate- oder UI-Operationalisierungen muss der vollständige Kriterienkatalog geprüft und gegen vorhandene Methode/Provenienz abgeglichen sein. Das Gate wurde am 08.09.2026 mit `docs/method/C3A_V1_0_REVIEW.md` und `data/method/c3a_v1_0_crosswalk.csv` erfüllt.
+    sources: [SRC-04, INT-05]
+  - id: DEC-049
+    status: accepted
+    title: C3A ist Provider-/Service-Autonomie-Layer und nicht die vollständige Entscheidungsmethode
+    rationale: C3A bewertet anhand objektiver/verifizierbarer Kriterien, ob ein Satz von Cloud-Services selbstbestimmte Nutzung im jeweiligen Risikokontext ermöglicht. Der Radar muss zusätzlich Workload, Organisation, Status quo, Business Value, Exit, Kosten, Risiken und alternative Zielarchitekturen vergleichen.
+    sources: [SRC-04, INT-05]
+  - id: DEC-050
+    status: accepted
+    title: C3A Criteria, Additional Criteria sowie EU-/Deutschlandvarianten sind kundenabhängige Anforderungen und keine Reifegradleiter
+    rationale: C3A lässt Kunden use-case-abhängig Kriterien auswählen. Additional Criteria erhöhen oder erweitern Anforderungen nur bei entsprechendem Souveränitätsbedarf. EU-/Deutschlandvarianten sind alternative Profile; Deutschlandrestriktionen dürfen nicht automatisch als höherer Score behandelt werden und benötigen dort, wo C3A dies verlangt, sachliche/rechtliche Begründung.
+    source: SRC-04
+  - id: DEC-051
+    status: accepted
+    title: Formale C3A-Erfüllungsbehauptung setzt belastbare C5-Grundlage im passenden Scope voraus
+    rationale: C3A setzt voraus, dass der Cloud-Service-Provider die C5-Kriterien erfüllt. Einzelne C3A-Kriterien dürfen als Methoden-/Anforderungsquelle genutzt werden, aber ohne passende C5-Grundlage und kriterienspezifische Evidence darf keine C3A-Gesamtkonformität behauptet werden.
+    sources: [SRC-04, SRC-05]
+  - id: DEC-052
+    status: accepted
+    title: Zukünftige nicht kompensierbare Anforderungen werden aus expliziten Requirement Profiles instanziiert
+    rationale: Die acht heutigen Hard Gates bleiben als interne Runtime-/Managementgruppierung bestehen. C3A zeigt jedoch, dass konkrete Anforderungen wie EU-/Deutschlandjurisdiktion oder Additional Criteria kundenspezifisch ausgewählt werden. Deshalb soll die spätere Runtime dynamische Requirement Profiles unterstützen, ohne C3A-Kriterien in die interne 0-4-Skala umzudeuten.
+    sources: [SRC-04, INT-05]
+  - id: DEC-053
+    status: accepted
+    title: C3A präzisiert Datenklassen und Provider-Capabilities, erzeugt aber vorerst keine neuen Top-Level-Souveränitätsrisiken
+    rationale: Account Data, Customer Data, Derived Data und Provider Data müssen künftig differenzierter modelliert werden; SOV-4 bis SOV-6 präzisieren Disconnect/Reconnect, Datenflüsse, Supply Chain und Provider-Entwicklungsfähigkeit. Die bestehenden G-z.S-Risiken decken diese Szenarien jedoch ausreichend ab; neue Risiko-IDs würden derzeit unnötige Taxonomie-Inflation erzeugen.
+    sources: [SRC-04, INT-05]
