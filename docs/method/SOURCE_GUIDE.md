@@ -1,6 +1,14 @@
 # Source Guide
 
-Das vollständige Source Register liegt in `data/method/source_register.csv`. Interne Herleitungen liegen ergänzend in `data/method/source_register_addendum_v1.csv`.
+Externe und projektbezogene Quellen liegen in `data/method/source_register.csv`. Interne Herleitungen und Runtime-/Methoden-Operationalisierungen liegen in `data/method/source_register_addendum_v1.csv`.
+
+Beide Dateien bilden gemeinsam die aktuelle Provenienzreferenz. History-/Agent-Log-Dateien ersetzen das Source Register nicht.
+
+## Aktueller Quellenstatus: C3A
+
+`SRC-04` (BSI C3A – Criteria enabling Cloud Computing Autonomy) ist derzeit als Publikation und Kriterienstruktur registriert. Der **vollständige C3A-Volltext ist noch nicht gegen Methodenkern v0.4, Provider Intelligence, Hard Gates und Risikotaxonomie geprüft**.
+
+Dieser Volltextreview ist **Issue #68 / NEXT-120** und muss vor weiterer fachlicher Runtime-/Schema-/UI-Migration abgeschlossen werden. Bis dahin dürfen aus C3A keine zusätzlichen Detailanforderungen, Mappings oder Vollständigkeitsbehauptungen erfunden werden.
 
 ## Grundsatz: Frameworks nicht stapeln
 
@@ -11,7 +19,7 @@ Der Radar führt **nicht automatisch mehrere vollständige Framework-Assessments
 | Rolle | Wichtige Quellen | Verwendung |
 |---|---|---|
 | **Orientierung / Entscheidungslogik** | `SRC-17` Bitkom Cloud-Souveränität 2026 | Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen, Exit, organisatorische und politisch-regulatorische Risiken |
-| **Provider-/Service-Souveränität** | `SRC-03`, `SRC-24` EU Cloud Sovereignty Framework; `SRC-04` BSI C3A | Souveränitätsdimensionen, Fragen, Capability-/Assurance-Evidence |
+| **Provider-/Service-Souveränität** | `SRC-03`, `SRC-24` EU Cloud Sovereignty Framework; `SRC-04` BSI C3A | Souveränitätsdimensionen, Fragen, Capability-/Assurance-Evidence; C3A-Detailmapping erst nach NEXT-120 als vollständig behandeln |
 | **Security-/Risiko-Deep-Dive** | `SRC-01` BSI 200-3; `SRC-02` IT-Grundschutz; `SRC-22` ISO/IEC 27005; `SRC-15` NIST SP 800-30 | Zielobjekte, Gefährdungen, Risikoanalyse/-behandlung, Vollständigkeitscheck |
 | **Security Assurance** | `SRC-05` BSI C5 | Provider-Control-/Assurance-Evidence; kein automatischer Workload-Eignungsnachweis |
 | **Exit / Switching / Portabilität** | `SRC-12` Data Act | Wechsel zu anderem Provider oder On-Prem, Vertrags-/Portierungs-/Interoperabilitätsfragen |
@@ -27,7 +35,7 @@ Der Radar führt **nicht automatisch mehrere vollständige Framework-Assessments
 
 1. Kundenentscheidungsfrage, Ziele und Optionen verstehen.
 2. Bitkom-/Souveränitätslogik für Handlungsfähigkeit und Trade-offs nutzen.
-3. EU-CSF/C3A für Provider-/Serviceeigenschaften heranziehen.
+3. EU-CSF und – nach abgeschlossenem Volltextreview – C3A für Provider-/Serviceeigenschaften heranziehen.
 4. BSI 200-3 / IT-Grundschutz bei Bedarf als Security-/Resilienz-Deep-Dive und Vollständigkeitscheck nutzen.
 5. Data Act für Exit-/Switching-Aspekte prüfen.
 6. Nur die für Kunde/Workload tatsächlich einschlägigen Compliance-Overlays aktivieren.
@@ -41,6 +49,7 @@ Der Radar führt **nicht automatisch mehrere vollständige Framework-Assessments
 5. regulatorisch tatsächlich anwendbar oder nur Methodenquelle?
 6. ist ein Vertrag/Test/Attest statt Provider-Selbstauskunft erforderlich?
 7. kann die Aussage die Empfehlung materiell verändern – und ist dafür die Evidenztiefe angemessen?
+8. ist die betreffende Quelle bereits im Projekt **vollständig** geprüft oder nur auf Publikations-/Strukturebene registriert?
 
 ## Verbotsregel
 
