@@ -20,6 +20,13 @@ jobs:
       - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example
       - name: Validate NEXT-101 Evidence Pack coverage baseline
         run: python tools/validation/customer_evidence_pack_pilot.py
+      - name: Upload repository validator diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-validator-diagnostics
+          path: /tmp/sovradar-repo-validator-errors.txt
+          if-no-files-found: warn
 
   frontend:
     runs-on: ubuntu-latest
@@ -127,7 +134,7 @@ jobs:
             exit 1
           fi
           if docker ps -a --format '{{.Names}}' | grep -Eqi 'souveraenitaetsradar|sovradar'; then
-            echo 'Souveraenitäts-Radar container remained after uninstall' >&2
+            echo 'Souveränitäts-Radar container remained after uninstall' >&2
             docker ps -a
             exit 1
           fi
