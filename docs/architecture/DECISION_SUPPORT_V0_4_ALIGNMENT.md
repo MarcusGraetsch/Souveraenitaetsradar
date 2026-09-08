@@ -2,11 +2,14 @@
 
 Status: **Architektur-Delta / noch keine Runtime-Migration**  
 Issue: #67  
+Review-Gate: #68 / NEXT-120  
 Provenienz: `internal-method` / `INT-05`
 
 ## 1. Zweck
 
 Dieses Dokument übersetzt den fachlichen Methodenkern `METHOD_CORE_V0_4_DE.md` in Konsequenzen für das bestehende Domain-/DecisionCase-Modell, ohne bereits DB, API, Schema oder UI zu ändern.
+
+Der Entwurf ist **nicht final**, solange der vollständige BSI-C3A-Kriterienkatalog in NEXT-120 nicht gegen Provider Intelligence, Hard Gates, Risikotaxonomie und v0.4 geprüft wurde.
 
 ## 2. Bestehende Objekte bleiben tragfähig
 
@@ -26,6 +29,8 @@ Weiterverwenden:
 - Provider Intelligence / Provider Capability
 
 Der v0.4-Kern ist deshalb kein Architektur-Neustart.
+
+**Vorbehalt:** NEXT-120 prüft, ob C3A zusätzliche Begriffe, Scope-Metadaten oder Evidence-Strukturen erfordert. Bestehende Objekte werden deshalb noch nicht als abschließend vollständig bezeichnet.
 
 ## 3. Fachliche Erweiterungen für spätere Schemas
 
@@ -56,17 +61,19 @@ Diese Werte dürfen Hard Gates nicht kompensieren.
 
 `ComparisonResult` benötigt eine Präsentationsschicht für die sieben Managementdimensionen:
 
-1. business_innovation
-2. security_resilience
-3. legal_data_control
-4. technology_exit
-5. organization_skills
-6. supply_chain_geopolitics
-7. economics_contract
+1. `business_innovation`
+2. `security_resilience`
+3. `legal_data_control`
+4. `technology_exit`
+5. `organization_skills`
+6. `supply_chain_geopolitics`
+7. `economics_contract`
 
 `evidence_confidence` bleibt separat.
 
 Die bestehenden internen Risiko-/Capability-Achsen werden **nicht ersetzt**, sondern auf diese verständlichere Managementsicht projiziert.
+
+Die sieben Dimensionen sind interne v0.4-Methodik und werden in NEXT-120/NEXT-119 auf Vollständigkeit und Trennschärfe geprüft; sie sind keine unveränderte C3A- oder EU-CSF-Taxonomie.
 
 ### 3.4 Compliance-/Deep-Dive-Profile
 
@@ -90,6 +97,8 @@ Ein Profil braucht mindestens:
 - `method_source` vs. `compliance_applicable`
 
 Damit kann DORA als Methodenquelle dienen, ohne fälschlich DORA-Anwendbarkeit zu behaupten.
+
+`c3a_provider_deep_dive` ist bis Abschluss von NEXT-120 nur ein Platzhalter für die spätere, quellengetreu definierte Profilstruktur.
 
 ### 3.5 Context Sources
 
@@ -117,12 +126,12 @@ Kein eigenes Länder-Ranking. Stattdessen wird `RiskScenario` um ein klar erkenn
 
 Beispiele:
 
-- compelled_access
-- sanctions_export_control
-- service_withdrawal
-- support_update_loss
-- change_of_control
-- contract_price_shock
+- `compelled_access`
+- `sanctions_export_control`
+- `service_withdrawal`
+- `support_update_loss`
+- `change_of_control`
+- `contract_price_shock`
 
 Die betroffenen Dependencies, Legal Entities, Services und Controls werden wie bei anderen Risikoszenarien referenziert.
 
@@ -132,11 +141,11 @@ Fragen und Evidence Requests benötigen perspektivisch eine Priorisierungsmetada
 
 Mögliche Faktoren:
 
-- affects_hard_gate
-- differentiates_options
-- material_risk_or_benefit
-- closes_material_evidence_gap
-- recommendation_sensitivity
+- `affects_hard_gate`
+- `differentiates_options`
+- `material_risk_or_benefit`
+- `closes_material_evidence_gap`
+- `recommendation_sensitivity`
 
 Diese Metadaten steuern die Arbeitsreihenfolge, nicht die fachliche Wahrheit.
 
@@ -153,13 +162,21 @@ Die bestehende Question Bank bleibt vollständig erhalten. Für spätere Runtime
 
 Ziel ist nicht, Fragen endgültig zu löschen, sondern den sichtbaren Einstieg auf etwa 15–25 Kernfragen zu reduzieren und danach gezielt zu verzweigen.
 
-## 5. Provider Intelligence bleibt unverändert wichtig
+Die endgültige C3A-Zuordnung von Fragen wird erst in NEXT-120 festgelegt.
 
-Provider Intelligence versorgt ArchitectureOptions mit wiederverwendbaren Provider-/Service-Capability-Claims und Evidence. Neu ist vor allem die Priorisierung:
+## 5. Provider Intelligence bleibt zentral
 
-- EU-CSF/C3A/C5/Provider-Primärdokumentation werden stärker als Provider-/Service-Layer genutzt;
-- kunden- bzw. workload-spezifische Anwendung bleibt separate Applied Capability;
+Provider Intelligence versorgt ArchitectureOptions mit wiederverwendbaren Provider-/Service-Capability-Claims und Evidence.
+
+Aktuelle Leitplanken:
+
+- EU-CSF, C3A, C5, Provider-Primärdokumentation und unabhängige Assurance sind mögliche Quellen für Provider-/Service-Capabilities.
+- kunden- bzw. workload-spezifische Anwendung bleibt separate Applied Capability.
 - Providerherkunft/Jurisdiktion wird als Fact/Dependency modelliert, nicht als Score.
+- Scope, Version, Region/Offering/Service und Freshness müssen erhalten bleiben.
+- Provider-Selbstaussage und unabhängige Assurance bleiben unterscheidbar.
+
+**C3A-Vorbehalt:** Die konkrete Capability-/Evidence-Abbildung wird erst nach Volltextreview in NEXT-120 finalisiert.
 
 ## 6. Output-Artefakt
 
@@ -167,17 +184,35 @@ Die Runtime soll später nicht nur einen Assessment-Report, sondern eine **Decis
 
 ## 7. Migrationsreihenfolge
 
-Noch **nicht implementieren**, bevor NEXT-119 die Methode validiert hat.
+### Gate 1 – zuerst NEXT-120
 
-Danach bevorzugt:
+Keine fachliche v0.4-Runtime-/Schema-/UI-Migration, bevor der vollständige C3A-Volltext geprüft und notwendige Methodenänderungen eingearbeitet wurden.
+
+### Gate 2 – danach NEXT-119
+
+Methodenkern v0.4 an Referenzvarianten validieren und Screening-/Deep-Dive-Logik kalibrieren.
+
+### Erst danach implementieren
+
+Bevorzugte Reihenfolge:
 
 1. Question-Library-Metadaten und Screeningkern
-2. DecisionCase/ArchitectureOption Schema inkl. Status quo
+2. `DecisionCase`/`ArchitectureOption` Schema inkl. Status quo
 3. Business-/Opportunity-Profil und sieben Decision Dimensions
 4. Profile/Overlay-Aktivierung
-5. ContextSource-/Adaptermodell
+5. `ContextSource`-/Adaptermodell
 6. Geopolitical Scenario Classification
 7. Decision Template / Recommendation UI
 8. Provider Intelligence Runtime
 
-Jeder Schritt benötigt Backward-Compatibility- und Boundary-Tests.
+Jeder Schritt benötigt Backward-Compatibility-, Boundary-, Provenienz- und Regressionstests.
+
+## 8. Was während des Gates zulässig ist
+
+Ohne C3A-Review können weiterhin umgesetzt werden:
+
+- Security-Hardening ohne Methodenänderung
+- Bugfixes
+- Repository-/CI-Hygiene
+- Dokumentationskorrekturen
+- reine Quellensicherung, sofern daraus keine neue fachliche Regel abgeleitet wird
