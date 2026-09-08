@@ -6,11 +6,23 @@ Der Souveränitäts-Radar ist fachlich auf **Decision Support für digitale Souv
 
 Die technische Webapp ist vorhanden und validiert, bildet aber noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Questions-Workflows ab. Diese Abweichung ist bewusst dokumentiert: **Zielmethode und Runtime sind noch nicht vollständig migriert.**
 
-Vor weiterer fachlicher Methoden-, Schema-, Runtime- oder UI-Entwicklung gilt ein explizites Gate:
+Der bisherige C3A-Review-Gate **NEXT-120 / Issue #68 ist fachlich abgeschlossen**. Der vollständige BSI-C3A-v1.0-Text wurde gegen Methodenkern v0.4, Provider Intelligence, Hard Gates, Risikotaxonomie und Question Library geprüft.
 
-> **NEXT-120 / Issue #68 – vollständigen BSI-C3A-Kriterienkatalog gegen Methodenkern v0.4 und die bestehende Architektur prüfen.**
+Kanonische C3A-Artefakte:
 
-Der C3A-Volltext wird vom Projektinhaber bereitgestellt. Bis dahin ist NEXT-120 `waiting_input`.
+- `docs/method/C3A_V1_0_REVIEW.md`
+- `data/method/c3a_v1_0_crosswalk.csv`
+- `SRC-04` in `data/method/source_register.csv`
+
+## Wichtigste C3A-Konsequenzen
+
+- C3A ist ein nicht bindender Provider-/Service-Autonomie- und Evidence-Rahmen und ersetzt nicht den kunden-/workloadspezifischen Variantenvergleich.
+- C3A deckt SOV-1 bis SOV-6 ab; SOV-7 Security & Compliance wird insbesondere über C5/IT-Grundschutz adressiert, SOV-8 liegt außerhalb des BSI-Scope.
+- C3A setzt die Erfüllung der C5-Kriterien voraus. Eine formale C3A-Erfüllung darf daher nicht ohne belastbare C5-Scope-Evidence behauptet werden.
+- `Criterion` und `Additional Criterion` sind keine Reifegradstufen. EU-/Deutschlandvarianten sind alternative Anforderungen. Der Kunde wählt abhängig von Use Case und Souveränitätsbedarf ein Requirement Profile.
+- C3A-Datenklassen `Account Data`, `Cloud Service Customer Data`, `Cloud Service Derived Data` und `Cloud Service Provider Data` werden im C3A-/Provider-Intelligence-Scope getrennt betrachtet.
+- C3A SOV-6 beschreibt primär providerseitige Source-Code-, Build-, Entwicklungs- und Fortführungsautonomie. Kundenseitiger Exit/Portabilität bleibt primär bei Data Act, DORA, Bitkom und interner Radar-Methodik.
+- Mehrere frühere C3A-Fragenzuordnungen wurden quellengetreu korrigiert; Details im Crosswalk.
 
 ## Aktueller fachlicher Zielstand
 
@@ -47,15 +59,15 @@ Frameworks werden nicht als mehrere Vollprüfungen gestapelt:
 
 - Bitkom Cloud-Souveränität 2026: Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen, Exit
 - EU Cloud Sovereignty Framework: Provider-/Service-Souveränität und Evidence
-- BSI C3A: wichtiger Provider-/Service-Souveränitätslayer; **Detailmapping noch nicht vollständig geprüft, siehe #68**
+- BSI C3A: konkretisierender Provider-/Service-Autonomie- und Evidence-Layer für SOV-1 bis SOV-6
 - BSI 200-3 / IT-Grundschutz: Anschlussfähigkeit, Security-/Resilienz-Deep-Dive, Gefährdungs- und Vollständigkeitsreferenz
 - Data Act: Exit/Switching/Portabilität, soweit anwendbar
-- C5: Security-/Assurance-Evidence
+- C5: Security-/Assurance-Evidence und C3A-Voraussetzung
 - NIS2, DORA, DSGVO/EDPB, AI Act usw.: nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay; sonst ggf. Methoden-/Fragenquelle
 
 ### Fragenlogik
 
-Die 128 Fragen bleiben als **Question Library** erhalten. Sie sind kein Pflichtfragebogen.
+Die Question Bank bleibt eine **adaptive Question Library**, kein Pflichtfragebogen.
 
 Zielbild:
 
@@ -63,13 +75,13 @@ Zielbild:
 vorhandene Artefakte / Provider Intelligence
   -> Vorbefüllung
   -> ca. 15–25 Screening-Fragen
-  -> nur entscheidungsrelevante Deep Dives
+  -> nur entscheidungsrelevante Deep Dives / ausgewählte Requirement Profiles
   -> Evidence / Claims / Risiken / Gates
   -> Variantenvergleich
   -> Entscheidungsvorlage / Empfehlung
 ```
 
-Der Zielkorridor 15–25 ist eine interne Designhypothese und muss nach NEXT-120 in Referenzfällen kalibriert werden.
+Der Zielkorridor 15–25 ist eine interne Designhypothese und muss in NEXT-119 an Referenzfällen kalibriert werden.
 
 ### Intake
 
@@ -116,6 +128,7 @@ Die Szenarien werden auf alle relevanten Varianten angewandt, auch auf On-Prem-L
 - LLM-Proposals wirken ohne Human Review nicht auf Gates
 - Legal Conclusions, Risikoakzeptanz und Kundenentscheidung bleiben menschlich
 - Raw Kundenevidence wird nicht committed
+- aktuelle 0–4-Level und acht Gate-Domänen sind interne MVP-Operationalisierung, keine C3A-/EU-Skala
 
 ## Runtime-Stand
 
@@ -131,32 +144,28 @@ Vorhanden und technisch validiert:
 - Copy/Paste LLM Bridge
 - Structured Export / Consultant Report / Backup / Restore
 
-Die Runtime ist aktuell **pre-v0.4** hinsichtlich DecisionCase/ArchitectureOptions, Status-quo-/Business-Value-Vergleich, sieben sichtbaren Decision Dimensions und stark verkleinertem Screeningkern.
+Die Runtime ist aktuell **pre-v0.4** hinsichtlich DecisionCase/ArchitectureOptions, Status-quo-/Business-Value-Vergleich, Requirement Profiles, sieben sichtbaren Decision Dimensions und stark verkleinertem Screeningkern.
 
 ## Aktuelle Reihenfolge
 
-### 1. NEXT-120 / Issue #68 – jetzt
+### 1. NEXT-118 / Issue #28 – erster operativer Schritt
 
-C3A-Volltextreview. Keine neue fachliche Runtime-/Schema-/UI-Entwicklung bis Abschluss.
+Manuelle Consultant-Installation und Evaluation der vorhandenen Runtime auf einem frischen Zielsystem. Dabei explizit die Differenz zwischen pre-v0.4-UI und Zielmethodik dokumentieren.
 
-### 2. NEXT-118 / Issue #28 – danach
+### 2. NEXT-119 / Issue #67 – Methodenvalidierung
 
-Manuelle Consultant-Evaluation der vorhandenen Runtime. Status: `blocked_by NEXT-120`.
+Methodenkern v0.4 an mehreren Referenzvarianten validieren; Screeningkern, Requirement-Profile-/Overlay-Aktivierung und Empfehlungsvorlage kalibrieren.
 
-### 3. NEXT-119 / Issue #67 – danach bzw. parallel nach Freigabe
+### 3. Erst danach größere Runtime-Migration
 
-Methodenkern v0.4 an mehreren Referenzvarianten validieren; Screeningkern, Overlay-Aktivierung und Empfehlungsvorlage kalibrieren. Status: `blocked_by NEXT-120`.
-
-### 4. Erst danach Runtime-Migration
-
-Schrittweise gemäß `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`.
+Schrittweise gemäß `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`. Insbesondere keine voreilige Übernahme der heutigen C3A-Crosswalk-Einträge als globale Hard Gates.
 
 ## Parallel zulässig
 
 - Security-Hardening, insbesondere Issue #25 / NEXT-117 und Issue #26
 - Bugfixes
 - Repository-/CI-Hygiene
-- Quellensicherung ohne neue fachliche Vorwegnahme
+- Provider-/Framework-Recherche ohne Vorwegnahme noch nicht validierter Scoringregeln
 
 ## Primäre Dokumente für den nächsten Agenten
 
@@ -167,11 +176,11 @@ Schrittweise gemäß `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`.
 5. `project/DECISIONS.yaml`
 6. `docs/method/METHOD_CORE_V0_4_DE.md`
 7. `docs/method/GLOSSARY_DE.md`
-8. `docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md`
-9. `docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md`
-10. `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`
-11. `docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md`
-12. `docs/method/SOURCE_GUIDE.md`
-13. Issue #68
+8. `docs/method/C3A_V1_0_REVIEW.md`
+9. `data/method/c3a_v1_0_crosswalk.csv`
+10. `docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md`
+11. `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`
+12. `docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md`
+13. `docs/method/SOURCE_GUIDE.md`
 
 `docs/history/` und Agent-Logs sind historische Nachweise, nicht die aktuelle Fachquelle. Repo-State schlägt Chatgedächtnis.
