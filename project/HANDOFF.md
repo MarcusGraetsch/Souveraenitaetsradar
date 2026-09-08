@@ -8,6 +8,8 @@ Die technische Webapp ist vorhanden und validiert, bildet aber noch wesentliche 
 
 Der bisherige C3A-Review-Gate **NEXT-120 / Issue #68 ist fachlich abgeschlossen**. Der vollständige BSI-C3A-v1.0-Text wurde gegen Methodenkern v0.4, Provider Intelligence, Hard Gates, Risikotaxonomie und Question Library geprüft.
 
+Die anschließende **Post-Merge-Hygiene NEXT-121 / Issue #69** hat die durch die Methodenerweiterung sichtbar gewordenen CI- und Repository-Inkonsistenzen bereinigt. Der Repository-Validator, Core-/API-Tests, Frontend-Build, Compose-Smoke-Test und vollständige synthetische Consultant-Walkthrough liefen auf PR #71 gemeinsam grün. Historische feste Fragezahlen wurden aus Regressionstests entfernt; geprüft werden nun stabile Workflow-Invarianten. Die nächste fachliche Arbeit bleibt NEXT-118/NEXT-119.
+
 Kanonische C3A-Artefakte:
 
 - `docs/method/C3A_V1_0_REVIEW.md`
