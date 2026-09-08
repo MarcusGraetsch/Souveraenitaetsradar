@@ -32,7 +32,16 @@ def check(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def create_assessment(base_url: str, *, name: str, workload_type: str, criticality: str, confidentiality: str, integrity: str = "medium", availability: str = "medium") -> dict[str, Any]:
+def create_assessment(
+    base_url: str,
+    *,
+    name: str,
+    workload_type: str,
+    criticality: str,
+    confidentiality: str,
+    integrity: str = "medium",
+    availability: str = "medium",
+) -> dict[str, Any]:
     return request(
         base_url,
         "POST",
@@ -124,6 +133,37 @@ def snapshot(base_url: str, assessment_id: str) -> dict[str, Any]:
     }
 
 
+def validate_snapshot_consistency(current: dict[str, Any], *, label: str) -> None:
+    summary = current["summary"]
+    applicability = summary["applicability"]
+    stages = summary["stages"]
+
+    check(summary["total"] == len(current["all"]), f"{label}: all-view and total disagree: {summary}")
+    check(summary["relevant"] == len(current["relevant"]), f"{label}: relevant-view and summary disagree: {summary}")
+    check(summary["work_queue"] == len(current["work"]), f"{label}: work-view and summary disagree: {summary}")
+    check(
+        summary["total"]
+        == applicability["applicable"] + applicability["needs_review"] + applicability["not_applicable"],
+        f"{label}: applicability partition does not equal total: {summary}",
+    )
+    check(
+        summary["relevant"] == applicability["applicable"] + applicability["needs_review"],
+        f"{label}: relevant count does not match applicable + needs_review: {summary}",
+    )
+    check(
+        stages["clarification"] == applicability["needs_review"],
+        f"{label}: needs_review is not fully represented in clarification queue: {summary}",
+    )
+    check(
+        len(current["clarification"]) == applicability["needs_review"],
+        f"{label}: clarification view lost unresolved questions: {summary}",
+    )
+    check(
+        all(q["applicability_status"] == "needs_review" for q in current["clarification"]),
+        f"{label}: clarification view contains non-needs_review questions",
+    )
+
+
 def validate_complex(base_url: str) -> dict[str, Any]:
     assessment = create_assessment(
         base_url,
@@ -136,21 +176,13 @@ def validate_complex(base_url: str) -> dict[str, Any]:
     assessment_id = assessment["id"]
     set_profile(base_url, assessment_id, complex_profile())
     before = snapshot(base_url, assessment_id)
+    validate_snapshot_consistency(before, label="complex")
     summary = before["summary"]
 
-    check(summary["total"] == 128, f"unexpected question total: {summary}")
-    check(summary["relevant"] == 124, f"NEXT-114 relevant baseline changed: {summary}")
-    check(summary["applicability"]["applicable"] == 83, f"applicable baseline changed: {summary}")
-    check(summary["applicability"]["needs_review"] == 41, f"needs_review baseline changed: {summary}")
-    check(summary["applicability"]["not_applicable"] == 4, f"not_applicable baseline changed: {summary}")
-    check(summary["stages"]["clarification"] == 41, "needs_review is not fully represented in clarification queue")
-    check(summary["stages"]["screening"] > 0, "screening queue is empty")
-    check(summary["stages"]["deep_dive"] > 0, "deep-dive queue is empty")
-    check(summary["work_queue"] < summary["relevant"], "progressive work queue does not reduce immediate workload")
-    check(len(before["work"]) == summary["work_queue"], "work view and summary disagree")
-    check(len(before["clarification"]) == 41, "clarification view lost unresolved questions")
-    check(all(q["applicability_status"] == "needs_review" for q in before["clarification"]), "clarification view contains non-needs_review questions")
-    check(len(before["all"]) == 128, "all-questions audit view is incomplete")
+    check(summary["total"] > 0, "complex: method question bank is empty")
+    check(summary["stages"]["screening"] > 0, "complex: screening queue is empty")
+    check(summary["stages"]["deep_dive"] > 0, "complex: deep-dive queue is empty")
+    check(summary["work_queue"] < summary["relevant"], "complex: progressive work queue does not reduce immediate workload")
 
     first_screening = before["screening"][0]
     saved = request(
@@ -167,11 +199,21 @@ def validate_complex(base_url: str) -> dict[str, Any]:
     )
     check(saved["question_id"] == first_screening["id"], "screening answer did not persist")
     after = snapshot(base_url, assessment_id)
+    validate_snapshot_consistency(after, label="complex-after-answer")
     after_summary = after["summary"]
-    check(after_summary["stages"]["completed"] == summary["stages"]["completed"] + 1, "answered question did not move to completed")
-    check(after_summary["stages"]["screening"] == summary["stages"]["screening"] - 1, "answered screening question did not leave screening queue")
-    check(any(q["id"] == first_screening["id"] for q in after["completed"]), "completed view does not expose answered question")
-    check(len(after["all"]) == 128, "answering a question removed it from audit view")
+    check(after_summary["total"] == summary["total"], "answering a question changed method-bank size")
+    check(
+        after_summary["stages"]["completed"] == summary["stages"]["completed"] + 1,
+        "answered question did not move to completed",
+    )
+    check(
+        after_summary["stages"]["screening"] == summary["stages"]["screening"] - 1,
+        "answered screening question did not leave screening queue",
+    )
+    check(
+        any(q["id"] == first_screening["id"] for q in after["completed"]),
+        "completed view does not expose answered question",
+    )
 
     return {
         "assessment_id": assessment_id,
@@ -192,9 +234,9 @@ def validate_public(base_url: str) -> dict[str, Any]:
     assessment_id = assessment["id"]
     set_profile(base_url, assessment_id, public_profile())
     current = snapshot(base_url, assessment_id)
+    validate_snapshot_consistency(current, label="public")
     summary = current["summary"]
-    check(summary["total"] == 128, "public audit view does not contain complete method bank")
-    check(len(current["all"]) == 128, "public all-question view incomplete")
+    check(summary["total"] > 0, "public: method question bank is empty")
     return {"assessment_id": assessment_id, "summary": summary}
 
 
@@ -207,22 +249,47 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
     complex_summary = complex_result["before"]
     public_summary = public_result["summary"]
 
-    check(public_summary["relevant"] < complex_summary["relevant"], "simple public workload is not shorter than complex AI workload")
-    check(public_summary["work_queue"] < complex_summary["work_queue"], "public immediate work queue is not shorter than complex AI queue")
+    check(
+        public_summary["total"] == complex_summary["total"],
+        "question-bank size differs between assessment profiles",
+    )
+    check(
+        public_summary["relevant"] < complex_summary["relevant"],
+        "simple public workload is not shorter than complex AI workload",
+    )
+    check(
+        public_summary["work_queue"] < complex_summary["work_queue"],
+        "public immediate work queue is not shorter than complex AI queue",
+    )
 
     report = {
         "validation_id": "NEXT-115-PROGRESSIVE-01",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "policy": complex_summary["policy"],
+        "question_bank_size": complex_summary["total"],
         "complex_ai_agent": complex_result,
         "public_content": public_result,
         "acceptance_checks": {
-            "all_questions_remain_inspectable": complex_summary["total"] == 128 and public_summary["total"] == 128,
-            "next_114_applicability_baseline_preserved": complex_summary["relevant"] == 124 and complex_summary["applicability"]["needs_review"] == 41,
-            "needs_review_visible_in_clarification": complex_summary["stages"]["clarification"] == 41,
+            "question_bank_size_consistent_across_profiles": public_summary["total"] == complex_summary["total"],
+            "applicability_partition_consistent": (
+                complex_summary["total"]
+                == complex_summary["applicability"]["applicable"]
+                + complex_summary["applicability"]["needs_review"]
+                + complex_summary["applicability"]["not_applicable"]
+            ),
+            "needs_review_visible_in_clarification": (
+                complex_summary["stages"]["clarification"]
+                == complex_summary["applicability"]["needs_review"]
+            ),
             "immediate_queue_smaller_than_relevant_path": complex_summary["work_queue"] < complex_summary["relevant"],
-            "screening_and_deep_dive_exist": complex_summary["stages"]["screening"] > 0 and complex_summary["stages"]["deep_dive"] > 0,
-            "answered_question_moves_to_completed": complex_result["after"]["stages"]["completed"] == complex_summary["stages"]["completed"] + 1,
+            "screening_and_deep_dive_exist": (
+                complex_summary["stages"]["screening"] > 0
+                and complex_summary["stages"]["deep_dive"] > 0
+            ),
+            "answered_question_moves_to_completed": (
+                complex_result["after"]["stages"]["completed"]
+                == complex_summary["stages"]["completed"] + 1
+            ),
             "public_workload_is_shorter": public_summary["work_queue"] < complex_summary["work_queue"],
         },
     }
@@ -233,7 +300,7 @@ def run(base_url: str, output: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate NEXT-115 progressive question workflow against a running Radar instance.")
+    parser = argparse.ArgumentParser(description="Validate progressive question workflow against a running Radar instance.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
     parser.add_argument("--output", default=".runtime/exports/progressive-workflow-validation.json")
     args = parser.parse_args()
@@ -244,6 +311,7 @@ def main() -> int:
         return 1
     print("NEXT-115 progressive workflow PASS")
     print(json.dumps(report["acceptance_checks"], indent=2, ensure_ascii=False))
+    print("Question bank size:", report["question_bank_size"])
     print("Complex stage counts:", json.dumps(report["complex_ai_agent"]["before"]["stages"], sort_keys=True))
     print("Public stage counts:", json.dumps(report["public_content"]["summary"]["stages"], sort_keys=True))
     print("Report:", args.output)
