@@ -1,12 +1,54 @@
 # Souveränitätsradar
 
-Der **Souveränitätsradar** ist ein Beratungs- und Softwareprojekt zur nachvollziehbaren Bewertung digitaler Souveränitätsrisiken von Cloud-, Plattform-, SaaS- und KI-Lösungen.
+Der **Souveränitätsradar** ist ein Beratungs- und Softwareprojekt zur nachvollziehbaren **Entscheidungsunterstützung bei Fragen digitaler Souveränität**.
 
-Das Projekt verbindet Informationssicherheits-Risikoanalyse, digitale Souveränität, Compliance/Governance und Evidence-Bewertung. Der Methodenkern ist **cloud-agnostisch** und benötigt **keinen direkten Zugang zu Kunden-Cloud-Accounts**.
+Im Mittelpunkt steht nicht die abstrakte Frage „Cloud oder On-Prem – was ist souveräner?“, sondern der vergleichende Entscheidungsfall:
 
-## MVP-01: Consultant Web Application
+> Welche Betriebs-/Architekturvariante ist für einen konkreten Workload unter den Zielen, Risiken, Fähigkeiten, Kosten und Mindestanforderungen der Organisation vorzuziehen – und wie belastbar ist diese Empfehlung belegt?
 
-Die operative Produktentwicklung läuft als lokal installierbare Webanwendung. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz; für den täglichen Beratungsworkflow ist sie nicht mehr die primäre Oberfläche.
+Der Radar soll eine begründete Empfehlung erzeugen können. Finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
+
+## Aktueller fachlicher Stand
+
+Der aktuelle fachliche Zielstand ist **Methodenkern v0.4**:
+
+- Decision Support statt Provider-/Länderranking
+- Vergleich mehrerer `ArchitectureOption`s unter einem `DecisionCase`
+- Status quo / Nichtstun als reale Option, soweit sinnvoll
+- sieben verständliche Entscheidungsdimensionen plus separate Evidence Confidence
+- adaptive Question Library statt 128-Fragen-Pflichtfragebogen
+- Provider Intelligence für wiederverwendbare Provider-/Service-Nachweise
+- Customer-mediated Evidence statt notwendiger Cloud-Credentials
+- geopolitische Sorgen werden in prüfbare Szenarien übersetzt
+- Frameworks werden nach ihrer Funktion genutzt, nicht als gestapelte Vollprüfungen
+
+Primäre Referenz: [`docs/method/METHOD_CORE_V0_4_DE.md`](docs/method/METHOD_CORE_V0_4_DE.md).  
+Terminologie: [`docs/method/GLOSSARY_DE.md`](docs/method/GLOSSARY_DE.md).
+
+### Aktuelles Development Gate
+
+Vor weiterer Methoden-, Schema-, Runtime- oder UI-Erweiterung wird der vollständige BSI-Kriterienkatalog **Criteria enabling Cloud Computing Autonomy (C3A)** gegen den v0.4-Kern geprüft: **Issue #68 / NEXT-120**.
+
+Bis dieser Volltextreview abgeschlossen ist, gilt das vorhandene C3A-Mapping als Arbeitsstand und nicht als vollständige Ableitung.
+
+## Framework-Rollen
+
+Der Radar ist **anschlussfähig** an etablierte Methoden und Anforderungen, aber kein universelles Compliance-Audit.
+
+- **Bitkom Cloud-Souveränität 2026:** Orientierung zu Handlungsfähigkeit, Chancen/Risiken, Skills, Interdependenzen und Exit
+- **EU Cloud Sovereignty Framework + BSI C3A:** Provider-/Service-Souveränität und prüfbare Capabilities/Evidence
+- **BSI 200-3 / IT-Grundschutz:** Scope, Zielobjekte, Gefährdungen, Risikobehandlung sowie Security-/Resilienz-Deep-Dive und Vollständigkeitscheck
+- **Data Act:** Exit, Switching und Portabilität, soweit anwendbar
+- **C5:** Security-/Assurance-Evidence
+- **NIS2, DORA, DSGVO/EDPB, AI Act usw.:** aktivierbare Compliance-Overlays bzw. Methodenquellen bei tatsächlicher Anwendbarkeit
+
+Details: [`docs/method/SOURCE_GUIDE.md`](docs/method/SOURCE_GUIDE.md).
+
+## MVP-01: aktuelle Consultant-Webanwendung
+
+Die operative Produktentwicklung läuft als lokal installierbare Webanwendung. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz; für den täglichen Beratungsworkflow ist sie nicht die primäre Oberfläche.
+
+**Wichtig:** Die aktuelle Runtime implementiert noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Question-Workflows. Sie ist technisch funktionsfähig und auditierbar, aber noch **nicht vollständig auf den Decision-Support-Kern v0.4 migriert**. Diese Abweichung ist als Implementation Gap dokumentiert und wird erst nach dem C3A-Volltextreview und der Methodenvalidierung aufgelöst.
 
 Aktueller MVP-Stack:
 
@@ -14,7 +56,7 @@ Aktueller MVP-Stack:
 - Python + FastAPI
 - PostgreSQL
 - lokaler Dokument-Speicher unter `.runtime/`
-- vorhandener deterministischer Methodenkern unter `src/sovradar/`
+- deterministischer Methodenkern unter `src/sovradar/`
 - **LLM Bridge per Copy/Paste**, keine LLM-API-Calls
 - Docker Compose
 
@@ -37,13 +79,7 @@ Danach:
 ./uninstall.sh   # Anwendung + alle erzeugten Daten löschen
 ```
 
-`./install.sh` kann für Reparatur oder Konfigurationsänderungen erneut ausgeführt
-werden und verwendet dabei das bestehende lokale Datenbankpasswort weiter. Existiert
-das Compose-Datenbank-Volume ohne die zugehörige `.env`, bricht die Installation zum
-Schutz vorhandener Daten mit einer konkreten Wiederherstellungs-/Löschanweisung ab,
-statt die API mit unpassenden Zugangsdaten in eine Neustartschleife zu schicken.
-`./test.sh` beendet sich bei einem abgestürzten oder neu startenden API-Container
-frühzeitig und gibt Status sowie die letzten API-Logzeilen aus.
+`./install.sh` kann für Reparatur oder Konfigurationsänderungen erneut ausgeführt werden und verwendet dabei das bestehende lokale Datenbankpasswort weiter. Existiert das Compose-Datenbank-Volume ohne die zugehörige `.env`, bricht die Installation zum Schutz vorhandener Daten mit einer konkreten Wiederherstellungs-/Löschanweisung ab, statt die API mit unpassenden Zugangsdaten in eine Neustartschleife zu schicken. `./test.sh` beendet sich bei einem abgestürzten oder neu startenden API-Container frühzeitig und gibt Status sowie die letzten API-Logzeilen aus.
 
 Default: `http://localhost:8080`
 
@@ -59,48 +95,68 @@ SOVRADAR_CA_CERT=/pfad/zur/enterprise-ca.pem ./install.sh
 
 TLS-Verifikation wird nicht deaktiviert. Details: [`docs/operations/ENTERPRISE_CA.md`](docs/operations/ENTERPRISE_CA.md).
 
-## Consultant Workflow
+## Zielworkflow der Beratung
 
-`Assessment anlegen -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
+```text
+Entscheidungsfrage / Workload
+  -> gemeinsame Anforderungen, Ziele und K.O.-Kriterien
+  -> realistische Varianten inkl. Status quo
+  -> vorhandene Kundenartefakte vorbefüllen
+  -> kompaktes Screening
+  -> nur entscheidungsrelevante Deep Dives
+  -> Provider Intelligence + Customer Evidence + Tests
+  -> geprüfte Claims / Risikoszenarien / Maßnahmen
+  -> Variantenvergleich
+  -> Entscheidungsvorlage / Empfehlung
+  -> Kundenentscheidung
+```
 
-Ein Assessment startet mit Workload, Kritikalität, Schutzbedarf, Kontrollraum und regulatorischem Kontext. Danach pflegt der Berater ein kompaktes **Relevanzprofil** mit Scope-Fakten wie Datenverarbeitung, Verschlüsselung, KI-Nutzung, Exit-Relevanz, IAM oder Unterauftragnehmern.
+Der Zielkorridor für das sichtbare Kernscreening liegt methodisch derzeit bei etwa **15–25 Fragen**. Das ist eine zu validierende interne Designhypothese, keine Normvorgabe.
 
-Aus Assessment + Relevanzprofil erzeugt der Radar einen deterministischen Fragenpfad aus der kanonischen Question Bank. Applicability hat drei Zustände:
+## Aktueller Runtime-Workflow
+
+Die bestehende Webapp arbeitet derzeit noch mit:
+
+`Assessment -> Scope -> Relevanzprofil -> Guided Questions -> Evidence -> LLM Bridge -> Human Review -> Rule Engine / Ergebnis`
+
+Applicability hat drei Zustände:
 
 - `applicable`
 - `not_applicable`
 - `needs_review`
 
-Unklare Bedingungen bleiben als `needs_review` sichtbar und werden niemals still ausgeblendet. Die Oberfläche bietet zusätzlich `Alle Fragen`, damit die Filterentscheidung jederzeit geprüft werden kann.
-
-Im aktuellen MVP können Assessments angelegt, Relevanzprofile gepflegt, relevante Fragen beantwortet, Evidence-Metadaten/Dateien lokal erfasst und LLM-Analysepakete erzeugt werden.
+Unklare Bedingungen bleiben als `needs_review` sichtbar und werden niemals still ausgeblendet. Die vollständige Question Bank bleibt über Audit-/Alle-Fragen-Sichten inspizierbar.
 
 Die **LLM Bridge** funktioniert bewusst ohne API:
 
-1. Radar erzeugt einen strukturierten Prompt mit offenen relevanten/zu prüfenden Fragen.
+1. Radar erzeugt einen strukturierten Prompt.
 2. Berater kopiert ihn in einen freigegebenen LLM-Chat seiner Wahl.
 3. LLM liefert strukturiertes JSON zurück.
-4. JSON wird in den Radar eingefügt.
-5. Das Backend validiert Assessment-ID, Question IDs, Evidence IDs und Schema.
-6. Ergebnisse bleiben **Vorschläge** und werden nicht automatisch als Beraterentscheidung übernommen.
+4. JSON wird in den Radar eingefügt und validiert.
+5. Ergebnisse bleiben **Vorschläge** und werden nicht automatisch als Beraterentscheidung übernommen.
 
-Die Applicability-Entscheidung selbst wird nicht an das LLM delegiert.
+LLM-Proposals entscheiden weder Applicability noch Hard Gates und werden ohne Human Review nicht zu wirksamen Claims.
 
-Details: [`docs/product/MVP_01_CONSULTANT_WEBAPP.md`](docs/product/MVP_01_CONSULTANT_WEBAPP.md)
+Details: [`docs/product/MVP_01_CONSULTANT_WEBAPP.md`](docs/product/MVP_01_CONSULTANT_WEBAPP.md).
 
 ## Evidence- und Cloud-Prinzip
 
-Der Standardprozess arbeitet mit **Customer-mediated Evidence**: Verträge, Architektur-/CMDB-/Dependency-Dokumentation, IaC/redigierte Konfigurationen, kundenseitige Provider-Exporte, Assurance-Nachweise, Screenshare-/Workshop-Beobachtungen und Testprotokolle. Öffentliche Provider-Dokumentation belegt primär Service Capability, nicht Kundenkonfiguration.
+Der Standardprozess arbeitet mit **Customer-mediated Evidence**: Verträge, Architektur-/CMDB-/Dependency-Dokumentation, IaC/redigierte Konfigurationen, kundenseitige Provider-Exporte, Assurance-Nachweise, Screenshare-/Workshop-Beobachtungen und Testprotokolle.
 
-AWS, Azure, GCP, OpenStack, Kubernetes, europäische Sovereign-Cloud-Angebote und SaaS werden über dasselbe generische Domänen- und Regelmodell bewertet. Provider-Adapter sind reine Übersetzer und enthalten keine eigene Risikomethode.
+Öffentliche Provider-Dokumentation belegt primär **Provider-/Service Capability**, nicht automatisch die konkrete Kundenkonfiguration oder Wirksamkeit im Workload.
 
-## Was der Radar getrennt ausweist
+AWS, Azure, GCP, OpenStack, Kubernetes, europäische Sovereign-Cloud-Angebote, chinesische Provider, SaaS und On-Prem-Varianten werden über dasselbe generische Modell betrachtet. Provider-Adapter sind reine Übersetzer und enthalten keine eigene Risikomethode.
 
-1. Provider / Service Capability
-2. Applied Capability
-3. Workload Sovereignty Risk
-4. klassisches Informationssicherheits- und Betriebsrisiko
-5. Evidence Confidence
+## Was getrennt sichtbar bleiben muss
+
+- Provider / Service Capability
+- Applied Capability
+- Workload Sovereignty Risk
+- Security / Operational Risk
+- Business-/Strategic Value
+- Evidence Confidence
+- Hard-Gate-/K.O.-Status
+- Kosten, Maßnahmen und Restrisiken
 
 Die Methode arbeitet nach **Gate first, score second**. Fehlende Evidence führt zu `UNVERIFIED`, nicht automatisch zu `FAIL`.
 
@@ -117,10 +173,11 @@ Die Methode arbeitet nach **Gate first, score second**. Fehlende Evidence führt
 ├── docs/product/                    # Produkt-/UX-Dokumentation
 ├── docs/method/                     # fachliche Methodik
 ├── docs/architecture/               # Architektur + ADRs
-├── data/method/                     # kanonische maschinenlesbare Methodik
-├── config/                          # Regeln und Evidence-Typen
+├── docs/history/                    # historischer Projektverlauf, nicht aktuelle Source of Truth
+├── data/method/                     # aktuell implementierte maschinenlesbare Methodik
+├── config/                          # aktuell implementierte Regeln und Evidence-Typen
 ├── schemas/                         # JSON Schemas
-├── src/sovradar/                    # deterministischer Methodenkern
+├── src/sovradar/                    # deterministischer Runtime-Methodenkern
 ├── tests/                           # Core Tests
 └── .github/                         # CI, Templates, CODEOWNERS
 ```
@@ -136,6 +193,8 @@ Laufzeitdaten gehören **nicht** ins Git-Repository. Sie liegen lokal im Postgre
 3. `project/HANDOFF.md`
 4. `project/NEXT_ACTIONS.yaml`
 5. `project/DECISIONS.yaml`
-6. offene Issues/PRs
+6. `docs/method/METHOD_CORE_V0_4_DE.md`
+7. `docs/method/GLOSSARY_DE.md`
+8. offene Issues/PRs
 
 Raw Kundenevidence, Cloud-Credentials und Secrets gehören niemals in GitHub Issues, PRs oder dieses Repository.
