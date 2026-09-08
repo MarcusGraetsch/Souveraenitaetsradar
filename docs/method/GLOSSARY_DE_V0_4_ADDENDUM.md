@@ -1,10 +1,12 @@
-# Glossar-Ergänzung – Methodenkern v0.4
+# Glossar-Modul – Methodenkern v0.4
 
-Status: **Ergänzung zu `GLOSSARY_DE.md`**  
+Status: **aktueller Bestandteil der Terminologiereferenz**  
+Basis: `docs/method/GLOSSARY_DE.md`  
 Provenienz: überwiegend `[METHOD]`, siehe Begriff  
-Issue: #67
+Issue: #67  
+Review-Gate: #68 / NEXT-120
 
-Diese Datei ergänzt das bestehende deutschsprachige Glossar um Begriffe, die mit dem Decision-Support-Methodenkern v0.4 eingeführt oder fachlich neu gewichtet wurden. Bis zur späteren Konsolidierung sind **`GLOSSARY_DE.md` + diese Ergänzung gemeinsam** die Terminologiereferenz.
+Dieses Modul ergänzt das Basisglossar um Begriffe des Decision-Support-Methodenkerns v0.4. **`GLOSSARY_DE.md` und dieses Modul gelten gemeinsam als aktuelle Terminologiereferenz.** Nach dem C3A-Volltextreview (#68) wird geprüft, ob C3A-Begriffe ergänzt oder Definitionen angepasst werden müssen; bis dahin werden keine C3A-Detailbegriffe aus unvollständig geprüftem Material vorweggenommen.
 
 ---
 
@@ -211,6 +213,8 @@ Beispiele:
 Methodische Ebene, die Eigenschaften eines konkreten Cloud-Angebots, Services, seiner Region, Legal Entities und dokumentierten Capabilities beschreibt. EU Cloud Sovereignty Framework, BSI C3A und Provider/Assurance-Evidence sind wichtige Quellen für diese Ebene.
 
 Sie ist getrennt vom workload- und organisationsspezifischen Souveränitätsrisiko.
+
+**C3A-Hinweis:** Die genaue C3A-Begrifflichkeit und das Detailmapping werden erst nach Issue #68 / NEXT-120 als vollständig behandelt.
 
 ---
 
