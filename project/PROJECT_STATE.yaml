@@ -2,8 +2,8 @@ project:
   name: Souveraenitaetsradar
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
-  current_phase: METHOD-ALIGNMENT
-  current_phase_name: c3a-fulltext-review-gate
+  current_phase: METHOD-VALIDATION
+  current_phase_name: post-c3a-reference-validation
   method_core_version: "0.4"
   runtime_method_baseline: "MVP-01 / INT-03"
   product_version: "0.4.0-dev"
@@ -20,7 +20,6 @@ method_target:
   primary_document: docs/method/METHOD_CORE_V0_4_DE.md
   terminology:
     - docs/method/GLOSSARY_DE.md
-    - docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md
   provenance:
     - data/method/source_register.csv
     - data/method/source_register_addendum_v1.csv
@@ -28,19 +27,30 @@ method_target:
     - docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md
     - docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md
     - docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
+  c3a:
+    source_id: SRC-04
+    review: docs/method/C3A_V1_0_REVIEW.md
+    crosswalk: data/method/c3a_v1_0_crosswalk.csv
+    version: "1.0 / 27.04.2026"
+    review_status: completed
 
 current_truth:
   - Der Souveränitäts-Radar ist primär Decision Support für mehrere Betriebs-/Architekturvarianten eines konkreten Workloads und kein universelles Compliance-Audit.
-  - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik gehört in Research-/Evidence-/Adapter-Layer.
-  - Die finale Empfehlung darf vom Radar bzw. Beratungsteam formuliert werden; finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
+  - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik gehört in Research-, Evidence- und Adapter-Layer.
+  - Der Radar darf eine begründete Empfehlung formulieren; finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
   - Die sichtbare Managementsicht nutzt sieben Entscheidungsdimensionen: Geschäft & Innovation, Security & Resilienz, Recht/Daten/Kontrolle, Technologie & Exit, Organisation & Skills, Lieferkette & Geopolitik sowie Wirtschaft & Vertrag.
   - Evidence Confidence bleibt separat von Risiko, Capability und Business Value.
   - BSI 200-3 ist Anschluss-, Deep-Dive- und Vollständigkeitsreferenz; die 47 elementaren Gefährdungen sind kein verpflichtender sichtbarer Interviewkatalog.
   - Bitkom Cloud-Souveränität 2026 ist zentrale Orientierungsquelle für Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen und Exit.
-  - EU Cloud Sovereignty Framework und BSI C3A bilden primär den Provider-/Service-Souveränitätslayer; das vollständige C3A-Detailmapping ist noch nicht freigegeben.
+  - EU Cloud Sovereignty Framework und BSI C3A bilden primär den Provider-/Service-Souveränitätslayer.
+  - Der C3A-v1.0-Volltext wurde vollständig gegen Methodenkern v0.4, Question Library und Provider-Intelligence-Konzept geprüft; Review und Crosswalk sind kanonisch dokumentiert.
+  - C3A Criterion und Additional Criterion sind keine Reifegradstufen; konkrete nicht kompensierbare Anforderungen entstehen aus einem kundenspezifischen Requirement Profile.
+  - Eine formale C3A-Erfüllung wird nur behauptet, wenn die C3A-Voraussetzungen einschließlich belastbarer C5-Erfüllung für den betrachteten Scope nachgewiesen sind.
+  - C3A SOV-6 beschreibt primär providerseitige Fortführungs- und Entwicklungsautonomie; kundenseitiger Exit und Switching bleiben vor allem Data-Act-, DORA-, Bitkom- und Radar-Themen.
+  - C3A-Datenklassen Account Data, Cloud Service Customer Data, Cloud Service Derived Data und Cloud Service Provider Data werden im C3A-/Provider-Intelligence-Scope getrennt betrachtet.
   - Data Act wird als Exit-/Switching-/Portabilitätsreferenz genutzt, soweit anwendbar.
-  - NIS2, DORA, DSGVO/EDPB, AI Act und andere Vorgaben werden nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay aktiviert; sonst können sie Methoden-/Fragenquelle sein.
-  - Die Question Bank ist eine adaptive Question Library, kein Pflichtfragebogen; Zielkorridor für das sichtbare Kernscreening sind etwa 15–25 Fragen und muss validiert werden.
+  - NIS2, DORA, DSGVO/EDPB, AI Act und andere Vorgaben werden nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay aktiviert; sonst können sie Methoden- oder Fragenquelle sein.
+  - Die Question Bank ist eine adaptive Question Library, kein Pflichtfragebogen; Zielkorridor für das sichtbare Kernscreening sind etwa 15–25 Fragen und muss in Referenzfällen kalibriert werden.
   - Eine realistische Status-quo-/Nichtstun-Variante wird bei Migrations-/Modernisierungsentscheidungen mitbetrachtet; Business-/Innovationsnutzen und Risiko des Nichtstuns sind expliziter Entscheidungsinput.
   - Vorhandene Kundenartefakte und Interviews bilden einen kombinierten optionalen Intake; ArchiMate, CMDB, IaC oder andere strukturierte Quellen sind hilfreich, aber keine Voraussetzung.
   - Politische/geopolitische Sorgen werden in konkrete prüfbare Szenarien übersetzt; Providerherkunft oder Staatenzugehörigkeit erzeugen keinen pauschalen Score.
@@ -53,39 +63,34 @@ current_truth:
 
 runtime_truth:
   - Die lokal installierbare React/FastAPI/PostgreSQL-Webanwendung ist vorhanden und technisch validiert.
-  - Die Runtime implementiert noch wesentliche Teile des früheren Einzel-Assessment-/128-Fragen-Workflows und ist deshalb nicht vollständig identisch mit dem fachlichen Zielmodell v0.4.
+  - Die Runtime implementiert noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Questions-Workflows und ist deshalb nicht vollständig identisch mit dem fachlichen Zielmodell v0.4.
   - Applicability nutzt applicable, not_applicable und needs_review; Unklarheit wird nicht still ausgeblendet.
   - Workflow-Staging nutzt screening, clarification, deep_dive, completed und excluded; Staging ersetzt nicht Applicability.
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
   - Structured Export, Consultant Report, Backup und Restore sind implementiert; Standardexport/Report enthalten keine Raw Evidence.
   - Öffentliche Provider-Dokumentation mit applied_state=available wird nicht zu configured Applied Capability hochgestuft.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
+  - Die aktuelle achtteilige Hard-Gate- und 0-4-Level-Logik bleibt bis zur Referenzfallvalidierung eine interne MVP-Operationalisierung und ist keine C3A-/EU-Skala.
 
-current_development_gate:
-  id: NEXT-120
-  github_issue: 68
-  title: C3A-Volltextreview vor weiterer Methoden-/Runtime-Entwicklung
-  status: waiting_input
-  reason: >-
-    Der vollständige BSI-C3A-Kriterienkatalog soll vom Projektinhaber bereitgestellt
-    und anschließend gegen Methodenkern v0.4, Provider Intelligence, Hard Gates,
-    Risikotaxonomie und Question Library geprüft werden.
-  blocks:
-    - neue fachliche Scoring-/Gate-Formeln
-    - v0.4 Schema-/DB-/API-/UI-Migration
-    - neue Providerbewertungen
-    - Behauptung eines vollständigen C3A-Mappings
-  allowed_while_waiting:
-    - repository_hygiene
-    - bugfixes
-    - security_hardening
-    - reine Quellensicherung ohne neue Methodenbehauptung
+completed_method_gates:
+  - id: NEXT-120
+    github_issue: 68
+    title: C3A-Volltextreview vor weiterer Methoden-/Runtime-Entwicklung
+    status: completed
+    result: >-
+      C3A v1.0 wurde vollständig geprüft. Die Grundrichtung des Decision-Support-Modells
+      bleibt bestehen; C3A präzisiert insbesondere Requirement Profiles, Datenklassen,
+      Provider-Operational-Autonomy, Supply Chain und Technology Sovereignty.
+    artifacts:
+      - docs/method/C3A_V1_0_REVIEW.md
+      - data/method/c3a_v1_0_crosswalk.csv
 
 primary_artifacts:
   method_core: docs/method/METHOD_CORE_V0_4_DE.md
   method_overview: docs/method/METHOD_OVERVIEW.md
-  glossary_base: docs/method/GLOSSARY_DE.md
-  glossary_v0_4: docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md
+  glossary: docs/method/GLOSSARY_DE.md
+  c3a_review: docs/method/C3A_V1_0_REVIEW.md
+  c3a_crosswalk: data/method/c3a_v1_0_crosswalk.csv
   source_guide: docs/method/SOURCE_GUIDE.md
   source_register: data/method/source_register.csv
   internal_source_register: data/method/source_register_addendum_v1.csv
@@ -130,10 +135,10 @@ quality_gates:
   report_may_embed_raw_evidence_by_default: false
   structured_restore_may_overwrite_existing_assessment: false
   evidence_coverage_status_may_equal_gate_decision: false
+  c3a_criterion_may_be_treated_as_maturity_level: false
+  c3a_conformity_may_be_claimed_without_c5_scope_evidence: false
 
 open_method_questions:
-  - id: OMQ-001
-    text: Welche Änderungen ergeben sich aus dem vollständigen C3A-Volltext für Methodenkern v0.4, Provider Intelligence, Hard Gates und G-z.S-Taxonomie?
   - id: OMQ-002
     text: Der v0.4-Screeningkern mit etwa 15–25 Fragen muss an mindestens drei sehr unterschiedlichen Architekturvarianten kalibriert werden.
   - id: OMQ-003
@@ -144,6 +149,8 @@ open_method_questions:
     text: Aktivierungsregeln für BSI-/C3A-/C5-/NIS2-/DORA-/Data-Act-/DSGVO-/KI-Deep-Dives und Compliance-Overlays müssen ohne erfundene Pflichten operationalisiert werden.
   - id: OMQ-006
     text: Inter-Rater-Konsistenz und interne Gate-/Requirement-Defaults müssen mit mehreren Beratern/Kundenfällen kalibriert werden.
+  - id: OMQ-007
+    text: Die im C3A-Crosswalk verbleibenden partial/gap-Einträge sollen nur dann in zusätzliche Deep-Dive-Fragen überführt werden, wenn das Requirement Profile sie aktiviert oder sie die Variantenentscheidung materiell beeinflussen.
 
 open_security_questions:
   - id: OSQ-001
@@ -153,25 +160,20 @@ open_security_questions:
 
 blockers: []
 
-waiting_inputs:
-  - id: WI-001
-    for: NEXT-120
-    item: vollständiger BSI-C3A-Kriterienkatalog
-    status: requested_from_project_owner
+waiting_inputs: []
 
 next_milestone:
-  id: NEXT-120
-  name: c3a-fulltext-method-review
+  id: NEXT-118
+  name: first-consultant-install-evaluation
   priority: P0
-  status: waiting_input
-  github_issue: 68
+  status: planned
+  github_issue: 28
   intent: >-
-    Den vollständigen C3A-Kriterienkatalog gegen den Decision-Support-Methodenkern v0.4
-    und die bestehende Architektur prüfen, notwendige Änderungen nachvollziehbar ableiten
-    und erst danach die weitere Methodenvalidierung bzw. Runtime-Migration freigeben.
+    Die vorhandene Runtime auf einem frischen Zielsystem aus Consultant-Sicht installieren
+    und bewerten; dabei insbesondere dokumentieren, wo die pre-v0.4-UI gegenüber dem
+    neuen Decision-Support-Zielbild überlädt oder falsche Prioritäten setzt.
+  parallel_method_milestone: NEXT-119
   exit_criteria:
-    - C3A-Volltext und Version sind im Source Register/Fundstellenmodell eindeutig erfasst.
-    - C3A-Kriterien sind gegen Provider Intelligence, Decision Dimensions, Hard Gates und G-z.S-Risiken geprüft.
-    - Direkte C3A-Aussagen, externe Ableitungen und interne Methodik bleiben getrennt gekennzeichnet.
-    - Notwendige Methodendokument-/Glossar-/Decision-Änderungen sind umgesetzt oder als Folge-Issues erfasst.
-    - NEXT-118/NEXT-119 und spätere Runtime-Migration sind danach explizit freigegeben oder angepasst.
+    - Installation und Runtime-Tests auf frischem Zielsystem sind nachvollziehbar dokumentiert.
+    - UX- und Methodenlücken der aktuellen Runtime gegenüber v0.4 sind erfasst.
+    - Keine C3A-Konformitätsaussage wird aus dem bisherigen Runtime-Scoring abgeleitet.
