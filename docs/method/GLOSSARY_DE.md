@@ -555,18 +555,219 @@ Diese Zustände sind eine **interne Operationalisierung des Radars**. Sie sind k
 | Empfehlung = Kundenentscheidung | Risikoakzeptanz und Entscheidung bleiben beim Kunden. |
 | On-Prem = automatisch souverän | Kontrolle kann formal hoch, praktisch aber wegen Skills, Resilienz oder Lieferketten schwach sein. |
 | deutscher Provider = automatisch souverän | Herkunft ist ein Fakt, kein pauschaler Score. Jurisdiktion, Konzernkontrolle, Technik, Supply Chain und Betriebsfähigkeit sind getrennt zu prüfen. |
+| C3A Criterion = Radar-Level | C3A-Kriterien sind Anforderungen, nicht die interne 0–4-Skala. |
+| C3A Additional Criterion = automatisch verpflichtend | Additional Criteria werden abhängig vom Kundenbedarf ausgewählt. |
+| C3A Deutschlandvariante = automatisch souveräner als EU-Variante | EU/DE sind alternative Anforderungsprofile und ggf. rechtlich zu begründen. |
+| C3A SOV-6 = Kundenausstieg/Portabilität | C3A SOV-6 fokussiert Provider-Fortführungs-/Entwicklungsfähigkeit; Customer Exit wird separat bewertet. |
 
 ---
 
-# 11. Referenzen im Repository
+# 11. Decision-Support-, Intake- und C3A-Begriffe
 
-- `docs/method/METHOD_OVERVIEW.md` – bestehender Methodenkern
+## Handlungsfähigkeit (`Agency`)
+**Herkunft:** `[EXT] [METHOD]`
+
+Die reale Fähigkeit einer Organisation, technologische Entscheidungen bewusst zu treffen, Systeme und Daten angemessen zu kontrollieren, Abhängigkeiten zu steuern und bei veränderten Rahmenbedingungen wirksame Alternativen auszuüben.
+
+Im Radar ist Handlungsfähigkeit wichtiger als die Vorstellung vollständiger Autarkie.
+
+---
+
+## Status-quo-/Nichtstun-Variante (`StatusQuoOption` / `DoNothingOption`)
+**Herkunft:** `[METHOD]`
+
+Die realistische Alternative, den heutigen Betriebszustand zunächst beizubehalten. Sie wird bei Migrations- und Modernisierungsentscheidungen als echte Variante betrachtet, damit Risiken und Chancen des Nichtstuns sichtbar werden.
+
+---
+
+## Geschäftlicher / strategischer Nutzen (`Business Value` / `Strategic Opportunity`)
+**Herkunft:** `[EXT] [METHOD]`
+
+Fachlicher oder strategischer Mehrwert einer Variante, z. B. schnellere Bereitstellung, bessere Skalierbarkeit, Zugang zu neuen Plattform-/KI-Funktionen, geringerer Betriebsaufwand oder höhere Innovationsfähigkeit.
+
+Nutzen darf nicht automatisch nicht kompensierbare Mindestkriterien oder unakzeptable Restrisiken überstimmen.
+
+---
+
+## Risiko des Nichtstuns (`Risk of Inaction`)
+**Herkunft:** `[EXT] [METHOD]`
+
+Risiko, das entsteht, wenn eine bestehende Lösung oder Betriebsweise beibehalten wird, obwohl relevante technologische, organisatorische, wirtschaftliche oder Security-Rahmenbedingungen sich verändern.
+
+---
+
+## Entscheidungsrelevanz (`Decision Relevance`)
+**Herkunft:** `[METHOD]`
+
+Maß dafür, ob eine zusätzliche Information, Frage oder Evidence die Entscheidung bzw. Empfehlung materiell verändern kann. Entscheidungsrelevanz steuert die Tiefe des adaptiven Assessments und ist nicht dasselbe wie fachliche Applicability.
+
+---
+
+## Fragenbibliothek (`Question Library`)
+**Herkunft:** `[REPO] [METHOD]`
+
+Die vollständige interne Sammlung methodischer Fragen. Sie dient als Wissens- und Deep-Dive-Bestand und ist **kein Pflichtfragebogen**.
+
+---
+
+## Adaptives Assessment (`Adaptive Assessment`)
+**Herkunft:** `[METHOD]`
+
+Assessment-Vorgehen, bei dem die Prüftiefe aus Scope, Varianten, Antworten, Mindestanforderungen und Evidence Gaps abgeleitet wird.
+
+Standardidee: `Vorbefüllung -> 15–25 Screening-Fragen -> gezielte Deep Dives -> Evidence -> Vergleich`.
+
+---
+
+## Screening / Kernscreening (`Screening`)
+**Herkunft:** `[REPO] [METHOD]`
+
+Kurze erste Erhebungsphase zur Klärung der Entscheidungsfrage, Varianten, kritischen Anforderungen, wesentlichen Unterschiede und wichtigsten Unsicherheiten. Der Zielkorridor von etwa 15–25 sichtbaren Fragen ist eine interne Designhypothese und wird in NEXT-119 kalibriert.
+
+---
+
+## Deep Dive / Vertiefung (`Deep Dive`)
+**Herkunft:** `[REPO] [METHOD]`
+
+Gezielte zusätzliche Prüfung eines Bereichs, wenn das Screening keine ausreichende Entscheidungsgrundlage liefert. Ein Deep Dive kann z. B. BSI-Gefährdungen, C3A/C5-Evidence, Vertragsprüfung, IaC-Auswertung oder ein regulatorisches Overlay aktivieren.
+
+---
+
+## Framework-Rolle (`Framework Role`)
+**Herkunft:** `[METHOD]`
+
+Die konkrete Funktion, die ein Standard, Leitfaden oder Regulierungsrahmen im Radar erfüllt, z. B. Orientierung, Provider-/Service-Autonomie, Security-Deep-Dive, Assurance, Exit/ switching oder Compliance-Overlay.
+
+---
+
+## Compliance-Overlay (`Compliance Overlay`)
+**Herkunft:** `[METHOD] [SW]`
+
+Zusätzliche Prüf- und Anforderungsschicht, die nur aktiviert wird, wenn ein regulatorischer oder interner Rahmen für den konkreten Kunden oder Workload tatsächlich einschlägig ist.
+
+---
+
+## Kontextquelle (`Context Source`)
+**Herkunft:** `[METHOD] [SW]`
+
+Artefakt oder Informationskanal, aus dem Scope-, Architektur-, Organisations- oder Abhängigkeitsinformationen für den Entscheidungsfall gewonnen werden, z. B. Interview, CMDB, ArchiMate, Diagramm, BIA/BCM, ISMS, IaC oder FinOps.
+
+Eine Kontextquelle kann Informationen vorbefüllen, ist aber nicht automatisch ausreichende Evidence.
+
+---
+
+## Kontext-Fakt (`Context Fact`)
+**Herkunft:** `[REPO] [METHOD]`
+
+Strukturierte Information über Scope oder Architektur, die Fragenwahl und Analyse steuert. Ein Kontext-Fakt kann Folgefragen aktivieren, ohne die Aussage bereits belastbar zu beweisen.
+
+---
+
+## Artefaktgestützter Intake (`Artifact-Assisted Intake`)
+**Herkunft:** `[METHOD]`
+
+Erhebungsweise, bei der vorhandene Kundenartefakte zur Vorbefüllung des Kontextmodells genutzt werden und Interviews anschließend vor allem Lücken und Unklarheiten klären. Der Radar muss auch ohne strukturierte Artefakte funktionieren.
+
+---
+
+## Geopolitisches Prüfszenario (`Geopolitical Scenario`)
+**Herkunft:** `[METHOD]`
+
+Konkretes, prüfbares Szenario, in das eine politische oder geopolitische Sorge übersetzt wird, z. B. staatlich erzwungener Zugriff, Sanktionen/Exportkontrollen, Serviceentzug, Supportverlust, Change of Control oder erhebliche Preis-/Vertragsänderung.
+
+---
+
+## Providerherkunft / Jurisdiktionsbezug (`Provider Origin / Jurisdiction Fact`)
+**Herkunft:** `[METHOD] [SW]`
+
+Fakt über Sitz, Konzernkontrolle, Vertragspartner- oder sonstige relevante Jurisdiktionen. Providerherkunft ist **kein Souveränitätsscore**.
+
+---
+
+## Provider-/Service-Souveränitätslayer (`Provider / Service Sovereignty Layer`)
+**Herkunft:** `[METHOD]`
+
+Methodische Ebene, die Eigenschaften eines konkreten Cloud-Angebots, Services, seiner Region, Legal Entities und dokumentierten Capabilities beschreibt. EU Cloud Sovereignty Framework, C3A, C5 und Provider-/Assurance-Evidence sind wichtige Quellen für diese Ebene.
+
+---
+
+## BSI-Deep-Dive / BSI-Vollständigkeitscheck
+**Herkunft:** `[BSI] [METHOD]`
+
+Gezielter Einsatz von BSI 200-3 bzw. IT-Grundschutz zur detaillierten Prüfung von Security-/Resilienzrisiken oder zur Kontrolle, ob relevante klassische Gefährdungen übersehen wurden. Der Begriff bedeutet nicht, dass das gesamte Radar-Verfahren automatisch eine vollständige Risikoanalyse nach BSI 200-3 darstellt.
+
+---
+
+## C3A-Kriterium (`Criterion`, `C`)
+**Herkunft:** `[EXT]`
+
+Ein im BSI-C3A definierter prüfbarer Anforderungsbaustein zur Konkretisierung autonomer Cloud-Nutzung. C3A-Kriterien werden abhängig vom Use Case ausgewählt und sind keine Radar-Reifegradstufen.
+
+---
+
+## C3A-Zusatzkriterium (`Additional Criterion`, `AC`)
+**Herkunft:** `[EXT]`
+
+Ein C3A-Kriterium, das eine bestehende Anforderung verschärft oder den Autonomieumfang erweitert. Ob es gefordert wird, entscheidet der Cloud-Service-Kunde entsprechend seinem Souveränitätsbedarf.
+
+---
+
+## C3A-Ergänzende Information (`Supplementary Information`, `SI`)
+**Herkunft:** `[EXT]`
+
+Erläuternde C3A-Information zu Scope, Ausnahmen oder externen Referenzen. SI ist keine zusätzliche Radar-Scorestufe.
+
+---
+
+## C3A-Anforderungsprofil (`C3A Requirement Profile`)
+**Herkunft:** `[EXT] [METHOD] [SW]`
+
+Die für einen konkreten Entscheidungsfall ausgewählte Menge relevanter C3A-Kriterien und Zusatzkriterien einschließlich EU-/Deutschlandvariante, Begründung, Scope und Priorität. Das Profil wird kundenseitig bzw. gemeinsam festgelegt und soll künftig konkrete Requirement Gates speisen.
+
+---
+
+## C3A-Datenklassen (`C3A Data Classes`)
+**Herkunft:** `[EXT]`
+
+Die vier in C3A verwendeten Datenklassen:
+
+- `Account Data`
+- `Cloud Service Customer Data`
+- `Cloud Service Derived Data`
+- `Cloud Service Provider Data`
+
+Sie müssen bei Residence-/Processing-Fragen getrennt betrachtet werden, weil C3A für sie unterschiedliche Anforderungen definiert.
+
+---
+
+## C3A-Konformitätsaussage
+**Herkunft:** `[EXT] [METHOD]`
+
+Aussage, dass ein definierter Satz von Cloud-Services die ausgewählten C3A-Kriterien im dokumentierten Scope erfüllt. Der Radar darf diese Aussage nur treffen, wenn die nötige kriterienspezifische Evidence und die von C3A vorausgesetzte C5-Grundlage belastbar vorliegen.
+
+Die Nutzung einzelner C3A-Fragen oder Kriterien als Methodenquelle ist **keine** C3A-Konformitätsaussage.
+
+---
+
+## C5-Voraussetzung für C3A (`C5 prerequisite`)
+**Herkunft:** `[EXT]`
+
+C3A setzt voraus, dass der Cloud-Service-Provider die C5-Kriterien erfüllt. Für eine formale C3A-Erfüllungsbehauptung muss diese Voraussetzung für den relevanten Provider-/Service-Scope belastbar nachgewiesen sein.
+
+---
+
+# 12. Referenzen im Repository
+
+- `docs/method/METHOD_CORE_V0_4_DE.md` – aktueller Decision-Support-Methodenkern
+- `docs/method/C3A_V1_0_REVIEW.md` – C3A-Volltextreview und methodische Konsequenzen
+- `data/method/c3a_v1_0_crosswalk.csv` – kriterienscharfer C3A-Crosswalk
 - `docs/architecture/DOMAIN_MODEL.md` – bestehendes Domänenmodell
 - `docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md` – Erweiterung um Variantenvergleich und Anbieter-Nachweisdatenbank
 - `docs/method/PROVENANCE_AND_EVIDENCE.md` – Nachweis- und Herkunftslogik
 - `docs/method/RISK_TAXONOMY.md` – Risikotaxonomie
 - `docs/method/SCORING_AND_GATES.md` – Gates und Scoring
 - BSI-Standard 200-3 – Zielobjekte, elementare/zusätzliche Gefährdungen, Risikoeinschätzung, -bewertung, -behandlung und Risikoappetit
+- BSI C3A v1.0 – Criteria, Additional Criteria, Supplementary Information und Cloud-Autonomieanforderungen SOV-1 bis SOV-6
 
 ## Pflegehinweis
 
