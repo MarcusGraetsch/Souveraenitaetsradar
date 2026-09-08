@@ -25,21 +25,35 @@ Der aktuelle fachliche Zielstand ist **Methodenkern v0.4**:
 Primäre Referenz: [`docs/method/METHOD_CORE_V0_4_DE.md`](docs/method/METHOD_CORE_V0_4_DE.md).  
 Terminologie: [`docs/method/GLOSSARY_DE.md`](docs/method/GLOSSARY_DE.md).
 
-### Aktuelles Development Gate
+### C3A-v1.0-Volltextreview abgeschlossen
 
-Vor weiterer Methoden-, Schema-, Runtime- oder UI-Erweiterung wird der vollständige BSI-Kriterienkatalog **Criteria enabling Cloud Computing Autonomy (C3A)** gegen den v0.4-Kern geprüft: **Issue #68 / NEXT-120**.
+Der vollständige BSI-Kriterienkatalog **Criteria enabling Cloud Computing Autonomy (C3A) v1.0** wurde am 08.09.2026 gegen Methodenkern v0.4, Provider Intelligence, Hard Gates, Risikotaxonomie und Question Library geprüft.
 
-Bis dieser Volltextreview abgeschlossen ist, gilt das vorhandene C3A-Mapping als Arbeitsstand und nicht als vollständige Ableitung.
+Kanonische Ergebnisse:
+
+- [`docs/method/C3A_V1_0_REVIEW.md`](docs/method/C3A_V1_0_REVIEW.md)
+- [`data/method/c3a_v1_0_crosswalk.csv`](data/method/c3a_v1_0_crosswalk.csv)
+
+Wichtige Konsequenzen:
+
+- C3A ist ein Provider-/Service-Autonomie- und Evidence-Layer, kein vollständiges Decision-Support-Verfahren.
+- C3A `Criterion` und `Additional Criterion` sind keine Reifegradstufen; Anforderungen werden kundenspezifisch ausgewählt.
+- eine formale C3A-Erfüllung setzt belastbare C5-Erfüllung im betrachteten Scope voraus.
+- C3A-Datenklassen werden im C3A-/Provider-Intelligence-Scope getrennt betrachtet.
+- C3A SOV-6 beschreibt primär providerseitige Fortführungs-/Entwicklungsautonomie; Kundenausstieg/Portabilität bleibt ein eigener Radar-/Data-Act-/DORA-/Bitkom-Prüfgegenstand.
+
+Der nächste fachliche Gate ist deshalb **nicht mehr C3A**, sondern die Referenzfallvalidierung in `NEXT-119` vor größeren v0.4-Runtime-/Schema-Migrationen. Parallel kann `NEXT-118` die bestehende Runtime aus Consultant-Sicht evaluieren.
 
 ## Framework-Rollen
 
 Der Radar ist **anschlussfähig** an etablierte Methoden und Anforderungen, aber kein universelles Compliance-Audit.
 
 - **Bitkom Cloud-Souveränität 2026:** Orientierung zu Handlungsfähigkeit, Chancen/Risiken, Skills, Interdependenzen und Exit
-- **EU Cloud Sovereignty Framework + BSI C3A:** Provider-/Service-Souveränität und prüfbare Capabilities/Evidence
+- **EU Cloud Sovereignty Framework:** Provider-/Service-Souveränität und Evidence
+- **BSI C3A:** prüfbare Provider-/Service-Autonomieanforderungen für SOV-1 bis SOV-6; kundenspezifisch als Requirement Profile aktivierbar
 - **BSI 200-3 / IT-Grundschutz:** Scope, Zielobjekte, Gefährdungen, Risikobehandlung sowie Security-/Resilienz-Deep-Dive und Vollständigkeitscheck
 - **Data Act:** Exit, Switching und Portabilität, soweit anwendbar
-- **C5:** Security-/Assurance-Evidence
+- **C5:** Security-/Assurance-Evidence und C3A-Voraussetzung
 - **NIS2, DORA, DSGVO/EDPB, AI Act usw.:** aktivierbare Compliance-Overlays bzw. Methodenquellen bei tatsächlicher Anwendbarkeit
 
 Details: [`docs/method/SOURCE_GUIDE.md`](docs/method/SOURCE_GUIDE.md).
@@ -48,7 +62,7 @@ Details: [`docs/method/SOURCE_GUIDE.md`](docs/method/SOURCE_GUIDE.md).
 
 Die operative Produktentwicklung läuft als lokal installierbare Webanwendung. Die Excel-Datei bleibt Methoden-/Entwicklungsreferenz; für den täglichen Beratungsworkflow ist sie nicht die primäre Oberfläche.
 
-**Wichtig:** Die aktuelle Runtime implementiert noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Question-Workflows. Sie ist technisch funktionsfähig und auditierbar, aber noch **nicht vollständig auf den Decision-Support-Kern v0.4 migriert**. Diese Abweichung ist als Implementation Gap dokumentiert und wird erst nach dem C3A-Volltextreview und der Methodenvalidierung aufgelöst.
+**Wichtig:** Die aktuelle Runtime implementiert noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Question-Workflows. Sie ist technisch funktionsfähig und auditierbar, aber noch **nicht vollständig auf den Decision-Support-Kern v0.4 migriert**. Diese Abweichung ist als Implementation Gap dokumentiert und wird erst nach der Referenzfallvalidierung gezielt migriert.
 
 Aktueller MVP-Stack:
 
@@ -103,7 +117,7 @@ Entscheidungsfrage / Workload
   -> realistische Varianten inkl. Status quo
   -> vorhandene Kundenartefakte vorbefüllen
   -> kompaktes Screening
-  -> nur entscheidungsrelevante Deep Dives
+  -> nur entscheidungsrelevante Deep Dives / Requirement Profiles
   -> Provider Intelligence + Customer Evidence + Tests
   -> geprüfte Claims / Risikoszenarien / Maßnahmen
   -> Variantenvergleich
@@ -195,6 +209,8 @@ Laufzeitdaten gehören **nicht** ins Git-Repository. Sie liegen lokal im Postgre
 5. `project/DECISIONS.yaml`
 6. `docs/method/METHOD_CORE_V0_4_DE.md`
 7. `docs/method/GLOSSARY_DE.md`
-8. offene Issues/PRs
+8. `docs/method/C3A_V1_0_REVIEW.md`
+9. `data/method/c3a_v1_0_crosswalk.csv`
+10. offene Issues/PRs
 
 Raw Kundenevidence, Cloud-Credentials und Secrets gehören niemals in GitHub Issues, PRs oder dieses Repository.
