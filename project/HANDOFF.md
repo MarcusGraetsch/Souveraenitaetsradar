@@ -2,19 +2,32 @@
 
 ## Kurzfassung – Stand 08.09.2026
 
-Der Souveränitäts-Radar besteht aus einem cloud-agnostischen Methodenkern und einer lokal installierbaren Consultant-Webanwendung. Die technische MVP-Basis bleibt unverändert; auf Branch `method/decision-case-provider-intelligence` / PR #66 wird derzeit die **nächste Methodenebene** vorbereitet.
+Der Souveränitäts-Radar ist fachlich auf **Decision Support für digitale Souveränität** ausgerichtet. Der aktuelle Zielstand steht in `docs/method/METHOD_CORE_V0_4_DE.md`.
 
-Der neue Entwurf `docs/method/METHOD_CORE_V0_4_DE.md` positioniert den Radar ausdrücklich als **Decision-Support-Instrument für vergleichende Souveränitätsentscheidungen**, nicht als universelles Compliance-Audit.
+Die technische Webapp ist vorhanden und validiert, bildet aber noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Questions-Workflows ab. Diese Abweichung ist bewusst dokumentiert: **Zielmethode und Runtime sind noch nicht vollständig migriert.**
 
-Issue #67 dokumentiert diese Neufokussierung.
+Vor weiterer fachlicher Methoden-, Schema-, Runtime- oder UI-Entwicklung gilt ein explizites Gate:
 
-## Methodenkern v0.4 – verbindliche Richtung für weitere Planung
+> **NEXT-120 / Issue #68 – vollständigen BSI-C3A-Kriterienkatalog gegen Methodenkern v0.4 und die bestehende Architektur prüfen.**
+
+Der C3A-Volltext wird vom Projektinhaber bereitgestellt. Bis dahin ist NEXT-120 `waiting_input`.
+
+## Aktueller fachlicher Zielstand
 
 ### Beratungsziel
 
-Ein konkreter Workload wird über mehrere realistische Betriebs-/Architekturvarianten verglichen. Eine Empfehlung ist zulässig; finale Kundenentscheidung, Risikoakzeptanz und Legal Conclusions bleiben beim Kunden.
+Für einen konkreten Workload werden mehrere realistische Betriebs-/Architekturvarianten verglichen. Der Radar darf eine Empfehlung formulieren; finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
 
-Bei Migrations-/Modernisierungsentscheidungen soll die realistische **Status-quo-/Nichtstun-Variante** mitbetrachtet werden, damit auch Modernisierungs-, Skill-, Security- und Innovationsrisiken des Verbleibs sichtbar werden.
+Typische Optionen:
+
+- Status quo / heutiges On-Prem
+- modernisiertes On-Prem / Private Cloud
+- US-Hyperscaler in EU-Region
+- deutscher/europäischer Cloud-Provider
+- chinesischer Provider
+- Sovereign Cloud
+- Hybrid-/Multi-Cloud
+- hypothetische Sollarchitektur
 
 ### Sichtbare Entscheidungsdimensionen
 
@@ -28,65 +41,69 @@ Bei Migrations-/Modernisierungsentscheidungen soll die realistische **Status-quo
 
 Separat: **Evidence Confidence / Belastbarkeit der Erkenntnisse**.
 
-Die internen Achsen Security Capability, Sovereignty Capability, Workload Sovereignty Risk und Evidence Confidence bleiben bestehen und dürfen sich nicht still kompensieren.
-
 ### Framework-Rollen
 
-Frameworks werden nicht als mehrere vollständige Pflichtaudits gestapelt:
+Frameworks werden nicht als mehrere Vollprüfungen gestapelt:
 
-- Bitkom Cloud-Souveränität 2026: Orientierungs-/Handlungsfähigkeitsrahmen, Risiko/Chance, Skills, Interdependenzen und Exit.
-- EU Cloud Sovereignty Framework + BSI C3A: Provider-/Service-Souveränitäts- und Evidence-Layer.
-- BSI 200-3 / IT-Grundschutz: Anschlussfähigkeit, Security-/Resilienz-Deep-Dive, Gefährdungs- und Vollständigkeitsreferenz; die 47 elementaren Gefährdungen sind kein sichtbarer Pflichtfragebogen.
-- Data Act: allgemeine Exit-/Switching-/Portabilitätsreferenz, soweit anwendbar.
-- C5: Assurance-/Control-Evidence.
-- NIS2, DORA, DSGVO/EDPB, AI Act, BSI-Mindeststandard usw.: aktivierbare Compliance-Overlays bzw. Methodenquellen nur bei tatsächlicher Anwendbarkeit.
+- Bitkom Cloud-Souveränität 2026: Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen, Exit
+- EU Cloud Sovereignty Framework: Provider-/Service-Souveränität und Evidence
+- BSI C3A: wichtiger Provider-/Service-Souveränitätslayer; **Detailmapping noch nicht vollständig geprüft, siehe #68**
+- BSI 200-3 / IT-Grundschutz: Anschlussfähigkeit, Security-/Resilienz-Deep-Dive, Gefährdungs- und Vollständigkeitsreferenz
+- Data Act: Exit/Switching/Portabilität, soweit anwendbar
+- C5: Security-/Assurance-Evidence
+- NIS2, DORA, DSGVO/EDPB, AI Act usw.: nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay; sonst ggf. Methoden-/Fragenquelle
 
-Siehe `docs/method/SOURCE_GUIDE.md`.
+### Fragenlogik
 
-### Adaptive Fragenlogik
+Die 128 Fragen bleiben als **Question Library** erhalten. Sie sind kein Pflichtfragebogen.
 
-Die 128 Methodenfragen bleiben als **Question Library** erhalten. Ziel der sichtbaren Beratung ist ein Screening von ca. 15–25 Kernfragen und danach nur gezielte Vertiefung, wenn:
-
-- die Antwort die Empfehlung materiell verändern kann;
-- ein Hard Gate / Mindestkriterium betroffen ist;
-- ein wesentliches Risiko oder ein wesentlicher Vorteil ungeklärt ist;
-- sich die Varianten gerade in diesem Punkt unterscheiden;
-- ein entscheidungsrelevantes Evidence Gap geschlossen werden muss.
-
-NEXT-116 wird daher erst nach methodischer Referenzfallvalidierung weitergeführt.
-
-### Intake
-
-Der bevorzugte Ablauf lautet:
+Zielbild:
 
 ```text
 vorhandene Artefakte / Provider Intelligence
-        -> Vorbefüllung
-        -> kurzes Interview
-        -> Entscheidungslücken
-        -> gezielte Evidence Requests
-        -> Claims / Risiken / Gates
-        -> Vergleich / Empfehlung
+  -> Vorbefüllung
+  -> ca. 15–25 Screening-Fragen
+  -> nur entscheidungsrelevante Deep Dives
+  -> Evidence / Claims / Risiken / Gates
+  -> Variantenvergleich
+  -> Entscheidungsvorlage / Empfehlung
 ```
 
-Optionale Inputs sind Servicekatalog/CMDB, ArchiMate/EA, Architekturdiagramme, BIA/BCM, ISMS/Risikoregister, Verträge/SLA/AVV, IaC, Kubernetes/Helm/Argo CD, IAM/PKI/KMS, FinOps sowie Backup-/Restore-/DR-/Exit-Tests. Kein Artefakttyp ist Voraussetzung.
+Der Zielkorridor 15–25 ist eine interne Designhypothese und muss nach NEXT-120 in Referenzfällen kalibriert werden.
 
-ArchiMate kann über das standardisierte Model Exchange File Format bzw. dokumentierte Tool-Adapter genutzt werden. Ein generisches ArchiMate-YAML wird nicht vorausgesetzt. Siehe `docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md`.
+### Intake
 
-### Politische / geopolitische Sorgen
+Optionale Quellen:
 
-Aussagen wie „US-Cloud ist unsouverän“ oder „deutscher Provider ist souverän“ sind keine Methodenregeln. Sorgen werden in prüfbare Szenarien übersetzt, z. B.:
+- Interview / Workshop
+- Servicekatalog / CMDB
+- ArchiMate / EA-Modelle
+- Architekturdiagramme
+- BIA / BCM
+- ISMS / Risikoregister
+- Verträge / SLA / AVV / Exit-Klauseln
+- IaC / Terraform / OpenTofu / Bicep / CloudFormation
+- Kubernetes / Helm / Argo CD / GitOps
+- IAM / PKI / KMS
+- FinOps / Kosteninformationen
+- Backup-/Restore-/DR-/Exit-Tests
 
-- compelled access / staatlich erzwungener Zugriff
+Keiner dieser Artefakttypen ist Voraussetzung. Kontextquelle ≠ automatisch ausreichende Evidence.
+
+### Geopolitik
+
+Providerherkunft ist kein Score. Politische oder geopolitische Sorgen werden in prüfbare Szenarien zerlegt, z. B.:
+
+- staatlich erzwungener Zugriff
 - Sanktionen / Exportkontrollen
-- Serviceentzug oder -beschränkung
+- Serviceentzug / Servicebeschränkung
 - Support-/Updateverlust
 - Change of Control
-- Preis-/Vertragsänderung
+- Preis-/Vertragsschock
 
-Diese Szenarien werden konsistent auf alle relevanten Varianten angewandt, einschließlich On-Prem-Abhängigkeiten von ausländischer Hardware, Software, Lizenzen, Support oder Trust Anchors.
+Die Szenarien werden auf alle relevanten Varianten angewandt, auch auf On-Prem-Lieferketten.
 
-## Bestehende Evidence-/Gate-Regeln bleiben unverändert
+## Bestehende verbindliche Evidence-/Gate-Regeln
 
 - cloud-agnostischer Core
 - Customer-mediated Evidence; keine Cloud-Credentials als Voraussetzung
@@ -96,53 +113,50 @@ Diese Szenarien werden konsistent auf alle relevanten Varianten angewandt, einsc
 - Gate first, score second
 - fehlende Evidence = `UNVERIFIED`, nicht automatisch FAIL
 - Human-reviewed Claims sind die einzige Brücke von Evidence zu deterministischen Hard Gates
-- Raw Evidence / LLM-Proposals wirken niemals direkt auf Gates
-- Legal Conclusions und Risk Acceptance bleiben menschlich
+- LLM-Proposals wirken ohne Human Review nicht auf Gates
+- Legal Conclusions, Risikoakzeptanz und Kundenentscheidung bleiben menschlich
 - Raw Kundenevidence wird nicht committed
 
-## Technischer MVP-Stand
+## Runtime-Stand
 
-NEXT-101, NEXT-112, NEXT-113, NEXT-114 und NEXT-115 sind technisch umgesetzt/validiert. Die aktuelle Webapp besitzt weiterhin den bisherigen Assessment-/Questions-/Evidence-/Claims-/Gates-Workflow. Die v0.4-Methodik ist **noch nicht in Runtime, Schema oder UI implementiert**.
+Vorhanden und technisch validiert:
 
-Wichtige vorhandene technische Regeln:
+- React/Vite Consultant UI
+- FastAPI / PostgreSQL / Docker Compose
+- Assessment + Relevanzprofil
+- Applicability `applicable | needs_review | not_applicable`
+- Workflow `screening | clarification | deep_dive | completed | excluded`
+- Evidence Intake / Evidence Review
+- Evidence -> Claim -> Hard Gate
+- Copy/Paste LLM Bridge
+- Structured Export / Consultant Report / Backup / Restore
 
-- Applicability: `applicable`, `needs_review`, `not_applicable`
-- Workflow Stage: `screening`, `clarification`, `deep_dive`, `completed`, `excluded`
-- Evidence Coverage: `VERIFIED`, `REVIEW_REQUIRED`, `INSUFFICIENT`, `MISSING`
-- öffentliche Provider-Dokumentation mit `available` belegt keine `configured` Applied Capability
-- Standardexport/Consultant Report enthalten keine Raw Evidence
-- Restore erzeugt neues Assessment und berechnet Gates neu
+Die Runtime ist aktuell **pre-v0.4** hinsichtlich DecisionCase/ArchitectureOptions, Status-quo-/Business-Value-Vergleich, sieben sichtbaren Decision Dimensions und stark verkleinertem Screeningkern.
 
-## Nächste Schritte
+## Aktuelle Reihenfolge
 
-### NEXT-118 / Issue #28 – weiterhin erster P0-Schritt
+### 1. NEXT-120 / Issue #68 – jetzt
 
-Erste manuelle Consultant-Installation und Evaluation auf einem frischen Zielsystem. Zusätzlich zu den bisherigen UX-/Evidence-Fragen soll explizit dokumentiert werden, wo die aktuelle UI den neuen v0.4-Decision-Support-Kern überlädt oder falsch priorisiert.
+C3A-Volltextreview. Keine neue fachliche Runtime-/Schema-/UI-Entwicklung bis Abschluss.
 
-### NEXT-119 / Issue #67 – danach Methodenkern validieren
+### 2. NEXT-118 / Issue #28 – danach
 
-Mindestens denselben Workload über folgende Referenzvarianten vergleichen:
+Manuelle Consultant-Evaluation der vorhandenen Runtime. Status: `blocked_by NEXT-120`.
 
-- bestehendes On-Prem
-- US-Hyperscaler in EU-Region
-- deutscher/europäischer Provider
-- optional hypothetische Soll-/Sovereign-Architektur
+### 3. NEXT-119 / Issue #67 – danach bzw. parallel nach Freigabe
 
-Ziele:
+Methodenkern v0.4 an mehreren Referenzvarianten validieren; Screeningkern, Overlay-Aktivierung und Empfehlungsvorlage kalibrieren. Status: `blocked_by NEXT-120`.
 
-- Screeningkern auf ca. 15–25 Fragen kalibrieren
-- adaptive Deep-Dive-Trigger definieren
-- Framework-/Compliance-Overlay-Aktivierung prüfen
-- Status quo / Business Value sichtbar machen
-- geopolitische Sorgen in prüfbare Szenarien übersetzen
-- Recommendation Template testen
+### 4. Erst danach Runtime-Migration
 
-Erst danach sollten größere Runtime-/Schema-/UI-Umbauten für DecisionCase/ArchitectureOptions und die neue sichtbare Methodik umgesetzt werden.
+Schrittweise gemäß `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`.
 
-## Offene Security-Hardening-Punkte
+## Parallel zulässig
 
-- Issue #25 / NEXT-117: ZIP-Decompression-Bomb-Limits vor untrusted Backup-Import
-- Issue #26: vollständige serverseitige Schema-Validierung für untrusted Structured Restore
+- Security-Hardening, insbesondere Issue #25 / NEXT-117 und Issue #26
+- Bugfixes
+- Repository-/CI-Hygiene
+- Quellensicherung ohne neue fachliche Vorwegnahme
 
 ## Primäre Dokumente für den nächsten Agenten
 
@@ -153,8 +167,11 @@ Erst danach sollten größere Runtime-/Schema-/UI-Umbauten für DecisionCase/Arc
 5. `project/DECISIONS.yaml`
 6. `docs/method/METHOD_CORE_V0_4_DE.md`
 7. `docs/method/GLOSSARY_DE.md`
-8. `docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md`
-9. `docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md`
-10. `docs/method/SOURCE_GUIDE.md`
+8. `docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md`
+9. `docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md`
+10. `docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md`
+11. `docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md`
+12. `docs/method/SOURCE_GUIDE.md`
+13. Issue #68
 
-Repo-State schlägt Chatgedächtnis.
+`docs/history/` und Agent-Logs sind historische Nachweise, nicht die aktuelle Fachquelle. Repo-State schlägt Chatgedächtnis.
