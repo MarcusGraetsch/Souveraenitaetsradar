@@ -12,8 +12,9 @@ Vor Planung oder Änderung in dieser Reihenfolge lesen:
 4. `project/NEXT_ACTIONS.yaml`
 5. `project/DECISIONS.yaml`
 6. `docs/method/METHOD_CORE_V0_4_DE.md` und `docs/method/GLOSSARY_DE.md`, sofern der Task die aktuelle Fachmethode betrifft
-7. relevante Dateien unter `docs/`, `data/`, `config/`, `schemas/`
-8. offene Issues und PRs, sofern GitHub-Zugriff vorhanden ist
+7. bei C3A-Bezug zusätzlich `docs/method/C3A_V1_0_REVIEW.md` und `data/method/c3a_v1_0_crosswalk.csv`
+8. relevante Dateien unter `docs/`, `data/`, `config/`, `schemas/`
+9. offene Issues und PRs, sofern GitHub-Zugriff vorhanden ist
 
 Repo-State schlägt Chatgedächtnis. Nicht aus älteren Chats rekonstruieren, wenn das Repository eine aktuelle Aussage enthält.
 
@@ -42,20 +43,30 @@ Wichtig:
 
 Der aktuelle fachliche Zielstand ist der **Decision-Support-Methodenkern v0.4**. Er versteht den Radar primär als vergleichende Entscheidungshilfe für Betriebs-/Architekturvarianten eines Workloads; nicht als universelles BSI-/NIS2-/DORA-Audit und nicht als Provider-Länderranking.
 
-Die vorhandene Webanwendung implementiert noch wesentliche Teile des früheren Einzel-Assessment-/128-Fragen-Workflows. Diese Runtime bleibt bis zur validierten Migration funktionsfähig und nachvollziehbar, ist aber nicht automatisch identisch mit dem fachlichen Zielbild v0.4.
+Die vorhandene Webanwendung implementiert noch wesentliche Teile des früheren Einzel-Assessment-/Guided-Questions-Workflows. Diese Runtime bleibt bis zur validierten Migration funktionsfähig und nachvollziehbar, ist aber nicht automatisch identisch mit dem fachlichen Zielbild v0.4.
 
-### Aktuelles Development Gate
+### C3A-Review abgeschlossen
 
-**Issue #68 / NEXT-120:** Vor weiterer Methoden-, Schema-, Runtime- oder UI-Erweiterung wird der vollständige BSI-Kriterienkatalog **Criteria enabling Cloud Computing Autonomy (C3A)** gegen v0.4, Provider Intelligence, Hard Gates und Risikotaxonomie geprüft.
+**NEXT-120 / Issue #68** ist fachlich abgeschlossen. C3A v1.0 wurde vollständig gegen Methodenkern v0.4, Provider Intelligence, Hard Gates, Risikotaxonomie und Question Library geprüft.
 
-Bis dieser Review abgeschlossen ist:
+Kanonische C3A-Referenzen im Repository:
 
-- keine neue fachliche Scoring-/Gate-Formel,
-- keine v0.4-Schema-/DB-/UI-Migration,
-- keine neue Providerbewertung,
-- keine Behauptung, das vorhandene C3A-Mapping sei vollständig.
+- `docs/method/C3A_V1_0_REVIEW.md`
+- `data/method/c3a_v1_0_crosswalk.csv`
+- `SRC-04`
 
-Erlaubt sind Repository-Hygiene, Fehlerbehebungen, Security-Hardening und Arbeiten, die die fachliche Review-Grenze nicht vorwegnehmen.
+Leitplanken daraus:
+
+- C3A Criterion / Additional Criterion sind keine Reifegradstufen.
+- formale C3A-Erfüllung nicht ohne C5-Scope-Evidence behaupten.
+- C3A SOV-6 ist primär providerseitige Fortführungs-/Entwicklungsautonomie, nicht Kundenausstieg.
+- C3A-Anforderungen werden über ein kundenspezifisches Requirement Profile aktiviert, nicht pauschal als globale Gates.
+
+### Aktuelles Validierungs-Gate
+
+Vor **größerer v0.4-Schema-/DB-/API-/UI-Migration** muss NEXT-119 die Methode an Referenzvarianten validieren und insbesondere Screeningkern, Requirement Profiles, Decision Dimensions und Recommendation-Logik kalibrieren. NEXT-118 kann die bestehende Runtime bereits operativ aus Consultant-Sicht evaluieren.
+
+Erlaubt sind außerdem Repository-Hygiene, Bugfixes, Security-Hardening und quellengetreue Methoden-/Provider-Recherche.
 
 ## 4. Projektarchitektur – nicht verhandelbare Grundsätze
 
@@ -166,7 +177,8 @@ Provider Adapter dürfen **nicht**:
 - Evidence-Pack-Parser arbeitet lokal und dateibasiert
 - Parser dürfen keine externen Systeme kontaktieren, außer ausdrücklich als separater Research-/Adapter-Task
 - Zielmethodik und Runtime-Implementierung in PRs explizit unterscheiden
-- vor v0.4-Runtime-Migration das aktuelle Development Gate in Abschnitt 3 beachten
+- vor größerer v0.4-Runtime-Migration NEXT-119 und den aktuellen Projektstand in `PROJECT_STATE.yaml` beachten
+- C3A-Mappings immer gegen `C3A_V1_0_REVIEW.md`/Crosswalk prüfen und nicht aus Erinnerung ableiten
 
 ## 11. Git- und Review-Workflow
 
