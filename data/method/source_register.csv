@@ -53,7 +53,7 @@ SRC-49;AWS CLI v2 – EC2 VPC Endpoints;https://docs.aws.amazon.com/cli/latest/r
 SRC-50;AWS CLI v2 – CloudTrail Read APIs;https://docs.aws.amazon.com/cli/latest/userguide/cli_cloudtrail_code_examples.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
 SRC-51;AWS CLI v2 – IAM role/policy read APIs;https://docs.aws.amazon.com/cli/latest/reference/iam/;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
 SRC-52;AWS CLI v2 – KMS read APIs;https://docs.aws.amazon.com/cli/latest/userguide/cli_kms_code_examples.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
-SRC-53;AWS CLI v2 – Lambda read APIs;https://docs.aws.amazon.com/cli/latest/reference/lambda/;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
+SRC-53;AWS CLI v2 – Lambda read APIs;https://docs.aws.amazon.com/cli/latest/userguide/cli_lambda_code_examples.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
 SRC-54;AWS CLI v2 – CloudWatch Logs describe-log-groups;https://docs.aws.amazon.com/cli/latest/reference/logs/describe-log-groups.html;AWS CLI 2.x / Abruf 02.09.2026;historischer R6 Collector;CLI-Referenz geprüft
 SRC-55;AWS Service Authorization – Amazon Bedrock;https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonbedrock.html;Abruf 02.09.2026;historischer R6 Collector;Service-Authorization-Referenz geprüft
 SRC-56;The Open Group ArchiMate Model Exchange File Format;https://www.opengroup.org/open-group-archimate-model-exchange-file-format;Version 1.10 / FAQ Oct. 2022;Standardformat zum Austausch von ArchiMate-Modellen zwischen Tools, inkl. Model-/View-/Diagram-Exchange;Offizielle Open-Group-Seite geprüft
