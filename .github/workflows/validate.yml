@@ -14,18 +14,21 @@ jobs:
         with: {python-version: "3.12"}
       - run: pip install -e . -r requirements-dev.txt -r apps/api/requirements.txt
       - run: python tools/validate_repo.py
-      - run: python -m pytest -q
-      - run: python -m pytest -q apps/api/tests
+      - run: python -m pytest -q --junitxml=/tmp/core-pytest.xml
+      - run: python -m pytest -q apps/api/tests --junitxml=/tmp/api-pytest.xml
       - run: python -m py_compile tools/evidence-pack/validate_evidence_pack.py tools/validation/synthetic_consultant_walkthrough.py tools/validation/progressive_workflow_validation.py tools/validation/export_restore_validation.py tools/validation/customer_evidence_pack_pilot.py tools/validation/customer_evidence_pack_webapp.py src/sovradar/*.py apps/api/app/*.py
       - run: python tools/evidence-pack/validate_evidence_pack.py data/templates/evidence-pack-example
       - name: Validate NEXT-101 Evidence Pack coverage baseline
         run: python tools/validation/customer_evidence_pack_pilot.py
-      - name: Upload repository validator diagnostics
+      - name: Upload Python validation diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: repository-validator-diagnostics
-          path: /tmp/sovradar-repo-validator-errors.txt
+          name: python-validation-diagnostics
+          path: |
+            /tmp/sovradar-repo-validator-errors.txt
+            /tmp/core-pytest.xml
+            /tmp/api-pytest.xml
           if-no-files-found: warn
 
   frontend:
