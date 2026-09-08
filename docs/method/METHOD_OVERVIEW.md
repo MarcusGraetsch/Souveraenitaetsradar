@@ -1,5 +1,9 @@
 # Method Overview
 
+## Terminology / Glossar
+
+Für deutschsprachige Beratung, Workshops und Management-Kommunikation gilt das zentrale Glossar unter [`GLOSSARY_DE.md`](./GLOSSARY_DE.md). Es führt deutsche Arbeitsbegriffe, englische/code-nahe Aliase, Herkunft und Abgrenzungen zusammen. Eigene Methoden- und Softwarebegriffe sind dort ausdrücklich von BSI-/externen Begriffen getrennt.
+
 ## 1. Process core
 
 The Radar uses BSI-200-3-/ISO-27005-like risk-process logic for scope, hazards, risk analysis, treatment and acceptance, supplemented by explicit sovereignty-specific risk types.
