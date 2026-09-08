@@ -2,10 +2,10 @@ project:
   name: Souveraenitaetsradar
   repository: MarcusGraetsch/Souveraenitaetsradar
   status: active
-  current_phase: MVP-VALIDATION
-  current_phase_name: first-manual-consultant-evaluation
-  method_version: "1.0"
-  method_design_revision: "v0.4-decision-support-draft"
+  current_phase: METHOD-ALIGNMENT
+  current_phase_name: c3a-fulltext-review-gate
+  method_core_version: "0.4"
+  runtime_method_baseline: "MVP-01 / INT-03"
   product_version: "0.4.0-dev"
   updated: "2026-09-08"
 
@@ -13,94 +13,99 @@ purpose:
   statement: >-
     Entwicklung einer belastbaren, nachvollziehbaren und später KI-gestützten
     Methode sowie eines praktisch nutzbaren Beratungswerkzeugs zur vergleichenden
-    Bewertung digitaler Souveränität, Risiken, Chancen und Handlungsfähigkeit von
-    Cloud-, Plattform-, SaaS-, KI- und On-Prem-Betriebsvarianten.
+    Entscheidungsunterstützung bei Fragen digitaler Souveränität für Cloud-,
+    Plattform-, SaaS-, KI- und On-Prem-Betriebsvarianten.
+
+method_target:
+  primary_document: docs/method/METHOD_CORE_V0_4_DE.md
+  terminology:
+    - docs/method/GLOSSARY_DE.md
+    - docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md
+  provenance:
+    - data/method/source_register.csv
+    - data/method/source_register_addendum_v1.csv
+  architecture:
+    - docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md
+    - docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md
+    - docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
 
 current_truth:
-  - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik ist Adapter-/Research-Layer.
-  - "Methodenkern v0.4 ist als Decision-Support-Entwurf dokumentiert: Ziel ist eine belastbare Entscheidungsvorlage für mehrere Betriebs-/Architekturvarianten eines konkreten Workloads, kein universelles Compliance-Audit."
-  - "Die sichtbare Managementsicht nutzt sieben Entscheidungsdimensionen: Geschäft & Innovation, Security & Resilienz, Recht/Daten/Kontrolle, Technologie & Exit, Organisation & Skills, Lieferkette & Geopolitik sowie Wirtschaft & Vertrag; Evidence Confidence bleibt separat."
-  - "BSI 200-3 bleibt Anschluss-, Deep-Dive- und Vollständigkeitsreferenz für Scope, Zielobjekte, Gefährdungen, Risikoappetit und Risikobehandlung; die 47 elementaren Gefährdungen sind kein verpflichtender sichtbarer Interviewkatalog."
-  - "Bitkom Cloud-Souveränität 2026 ist zentrale Orientierungsquelle für Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen und Exit; EU-CSF/C3A bilden primär den Provider-/Service-Souveränitätslayer."
-  - "Data Act wird als allgemeine Exit-/Switching-/Portabilitätsreferenz genutzt; NIS2, DORA, DSGVO/EDPB, AI Act und andere Vorgaben werden nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay aktiviert und sonst höchstens als Methoden-/Fragenquelle verwendet."
-  - "Die vorhandene Fragenbank ist eine adaptive Question Library, kein Standardfragebogen; Ziel für den sichtbaren Einstieg sind etwa 15–25 Screening-Fragen mit Vertiefung nur bei Entscheidungsrelevanz, Mindestkriterien, wesentlichen Risiken/Vorteilen oder Evidence Gaps."
-  - "Eine realistische Status-quo-/Nichtstun-Variante wird bei Migrations-/Modernisierungsentscheidungen mitbetrachtet; Business-/Innovationsnutzen und Risiko des Nichtstuns sind expliziter Entscheidungsinput."
-  - "Vorhandene Kundenartefakte und Interviews bilden einen kombinierten Intake: Servicekatalog/CMDB, ArchiMate/EA, Diagramme, BIA/BCM, ISMS, Verträge, IaC, Kubernetes/GitOps, IAM/PKI/KMS, FinOps und Tests sind optionale Quellen, nie Voraussetzung."
-  - "ArchiMate kann über standardisierte Austauschformate oder dokumentierte Tool-Adapter genutzt werden; ein generisches ArchiMate-YAML wird nicht vorausgesetzt."
-  - "Politische/geopolitische Sorgen werden in konkrete prüfbare Szenarien wie compelled access, Sanktionen/Exportkontrollen, Serviceentzug, Supportverlust, Change of Control oder Preis-/Vertragsänderungen übersetzt; Herkunft allein ist kein Provider-Score."
-  - Direkter Cloud-Account-, Root-, Owner- oder Credential-Zugang ist keine Voraussetzung des Beratungsprodukts.
-  - "Standard ist Customer-mediated Evidence: Kunde liefert Dokumente, Exporte, Screenshare-Beobachtungen oder Testergebnisse."
-  - Security Capability, Sovereignty Capability, Workload Sovereignty Risk und Evidence Confidence bleiben getrennt.
-  - Gate first, score second; nicht kompensierbare Mindestanforderungen werden zuerst geprüft.
-  - Provider/Service Capability wird von Applied Capability getrennt.
-  - Fehlende Evidence führt zu UNVERIFIED/EVIDENCE HOLD, nicht zu erfundenem PASS/FAIL.
-  - Die Excel-Datei ist Methoden-/Entwicklungsreferenz, nicht primäre Consultant-UI.
-  - MVP-01 ist eine lokal installierbare React/FastAPI/PostgreSQL-Webanwendung mit lokalem Dokument-Speicher.
-  - KI-Unterstützung im MVP erfolgt über eine Copy/Paste LLM Bridge ohne API-Key oder Providerbindung.
-  - Question Applicability nutzt applicable, not_applicable und needs_review; Unklarheit blendet keine Frage still aus.
-  - Evidence wird vor Gate-Nutzung mit Applied State, Trust-Dimensionen und Review Status bewertet.
+  - Der Souveränitäts-Radar ist primär Decision Support für mehrere Betriebs-/Architekturvarianten eines konkreten Workloads und kein universelles Compliance-Audit.
+  - Der Methodenkern ist cloud-agnostisch; Provider-spezifische Logik gehört in Research-/Evidence-/Adapter-Layer.
+  - Die finale Empfehlung darf vom Radar bzw. Beratungsteam formuliert werden; finale Entscheidung, Risikoakzeptanz und rechtliche Würdigung bleiben beim Kunden.
+  - Die sichtbare Managementsicht nutzt sieben Entscheidungsdimensionen: Geschäft & Innovation, Security & Resilienz, Recht/Daten/Kontrolle, Technologie & Exit, Organisation & Skills, Lieferkette & Geopolitik sowie Wirtschaft & Vertrag.
+  - Evidence Confidence bleibt separat von Risiko, Capability und Business Value.
+  - BSI 200-3 ist Anschluss-, Deep-Dive- und Vollständigkeitsreferenz; die 47 elementaren Gefährdungen sind kein verpflichtender sichtbarer Interviewkatalog.
+  - Bitkom Cloud-Souveränität 2026 ist zentrale Orientierungsquelle für Handlungsfähigkeit, Risiko/Chance, Skills, Interdependenzen und Exit.
+  - EU Cloud Sovereignty Framework und BSI C3A bilden primär den Provider-/Service-Souveränitätslayer; das vollständige C3A-Detailmapping ist noch nicht freigegeben.
+  - Data Act wird als Exit-/Switching-/Portabilitätsreferenz genutzt, soweit anwendbar.
+  - NIS2, DORA, DSGVO/EDPB, AI Act und andere Vorgaben werden nur bei tatsächlicher Anwendbarkeit als Compliance-Overlay aktiviert; sonst können sie Methoden-/Fragenquelle sein.
+  - Die Question Bank ist eine adaptive Question Library, kein Pflichtfragebogen; Zielkorridor für das sichtbare Kernscreening sind etwa 15–25 Fragen und muss validiert werden.
+  - Eine realistische Status-quo-/Nichtstun-Variante wird bei Migrations-/Modernisierungsentscheidungen mitbetrachtet; Business-/Innovationsnutzen und Risiko des Nichtstuns sind expliziter Entscheidungsinput.
+  - Vorhandene Kundenartefakte und Interviews bilden einen kombinierten optionalen Intake; ArchiMate, CMDB, IaC oder andere strukturierte Quellen sind hilfreich, aber keine Voraussetzung.
+  - Politische/geopolitische Sorgen werden in konkrete prüfbare Szenarien übersetzt; Providerherkunft oder Staatenzugehörigkeit erzeugen keinen pauschalen Score.
+  - Provider/Service Capability ist nicht Applied Capability.
+  - Fehlende Evidence führt zu UNVERIFIED/EVIDENCE HOLD, nicht automatisch zu FAIL.
+  - Gate first, score second; nicht kompensierbare Mindestanforderungen dürfen nicht durch andere Stärken ausgeglichen werden.
   - Human-reviewed Claims sind die einzige Brücke von Evidence zur deterministischen Gate-Bewertung.
-  - "Gate-Aggregation ist konservativ: schwächste bestätigte Capability begrenzt das Gate; unzureichende Evidence bleibt UNVERIFIED."
-  - Gate-Requirements werden aus internen Kritikalitäts-Templates vorbelegt; eine Abweichung ist nur als begründeter Consultant-Override mit Auditspur zulässig und die Rückkehr zum Standard erfolgt explizit per Reset.
-  - Die fachlichen Beschreibungen der internen Gate-Stufen 0-4 stammen pro Gate aus der Methodenbank; die Skala ist keine externe BSI-/EU-/Gesetzesskala.
+  - Customer-mediated Evidence ist Standard; direkter Cloud-Account-, Root-, Owner- oder Credential-Zugang ist keine Voraussetzung.
+  - Raw Kundenevidence wird nicht in Git committed.
+
+runtime_truth:
+  - Die lokal installierbare React/FastAPI/PostgreSQL-Webanwendung ist vorhanden und technisch validiert.
+  - Die Runtime implementiert noch wesentliche Teile des früheren Einzel-Assessment-/128-Fragen-Workflows und ist deshalb nicht vollständig identisch mit dem fachlichen Zielmodell v0.4.
+  - Applicability nutzt applicable, not_applicable und needs_review; Unklarheit wird nicht still ausgeblendet.
+  - Workflow-Staging nutzt screening, clarification, deep_dive, completed und excluded; Staging ersetzt nicht Applicability.
   - LLM-Proposals verändern ohne Human Review weder Claims noch Hard Gates.
-  - Applicability und Workflow-Priorisierung sind getrennte Zustände; Workflow Stage ersetzt keine fachliche Applicability.
-  - "NEXT-115 Stufen: screening, clarification, deep_dive, completed, excluded."
-  - needs_review wird vollständig in einer sichtbaren clarification-Queue geführt und niemals still ausgeblendet.
-  - answered questions wechseln in completed und bleiben in der All-Questions-/Audit-Ansicht sichtbar.
-  - deterministisch not_applicable Fragen liegen in excluded und bleiben vollständig inspizierbar.
-  - "NEXT-116 / Issue #22 adressiert die noch zu große unmittelbare work_queue und bleibt P1; die v0.4-Methodik liefert dafür die fachliche Zielrichtung einer deutlich kleineren Screening-Oberfläche."
-  - "NEXT-113 ist auf main: Structured Export, Consultant Report, strukturierte/full Backups, Restore und Gate-Semantikvergleich sind implementiert und validiert."
-  - "NEXT-113 Merge-Gate Run 33834276156 ist vollständig grün; Artifact 9922749183."
-  - "Standardexport und Consultant Report enthalten keine sensitiven Evidence-Inhalte; Full Backup ist explizites Opt-in."
-  - "Restore erzeugt immer ein neues Assessment, remappt Referenzen und berechnet Gates neu."
-  - "NEXT-101 ist implementiert und validiert: providerneutrales Customer Evidence Pack ohne Cloud-Credentials, explizites Mapping auf Evidence Requests und konservative Coverage-Analyse."
-  - "NEXT-101 Coverage-Baseline: 5 Evidence-Klassen, 11 erforderliche Requests, 3 VERIFIED, 4 REVIEW_REQUIRED, 1 INSUFFICIENT, 3 MISSING."
-  - "NEXT-101 Live-Webapp-Pilot: nur ein explizit human-reviewed synthetischer Claim wirkt auf Hard Gates; HG-01 PASS, HG-02 bis HG-08 UNVERIFIED."
-  - "Öffentliche Provider-Dokumentation mit applied_state=available wird nicht als configured Applied Capability behandelt."
-  - "NEXT-101 CI Run 33837372041 vollständig grün; Artifact 9923731562; Python, Frontend, Compose, Live-Webapp-Pilot und kompletter Lifecycle bestanden."
-  - "Der erste reale Mensch-im-Loop-Nutzertest ist NEXT-118 / Issue #28; Runbook: docs/validation/FIRST_INSTALL_EVALUATION.md."
-  - "Issue #67 dokumentiert die v0.4-Neufokussierung; vor Runtime-Umbauten soll die Methodik an Referenzfällen validiert werden."
-  - "Security-Hardening-Finding NEXT-117 / Issue #25: ZIP-Import benötigt vor untrusted Nutzung Limits für unkomprimierte Member-/Gesamtgrößen und Entry Count."
-  - "Issue #26: Structured Restore soll vor untrusted Nutzung serverseitig vollständig gegen das versionierte Export-Schema validieren."
-  - LLM darf weder Applicability noch Workflow Stage deterministisch entscheiden.
+  - Structured Export, Consultant Report, Backup und Restore sind implementiert; Standardexport/Report enthalten keine Raw Evidence.
+  - Öffentliche Provider-Dokumentation mit applied_state=available wird nicht zu configured Applied Capability hochgestuft.
   - Der frühere direkte AWS-Collector ist als Standardansatz verworfen und nur historisch dokumentiert.
 
+current_development_gate:
+  id: NEXT-120
+  github_issue: 68
+  title: C3A-Volltextreview vor weiterer Methoden-/Runtime-Entwicklung
+  status: waiting_input
+  reason: >-
+    Der vollständige BSI-C3A-Kriterienkatalog soll vom Projektinhaber bereitgestellt
+    und anschließend gegen Methodenkern v0.4, Provider Intelligence, Hard Gates,
+    Risikotaxonomie und Question Library geprüft werden.
+  blocks:
+    - neue fachliche Scoring-/Gate-Formeln
+    - v0.4 Schema-/DB-/API-/UI-Migration
+    - neue Providerbewertungen
+    - Behauptung eines vollständigen C3A-Mappings
+  allowed_while_waiting:
+    - repository_hygiene
+    - bugfixes
+    - security_hardening
+    - reine Quellensicherung ohne neue Methodenbehauptung
+
 primary_artifacts:
-  method_core_v0_4: docs/method/METHOD_CORE_V0_4_DE.md
-  glossary_de: docs/method/GLOSSARY_DE.md
-  decision_case_architecture: docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md
-  intake_context_sources: docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
+  method_core: docs/method/METHOD_CORE_V0_4_DE.md
+  method_overview: docs/method/METHOD_OVERVIEW.md
+  glossary_base: docs/method/GLOSSARY_DE.md
+  glossary_v0_4: docs/method/GLOSSARY_DE_V0_4_ADDENDUM.md
   source_guide: docs/method/SOURCE_GUIDE.md
+  source_register: data/method/source_register.csv
+  internal_source_register: data/method/source_register_addendum_v1.csv
+  decision_case_architecture: docs/architecture/DECISION_CASE_AND_PROVIDER_INTELLIGENCE.md
+  decision_support_alignment: docs/architecture/DECISION_SUPPORT_V0_4_ALIGNMENT.md
+  intake_context_sources: docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
+  roadmap: project/ROADMAP.md
+  decisions: project/DECISIONS.yaml
   product_mvp: docs/product/MVP_01_CONSULTANT_WEBAPP.md
   first_install_evaluation: docs/validation/FIRST_INSTALL_EVALUATION.md
   web_app: apps/web/
   api_app: apps/api/
-  gate_api: apps/api/app/gate_api.py
-  export_api: apps/api/app/export_api.py
-  export_ui: apps/web/src/ExportTools.tsx
-  export_schema: schemas/assessment-export.schema.json
   compose: docker-compose.yml
-  applicability_engine: src/sovradar/applicability.py
-  gate_catalog_engine: src/sovradar/gate_catalog.py
-  gate_evaluation_engine: src/sovradar/gate_evaluation.py
-  evidence_intake: src/sovradar/intake.py
-  evidence_coverage_engine: src/sovradar/evidence_coverage.py
-  evidence_pack_pilot_plan: data/pilots/next-101/requirement-plan.json
-  evidence_pack_offline_validation: tools/validation/customer_evidence_pack_pilot.py
-  evidence_pack_webapp_validation: tools/validation/customer_evidence_pack_webapp.py
-  synthetic_walkthrough: tools/validation/synthetic_consultant_walkthrough.py
-  progressive_workflow_validation: tools/validation/progressive_workflow_validation.py
-  export_restore_validation: tools/validation/export_restore_validation.py
-  workbook_manifest: artifacts/method/METHOD_WORKBOOK_MANIFEST.md
   question_bank: data/method/question_bank/
   risk_taxonomy: data/method/risk_taxonomy.csv
-  source_register: data/method/source_register.csv
   hard_gates: data/method/r4_hard_gates.csv
   factor_rules: data/method/r4_factor_rules.csv
   evidence_request_catalog: data/method/evidence_request_catalog.csv
-  evidence_pack_example: data/templates/evidence-pack-example/
   evidence_pack_schema: schemas/evidence-pack.schema.json
+  assessment_export_schema: schemas/assessment-export.schema.json
 
 quality_gates:
   provenance_required: true
@@ -108,79 +113,65 @@ quality_gates:
   deterministic_rule_tests_required: true
   raw_customer_evidence_in_repo: false
   automatic_risk_acceptance_allowed: false
+  automatic_legal_decision_allowed: false
   customer_cloud_credentials_required: false
   llm_api_required_for_mvp: false
-  uninstall_removes_generated_data: true
-  unknown_applicability_may_be_hidden: false
   llm_proposal_may_change_gate_without_human_review: false
-  gate_requirement_defaults_are_regulatory_requirements: false
-  gate_requirement_override_requires_reason: true
-  gate_requirement_change_audit_required: true
-  synthetic_provider_assumptions_may_be_presented_as_provider_facts: false
-  llm_may_decide_question_applicability: false
-  workflow_stage_may_replace_applicability: false
-  needs_review_may_be_silently_hidden: false
-  all_questions_audit_view_required: true
-  report_may_embed_raw_evidence_by_default: false
-  structured_restore_may_overwrite_existing_assessment: false
-  evidence_coverage_status_may_equal_gate_decision: false
   public_provider_capability_may_imply_applied_configuration: false
   provider_country_may_directly_set_sovereignty_score: false
   all_frameworks_must_run_for_every_assessment: false
   structured_enterprise_architecture_required: false
-
-blockers: []
+  unknown_applicability_may_be_hidden: false
+  workflow_stage_may_replace_applicability: false
+  needs_review_may_be_silently_hidden: false
+  all_questions_audit_view_required: true
+  gate_requirement_defaults_are_regulatory_requirements: false
+  gate_requirement_override_requires_reason: true
+  report_may_embed_raw_evidence_by_default: false
+  structured_restore_may_overwrite_existing_assessment: false
+  evidence_coverage_status_may_equal_gate_decision: false
 
 open_method_questions:
   - id: OMQ-001
-    text: Default-Requirement-Templates und interne Schwellen müssen mit mehreren Beratern/Kundenfällen kalibriert werden.
+    text: Welche Änderungen ergeben sich aus dem vollständigen C3A-Volltext für Methodenkern v0.4, Provider Intelligence, Hard Gates und G-z.S-Taxonomie?
   - id: OMQ-002
-    text: Inter-Rater-Konsistenz der Fragen-/Gate-Bewertung ist noch nicht empirisch gemessen.
+    text: Der v0.4-Screeningkern mit etwa 15–25 Fragen muss an mindestens drei sehr unterschiedlichen Architekturvarianten kalibriert werden.
   - id: OMQ-003
-    text: C5:2026 Detailmapping und weitere Framework-Versionen müssen weiter verfeinert werden.
-  - id: OMQ-004
-    text: Noch nicht deterministisch operationalisierte natürliche Anwendbarkeitsregeln bleiben needs_review und müssen schrittweise strukturiert werden.
-  - id: OMQ-005
-    text: Die interne Aggregation mehrerer Capability-Claims pro Gate muss im späteren Inter-Rater-/Kundenpilot kalibriert werden.
-  - id: OMQ-006
-    text: Der progressive Fragenworkflow muss priorisieren, ohne komplexe Workloads durch stilles Wegfiltern methodisch zu verengen.
-  - id: OMQ-007
-    text: Die einfache MVP-Regel Basis/Scope→Screening und sonst applicable→Deep Dive muss nach realen Consultant-Durchläufen weiter kalibriert werden.
-  - id: OMQ-008
-    text: Die aktuelle work_queue fasst Screening und Clarification zusammen und differenziert einfache vs. komplexe Workloads noch nicht ausreichend; NEXT-116 / Issue #22 adressiert das.
-  - id: OMQ-009
-    text: Evidence-Request-Coverage und Hard-Gate-Auswertung sind bewusst getrennt; reale Piloten müssen zeigen, ob zusätzliche deterministische Coverage-Holds pro Gate benötigt werden.
-  - id: OMQ-010
-    text: Der v0.4-Screeningkern mit etwa 15–25 Fragen muss an mindestens drei sehr unterschiedlichen Entscheidungsfällen kalibriert werden.
-  - id: OMQ-011
-    text: Business-/Innovationsnutzen muss sichtbar sein, darf aber nicht automatisch nicht kompensierbare rechtliche, Security- oder Kundenanforderungen überstimmen; Darstellungs- und Gewichtungslogik ist zu validieren.
-  - id: OMQ-012
-    text: Aktivierungsregeln für BSI-/C3A-/C5-/NIS2-/DORA-/Data-Act-/DSGVO-/KI-Deep-Dives und Compliance-Overlays müssen so definiert werden, dass sie weder Pflichten erfinden noch relevante Anforderungen übersehen.
-  - id: OMQ-013
     text: Die sieben sichtbaren Entscheidungsdimensionen müssen auf Trennschärfe, Vollständigkeit und Inter-Rater-Verständlichkeit geprüft werden.
+  - id: OMQ-004
+    text: Business-/Innovationsnutzen muss sichtbar sein, darf aber Hard Gates oder bewusst nicht akzeptierte Restrisiken nicht automatisch kompensieren; Darstellung und Gewichtung sind zu validieren.
+  - id: OMQ-005
+    text: Aktivierungsregeln für BSI-/C3A-/C5-/NIS2-/DORA-/Data-Act-/DSGVO-/KI-Deep-Dives und Compliance-Overlays müssen ohne erfundene Pflichten operationalisiert werden.
+  - id: OMQ-006
+    text: Inter-Rater-Konsistenz und interne Gate-/Requirement-Defaults müssen mit mehreren Beratern/Kundenfällen kalibriert werden.
 
 open_security_questions:
   - id: OSQ-001
-    text: Backup-ZIP-Import benötigt vor nicht vertrauenswürdiger Nutzung Vorablimits für unkomprimierte Membergrößen, Gesamtgröße und Eintragsanzahl; siehe NEXT-117 / Issue #25.
+    text: Backup-ZIP-Import benötigt vor nicht vertrauenswürdiger Nutzung Limits für unkomprimierte Membergrößen, Gesamtgröße und Eintragsanzahl; siehe NEXT-117 / Issue #25.
   - id: OSQ-002
     text: Structured Restore soll vor nicht vertrauenswürdiger Nutzung vollständig serverseitig gegen das versionierte Export-Schema validieren; siehe Issue #26.
 
+blockers: []
+
+waiting_inputs:
+  - id: WI-001
+    for: NEXT-120
+    item: vollständiger BSI-C3A-Kriterienkatalog
+    status: requested_from_project_owner
+
 next_milestone:
-  id: NEXT-118
-  name: first-manual-consultant-install-evaluation
+  id: NEXT-120
+  name: c3a-fulltext-method-review
   priority: P0
-  status: ready
-  github_issue: 28
+  status: waiting_input
+  github_issue: 68
   intent: >-
-    Die technisch grüne Installation und den synthetischen Evidence-Pilot erstmals aus echter
-    Beraterperspektive manuell bedienen und fachlich/UX-seitig evaluieren. Dabei soll zusätzlich
-    geprüft werden, welche Teile der bisherigen UI den v0.4-Decision-Support-Kern unnötig sichtbar
-    machen oder die Beratungsoberfläche überladen.
+    Den vollständigen C3A-Kriterienkatalog gegen den Decision-Support-Methodenkern v0.4
+    und die bestehende Architektur prüfen, notwendige Änderungen nachvollziehbar ableiten
+    und erst danach die weitere Methodenvalidierung bzw. Runtime-Migration freigeben.
   exit_criteria:
-    - Installation auf dem Zielsystem ist erfolgreich oder ein reproduzierbarer Blocker dokumentiert.
-    - Mindestens ein manueller synthetischer End-to-End-Fall wurde durchgeführt.
-    - Evidence, Claims, Requirements und Gate-Ergebnisse wurden aus Beratersicht auf Verständlichkeit geprüft.
-    - Export, Report, Backup und Restore wurden manuell ausprobiert.
-    - Methodik- und UX-Findings sind als Issues/Decisions dokumentiert.
-    - Die Abweichungen zwischen aktueller MVP-Oberfläche und Methodenkern v0.4 sind dokumentiert.
-    - Danach ist die Priorisierung zwischen NEXT-116, v0.4-Referenzfallvalidierung, Security-Hardening und erstem realen Customer-mediated Pilot entschieden.
+    - C3A-Volltext und Version sind im Source Register/Fundstellenmodell eindeutig erfasst.
+    - C3A-Kriterien sind gegen Provider Intelligence, Decision Dimensions, Hard Gates und G-z.S-Risiken geprüft.
+    - Direkte C3A-Aussagen, externe Ableitungen und interne Methodik bleiben getrennt gekennzeichnet.
+    - Notwendige Methodendokument-/Glossar-/Decision-Änderungen sind umgesetzt oder als Folge-Issues erfasst.
+    - NEXT-118/NEXT-119 und spätere Runtime-Migration sind danach explizit freigegeben oder angepasst.
