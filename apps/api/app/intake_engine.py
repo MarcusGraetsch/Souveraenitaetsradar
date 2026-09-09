@@ -35,7 +35,7 @@ def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[Complia
         gdpr_missing = ["Personenbezug der verarbeiteten Daten klären."]
     candidates.append(ComplianceCandidate(
         framework="GDPR", candidate_status=gdpr_status, rationale=gdpr_rationale,
-        missing_facts=gdpr_missing, source_refs=["SRC-GDPR"],
+        missing_facts=gdpr_missing, source_refs=["SRC-11"],
     ))
 
     sector_nis2 = _contains_hint(org.sector, NIS2_SECTOR_HINTS)
@@ -55,7 +55,7 @@ def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[Complia
         nis2_missing.append("Sonderfälle und nationale Umsetzung prüfen.")
     candidates.append(ComplianceCandidate(
         framework="NIS2", candidate_status=nis2_status, rationale=nis2_rationale,
-        missing_facts=nis2_missing, source_refs=["SRC-NIS2"],
+        missing_facts=nis2_missing, source_refs=["SRC-06", "SRC-07"],
     ))
 
     if _contains_hint(org.sector, DORA_SECTOR_HINTS):
@@ -68,7 +68,7 @@ def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[Complia
         dora_missing = ["Prüfen, ob die Organisation unter eine DORA-Unternehmenskategorie oder relevante ICT-Drittdienstleisterrolle fällt."]
     candidates.append(ComplianceCandidate(
         framework="DORA", candidate_status=dora_status, rationale=dora_rationale,
-        missing_facts=dora_missing, source_refs=["SRC-DORA"],
+        missing_facts=dora_missing, source_refs=["SRC-08", "SRC-09", "SRC-10"],
     ))
 
     if workload.ai_used == "yes" or workload.primary_archetype in {"ai-system", "ai-agent"}:
@@ -85,7 +85,7 @@ def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[Complia
         ai_missing = ["KI-Nutzung und AI-Act-Rolle klären."]
     candidates.append(ComplianceCandidate(
         framework="AI_ACT", candidate_status=ai_status, rationale=ai_rationale,
-        missing_facts=ai_missing, source_refs=["SRC-AI-ACT"],
+        missing_facts=ai_missing, source_refs=["SRC-13", "SRC-18", "SRC-19"],
     ))
     return candidates
 
