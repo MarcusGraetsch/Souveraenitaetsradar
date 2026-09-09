@@ -1,5 +1,6 @@
-version: 19
-updated: "2026-09-08"
+version: 20
+updated: "2026-09-09"
+human_in_the_loop_governance: project/HUMAN_IN_THE_LOOP.md
 
 priorities:
   - id: NEXT-118
@@ -10,6 +11,16 @@ priorities:
     status: planned
     github_issue: 28
     depends_on: [NEXT-101, NEXT-113, NEXT-115]
+    human_in_the_loop:
+      required: true
+      gates: [HITL-01, HITL-08]
+      human_roles:
+        - Product Owner
+        - Test-Consultant
+      decision_required: >-
+        Die Anwendung muss von einem Menschen auf einem frischen Zielsystem selbst
+        installiert und aus Consultant-Sicht bewertet werden; synthetische CI-Tests
+        ersetzen diese Freigabe nicht.
     inputs:
       - docs/validation/FIRST_INSTALL_EVALUATION.md
       - docs/method/METHOD_CORE_V0_4_DE.md
@@ -23,6 +34,7 @@ priorities:
     exit_criteria:
       - Installation und Runtime-Tests auf einem frischen Zielsystem sind dokumentiert.
       - UX- und Methodenlücken der pre-v0.4-Runtime sind erfasst.
+      - Eine menschliche Product-Owner-/Consultant-Bewertung ist dokumentiert.
       - Keine C3A-Konformitätsaussage wird aus dem bisherigen Runtime-Scoring abgeleitet.
     next_primary_candidate: true
 
@@ -33,6 +45,16 @@ priorities:
     owner_role: methodologist
     status: planned
     github_issue: 67
+    human_in_the_loop:
+      required: true
+      gates: [HITL-01, HITL-02, HITL-05, HITL-06, HITL-08]
+      human_roles:
+        - Method Owner / Lead Consultant
+        - Product Owner
+      decision_required: >-
+        Referenzfall und Varianten, Requirement Profile/Hard Gates, Screeningkern,
+        Deep-Dive-Aktivierung, Plausibilität der Variantenbewertung und die Freigabe
+        zur späteren Runtime-Migration müssen menschlich bestätigt werden.
     inputs:
       - docs/method/METHOD_CORE_V0_4_DE.md
       - docs/method/GLOSSARY_DE.md
@@ -61,6 +83,7 @@ priorities:
       - Business-/Innovationsnutzen und Status-quo-Risiken sind sichtbar, ohne Hard Gates zu kompensieren.
       - Evidence Gaps und Unsicherheit bleiben getrennt von Risikoeinstufung sichtbar.
       - C3A Criteria/Additional Criteria werden als Anforderungen und nicht als Reifegradleiter behandelt.
+      - Die menschlichen Freigaben für Plausibilität und Runtime-Migration sind dokumentiert.
 
   - id: NEXT-116
     priority: P1
@@ -134,6 +157,15 @@ priorities:
     owner_role: methodologist
     status: planned
     depends_on: [NEXT-119]
+    human_in_the_loop:
+      required: true
+      gates: [HITL-05]
+      human_roles:
+        - Method Owner / Lead Consultant
+        - mindestens ein weiterer realer Berater
+      decision_required: >-
+        Inter-Rater-Kalibrierung erfordert mindestens zwei menschliche Bewerter;
+        ein zweiter Agent oder LLM-Lauf zählt nicht als unabhängiger Rater.
 
   - id: NEXT-109
     priority: P2
