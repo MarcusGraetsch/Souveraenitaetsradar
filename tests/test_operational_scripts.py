@@ -84,6 +84,9 @@ exit 0
 
     assert result.returncode == 1
     assert "Datenbank-Volume, aber keine passende .env" in result.stderr
+    assert "docker volume rm sovradar_sovradar_db_data" in result.stderr
+    assert "docker compose down --volumes` in diesem Zustand NICHT" in result.stderr
+    assert "unwiderruflich" in result.stderr
     assert not (workspace / ".env").exists()
 
 
