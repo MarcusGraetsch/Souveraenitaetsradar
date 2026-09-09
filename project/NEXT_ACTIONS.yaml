@@ -1,14 +1,59 @@
-version: 20
+version: 21
 updated: "2026-09-09"
 human_in_the_loop_governance: project/HUMAN_IN_THE_LOOP.md
 
 priorities:
+  - id: NEXT-122
+    priority: P0
+    phase: PRODUCT-RUNTIME
+    title: Assessment Intake / Decision Context v0.5 implementieren und manuell validieren
+    owner_role: product-owner-methodologist
+    status: in_progress
+    github_issue: 77
+    depends_on: [NEXT-121]
+    human_in_the_loop:
+      required: true
+      completed_gates: [HITL-08]
+      pending_gates: [HITL-09]
+      human_roles:
+        - Product Owner
+        - Method Owner / Lead Consultant
+      decision_required: >-
+        A1, B1, C1, D1, E1 und F wurden am 2026-09-09 freigegeben.
+        Vor Merge der Runtime-Implementierung ist ein menschliches Review der
+        substantiellen Produkt-/Methodenänderung erforderlich.
+    inputs:
+      - docs/product/ASSESSMENT_INTAKE_V0_5_DE.md
+      - docs/product/ASSESSMENT_INTAKE_HITL_DECISION.md
+      - docs/architecture/INTAKE_AND_CONTEXT_SOURCES.md
+      - docs/method/METHOD_CORE_V0_4_DE.md
+    outputs:
+      - 3-4-stufiger Intake-Wizard
+      - strukturierter Decision-Case-/Organisations-/Workload-Kontext
+      - primäre plus optionale weitere Legal Entities
+      - Primär-Archetyp plus Mehrfach-Tags plus Freitext
+      - transparente Compliance-Kandidaten für GDPR/NIS2/DORA/AI Act
+      - keine vorgetäuschten C/I/A-/Kritikalitätswerte im Intake
+      - Pre-Assessment Context mit Missing Facts und Deep-Dive-Hinweisen
+      - Regressionstests
+    exit_criteria:
+      - HITL-08-Freigabe ist im Repo dokumentiert.
+      - Neue Intakes persistieren strukturierten Kontext getrennt vom Legacy-Assessment.
+      - C/I/A und Kritikalität werden für neue v0.5-Intakes initial als unknown geführt.
+      - Compliance-Kandidaten tragen Status, Begründung, Missing Facts, Source Refs und not_reviewed.
+      - Keine Compliance-Kandidatenlogik erzeugt automatisch eine finale Rechtsfeststellung.
+      - Alte Assessment-API bleibt abwärtskompatibel.
+      - Product Owner kann den neuen Einstieg manuell erneut testen.
+      - PR ist grün und HITL-09 wurde vor Merge durchgeführt.
+    next_primary_candidate: true
+
   - id: NEXT-118
     priority: P0
     phase: MVP-VALIDATION
     title: Erste manuelle Consultant-Installation und Evaluation durchführen
     owner_role: evidence-analyst
-    status: planned
+    status: in_progress
+    blocked_by: [NEXT-122]
     github_issue: 28
     depends_on: [NEXT-101, NEXT-113, NEXT-115]
     human_in_the_loop:
@@ -18,9 +63,9 @@ priorities:
         - Product Owner
         - Test-Consultant
       decision_required: >-
-        Die Anwendung muss von einem Menschen auf einem frischen Zielsystem selbst
-        installiert und aus Consultant-Sicht bewertet werden; synthetische CI-Tests
-        ersetzen diese Freigabe nicht.
+        Installation wurde manuell erfolgreich bewertet. Die fachliche Runtime-Evaluation
+        wurde beim alten Formular Neues Assessment bewusst gestoppt und wird nach NEXT-122
+        am neuen Intake fortgesetzt.
     inputs:
       - docs/validation/FIRST_INSTALL_EVALUATION.md
       - docs/method/METHOD_CORE_V0_4_DE.md
@@ -29,14 +74,14 @@ priorities:
       - manual install result
       - consultant UX findings
       - method findings
-      - v0.4 UI-gap findings
+      - v0.4/v0.5 UI-gap findings
       - follow-up issues/decisions
     exit_criteria:
       - Installation und Runtime-Tests auf einem frischen Zielsystem sind dokumentiert.
-      - UX- und Methodenlücken der pre-v0.4-Runtime sind erfasst.
+      - UX- und Methodenlücken sind erfasst.
+      - Der neue NEXT-122-Intake wurde vom Product Owner manuell weitergetestet.
       - Eine menschliche Product-Owner-/Consultant-Bewertung ist dokumentiert.
       - Keine C3A-Konformitätsaussage wird aus dem bisherigen Runtime-Scoring abgeleitet.
-    next_primary_candidate: true
 
   - id: NEXT-119
     priority: P0
@@ -45,6 +90,7 @@ priorities:
     owner_role: methodologist
     status: planned
     github_issue: 67
+    depends_on: [NEXT-122, NEXT-118]
     human_in_the_loop:
       required: true
       gates: [HITL-01, HITL-02, HITL-05, HITL-06, HITL-08]
