@@ -35,6 +35,33 @@ EOF
   exit 1
 fi
 
+for runtime_path in .runtime .runtime/documents .runtime/exports .runtime/temp; do
+  if [[ -e "$runtime_path" && ! -w "$runtime_path" ]]; then
+    cat >&2 <<EOF
+✖ Der lokale Runtime-Pfad '$runtime_path' existiert, ist für den aktuellen Benutzer aber nicht beschreibbar.
+
+  Das kann nach einer früheren containerisierten Ausführung auftreten. Der Installer ändert
+  Eigentümer oder löscht Evidence-/Exportdaten absichtlich nicht automatisch.
+
+  Prüfe zuerst die vorhandenen Daten:
+
+    ls -ld .runtime .runtime/* 2>/dev/null
+
+  Wenn die Daten erhalten bleiben sollen, kann der Eigentümer bewusst korrigiert werden:
+
+    sudo chown -R "\$(id -u):\$(id -g)" .runtime
+
+  Für einen wirklich frischen Test die alte Runtime stattdessen außerhalb des Repositories
+  sichern oder bewusst löschen, z. B.:
+
+    sudo mv .runtime "../sovradar-runtime-backup-\$(date +%Y%m%d-%H%M%S)"
+
+  Danach `./install.sh` erneut starten.
+EOF
+    exit 1
+  fi
+done
+
 read -rp "Port [8080]: " APP_PORT;APP_PORT="${APP_PORT:-8080}";[[ "$APP_PORT" =~ ^[0-9]+$ ]]||fail "Ungültiger Port"
 printf "Nur lokal erreichbar (empfohlen) oder im Netzwerk?\n  [1] 127.0.0.1\n  [2] 0.0.0.0\n";read -rp "Auswahl [1]: " BIND_CHOICE
 if [[ "${BIND_CHOICE:-1}" == "2" ]];then BIND_HOST="0.0.0.0";warn "MVP-01 hat noch keine Authentisierung. Netzwerkfreigabe nur im vertrauenswürdigen Testnetz.";else BIND_HOST="127.0.0.1";fi
