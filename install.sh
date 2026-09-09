@@ -16,7 +16,23 @@ if [[ -f .env ]];then
   EXISTING_DB_PASSWORD="$(sed -n 's/^POSTGRES_PASSWORD=//p' .env | tail -n 1)"
   [[ -n "$EXISTING_DB_PASSWORD" ]]||fail "Die vorhandene .env enthält kein POSTGRES_PASSWORD. Bitte Konfiguration reparieren oder mit ./uninstall.sh zurücksetzen."
 elif docker volume inspect sovradar_sovradar_db_data >/dev/null 2>&1;then
-  fail "Es existiert bereits ein Souveränitäts-Radar-Datenbank-Volume, aber keine passende .env. Das Datenbankpasswort kann nicht sicher rekonstruiert werden. Stelle die ursprüngliche .env wieder her oder lösche die lokale Installation bewusst mit: docker compose down --volumes"
+  cat >&2 <<'EOF'
+✖ Es existiert bereits ein Souveränitäts-Radar-Datenbank-Volume, aber keine passende .env.
+  Das Datenbankpasswort kann nicht sicher rekonstruiert werden.
+
+  Wenn die alten Daten erhalten bleiben müssen, stelle die ursprüngliche .env wieder her.
+
+  Wenn die alte lokale Installation bewusst vollständig verworfen werden darf, funktioniert
+  `docker compose down --volumes` in diesem Zustand NICHT, weil Compose das fehlende
+  POSTGRES_PASSWORD bereits beim Einlesen verlangt. Verwende stattdessen:
+
+    docker ps -aq --filter volume=sovradar_sovradar_db_data | xargs -r docker rm -f
+    docker volume rm sovradar_sovradar_db_data
+
+  ACHTUNG: Diese Befehle löschen die alte Souveränitäts-Radar-Datenbank unwiderruflich.
+  Danach `./install.sh` erneut starten.
+EOF
+  exit 1
 fi
 
 read -rp "Port [8080]: " APP_PORT;APP_PORT="${APP_PORT:-8080}";[[ "$APP_PORT" =~ ^[0-9]+$ ]]||fail "Ungültiger Port"
