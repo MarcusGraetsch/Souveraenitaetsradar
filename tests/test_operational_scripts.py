@@ -84,7 +84,21 @@ exit 0
 
     assert result.returncode == 1
     assert "Datenbank-Volume, aber keine passende .env" in result.stderr
+    assert "docker volume rm sovradar_sovradar_db_data" in result.stderr
+    assert "docker compose down --volumes` in diesem Zustand NICHT" in result.stderr
+    assert "unwiderruflich" in result.stderr
     assert not (workspace / ".env").exists()
+
+
+def test_install_contains_safe_non_writable_runtime_preflight(tmp_path: Path) -> None:
+    workspace, _ = _script_workspace(tmp_path)
+    script = (workspace / "install.sh").read_text(encoding="utf-8")
+
+    assert 'for runtime_path in .runtime .runtime/documents .runtime/exports .runtime/temp' in script
+    assert '[[ -e "$runtime_path" && ! -w "$runtime_path" ]]' in script
+    assert 'sudo chown -R' in script
+    assert 'sudo mv .runtime' in script
+    assert 'löscht Evidence-/Exportdaten absichtlich nicht automatisch' in script
 
 
 def test_healthcheck_reports_restarting_api_without_waiting(tmp_path: Path) -> None:
