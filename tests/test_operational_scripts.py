@@ -90,6 +90,38 @@ exit 0
     assert not (workspace / ".env").exists()
 
 
+def test_install_reports_non_writable_runtime_before_creating_env(tmp_path: Path) -> None:
+    if os.geteuid() == 0:
+        return
+
+    workspace, bin_dir = _script_workspace(tmp_path)
+    runtime = workspace / ".runtime"
+    runtime.mkdir()
+    runtime.chmod(0o500)
+    _write_executable(
+        bin_dir / "docker",
+        """#!/usr/bin/env bash
+if [[ "$1" == "--version" ]]; then echo 'Docker version test'; exit 0; fi
+if [[ "$1 $2" == "compose version" ]]; then echo 'v2.test'; exit 0; fi
+if [[ "$1 $2" == "volume inspect" ]]; then exit 1; fi
+exit 0
+""",
+    )
+    _write_executable(bin_dir / "curl", "#!/usr/bin/env bash\nexit 0\n")
+    env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}"}
+
+    try:
+        result = subprocess.run(["bash", "install.sh"], cwd=workspace, env=env, text=True, capture_output=True)
+    finally:
+        runtime.chmod(0o700)
+
+    assert result.returncode == 1
+    assert "Runtime-Pfad '.runtime'" in result.stderr
+    assert "sudo chown -R" in result.stderr
+    assert "sudo mv .runtime" in result.stderr
+    assert not (workspace / ".env").exists()
+
+
 def test_healthcheck_reports_restarting_api_without_waiting(tmp_path: Path) -> None:
     workspace, bin_dir = _script_workspace(tmp_path)
     _write_executable(bin_dir / "curl", "#!/usr/bin/env bash\nexit 22\n")
