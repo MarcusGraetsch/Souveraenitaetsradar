@@ -16,8 +16,51 @@ if [[ -f .env ]];then
   EXISTING_DB_PASSWORD="$(sed -n 's/^POSTGRES_PASSWORD=//p' .env | tail -n 1)"
   [[ -n "$EXISTING_DB_PASSWORD" ]]||fail "Die vorhandene .env enthält kein POSTGRES_PASSWORD. Bitte Konfiguration reparieren oder mit ./uninstall.sh zurücksetzen."
 elif docker volume inspect sovradar_sovradar_db_data >/dev/null 2>&1;then
-  fail "Es existiert bereits ein Souveränitäts-Radar-Datenbank-Volume, aber keine passende .env. Das Datenbankpasswort kann nicht sicher rekonstruiert werden. Stelle die ursprüngliche .env wieder her oder lösche die lokale Installation bewusst mit: docker compose down --volumes"
+  cat >&2 <<'EOF'
+✖ Es existiert bereits ein Souveränitäts-Radar-Datenbank-Volume, aber keine passende .env.
+  Das Datenbankpasswort kann nicht sicher rekonstruiert werden.
+
+  Wenn die alten Daten erhalten bleiben müssen, stelle die ursprüngliche .env wieder her.
+
+  Wenn die alte lokale Installation bewusst vollständig verworfen werden darf, funktioniert
+  `docker compose down --volumes` in diesem Zustand NICHT, weil Compose das fehlende
+  POSTGRES_PASSWORD bereits beim Einlesen verlangt. Verwende stattdessen:
+
+    docker ps -aq --filter volume=sovradar_sovradar_db_data | xargs -r docker rm -f
+    docker volume rm sovradar_sovradar_db_data
+
+  ACHTUNG: Diese Befehle löschen die alte Souveränitäts-Radar-Datenbank unwiderruflich.
+  Danach `./install.sh` erneut starten.
+EOF
+  exit 1
 fi
+
+for runtime_path in .runtime .runtime/documents .runtime/exports .runtime/temp; do
+  if [[ -e "$runtime_path" && ! -w "$runtime_path" ]]; then
+    cat >&2 <<EOF
+✖ Der lokale Runtime-Pfad '$runtime_path' existiert, ist für den aktuellen Benutzer aber nicht beschreibbar.
+
+  Das kann nach einer früheren containerisierten Ausführung auftreten. Der Installer ändert
+  Eigentümer oder löscht Evidence-/Exportdaten absichtlich nicht automatisch.
+
+  Prüfe zuerst die vorhandenen Daten:
+
+    ls -ld .runtime .runtime/* 2>/dev/null
+
+  Wenn die Daten erhalten bleiben sollen, kann der Eigentümer bewusst korrigiert werden:
+
+    sudo chown -R "\$(id -u):\$(id -g)" .runtime
+
+  Für einen wirklich frischen Test die alte Runtime stattdessen außerhalb des Repositories
+  sichern oder bewusst löschen, z. B.:
+
+    sudo mv .runtime "../sovradar-runtime-backup-\$(date +%Y%m%d-%H%M%S)"
+
+  Danach `./install.sh` erneut starten.
+EOF
+    exit 1
+  fi
+done
 
 read -rp "Port [8080]: " APP_PORT;APP_PORT="${APP_PORT:-8080}";[[ "$APP_PORT" =~ ^[0-9]+$ ]]||fail "Ungültiger Port"
 printf "Nur lokal erreichbar (empfohlen) oder im Netzwerk?\n  [1] 127.0.0.1\n  [2] 0.0.0.0\n";read -rp "Auswahl [1]: " BIND_CHOICE
