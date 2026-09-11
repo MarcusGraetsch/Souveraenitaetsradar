@@ -5,20 +5,36 @@ from .intake_schemas import AssessmentIntakeCreate, ComplianceCandidate, PreAsse
 NIS2_SECTOR_HINTS = {
     "energy", "transport", "banking", "financial", "health", "water", "wastewater",
     "digital infrastructure", "ict", "managed service", "public administration", "space",
-    "energie", "verkehr", "banken", "finanz", "gesundheit", "wasser", "digitale infrastruktur",
-    "it-dienst", "öffentliche verwaltung", "oeffentliche verwaltung",
+    "postal", "courier", "waste management", "chemicals", "food", "manufacturing",
+    "digital services", "research",
+    "energie", "verkehr", "banken", "finanz", "gesundheit", "wasser", "abwasser",
+    "digitale infrastruktur", "it dienst", "öffentliche verwaltung", "oeffentliche verwaltung",
+    "post", "kurier", "abfall", "chemie", "lebensmittel", "herstellung", "forschung",
 }
-DORA_SECTOR_HINTS = {"bank", "banking", "insurance", "financial", "finance", "investment", "payment", "finanz", "versicherung", "zahlung"}
+DORA_SECTOR_HINTS = {
+    "bank", "banking", "insurance", "financial", "finance", "investment", "payment",
+    "finanz", "versicherung", "zahlung",
+}
+
+
+def _normalize(value: str) -> str:
+    return value.strip().lower().replace("-", " ").replace("_", " ")
 
 
 def _contains_hint(value: str, hints: set[str]) -> bool:
-    lowered = value.strip().lower()
+    lowered = _normalize(value)
     return any(hint in lowered for hint in hints)
+
+
+def _sector_text(payload: AssessmentIntakeCreate) -> str:
+    org = payload.organization
+    return " ".join(part for part in [org.sector, org.sector_detail] if part).strip()
 
 
 def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[ComplianceCandidate]:
     org = payload.organization
     workload = payload.workload
+    sector_text = _sector_text(payload)
     candidates: list[ComplianceCandidate] = []
 
     if workload.personal_data == "yes":
@@ -38,15 +54,15 @@ def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[Complia
         missing_facts=gdpr_missing, source_refs=["SRC-11"],
     ))
 
-    sector_nis2 = _contains_hint(org.sector, NIS2_SECTOR_HINTS)
+    sector_nis2 = _contains_hint(sector_text, NIS2_SECTOR_HINTS)
     size_nis2 = org.employee_size in {"medium", "large"}
     if sector_nis2 and size_nis2:
         nis2_status = "likely_applicable"
-        nis2_rationale = ["Sektor und Größenklasse sind als NIS2-relevante Routing-Signale erfasst."]
+        nis2_rationale = ["Sektor/Tätigkeit und Größenklasse sind als NIS2-relevante Routing-Signale erfasst."]
         nis2_missing = ["Konkrete Tätigkeit, nationale Umsetzung, Sonderfälle und Entity-Scope rechtlich prüfen."]
     else:
         nis2_status = "needs_review"
-        nis2_rationale = ["Aus Sektor und Größenangaben ergibt sich noch keine belastbare NIS2-Anwendbarkeit."]
+        nis2_rationale = ["Aus Sektor/Tätigkeit und Größenangaben ergibt sich noch keine belastbare NIS2-Anwendbarkeit."]
         nis2_missing = []
         if not sector_nis2:
             nis2_missing.append("Konkrete NIS2-Sektor-/Tätigkeitszuordnung prüfen.")
@@ -58,9 +74,9 @@ def build_compliance_candidates(payload: AssessmentIntakeCreate) -> list[Complia
         missing_facts=nis2_missing, source_refs=["SRC-06", "SRC-07"],
     ))
 
-    if _contains_hint(org.sector, DORA_SECTOR_HINTS):
+    if _contains_hint(sector_text, DORA_SECTOR_HINTS):
         dora_status = "likely_applicable"
-        dora_rationale = ["Der angegebene Sektor deutet auf einen Finanz-/Versicherungs-/Zahlungsbezug hin."]
+        dora_rationale = ["Der angegebene Sektor bzw. die Tätigkeit deutet auf einen Finanz-/Versicherungs-/Zahlungsbezug hin."]
         dora_missing = ["Konkrete DORA-Unternehmenskategorie und ggf. ICT-Drittdienstleisterrolle prüfen."]
     else:
         dora_status = "needs_review"
@@ -100,8 +116,6 @@ def build_pre_assessment(payload: AssessmentIntakeCreate) -> PreAssessmentContex
         missing.append("Sensibilität von Fach-/Geschäftsdaten klären")
     if workload.external_provider_in_scope == "unknown":
         missing.append("Externen Provider-/Cloud-/SaaS-Scope klären")
-    if org.group_structure == "unknown":
-        missing.append("Konzern-/Gruppenstruktur klären")
     if org.employee_size == "unknown":
         missing.append("Organisationsgröße klären")
 
@@ -122,7 +136,11 @@ def build_pre_assessment(payload: AssessmentIntakeCreate) -> PreAssessmentContex
         complexity.append(f"Mehrere juristische Einheiten im Scope: {len(org.legal_entities)}")
 
     tags = list(dict.fromkeys([*workload.tags, workload.primary_archetype]))
-    focus = ["Entscheidungsziel und Scope bestätigen", "Datenarten und Datenflüsse klären", "Betriebs-/Providerabhängigkeiten erfassen"]
+    focus = [
+        "Entscheidungsziel und Scope bestätigen",
+        "Datenarten und Datenflüsse klären",
+        "Betriebs-/Providerabhängigkeiten erfassen",
+    ]
     if "ai-agent" in tags or "ai-system" in tags:
         focus.append("KI-Rolle, Modell-/Tool-Abhängigkeiten und Datenzugriffe klären")
     if workload.current_operating_model in {"public-cloud", "saas", "hybrid", "multi-cloud"}:
