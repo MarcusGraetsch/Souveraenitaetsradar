@@ -15,6 +15,7 @@ from sovradar.applicability import apply_to_questions, default_profile
 from .database import Base, engine, get_db
 from .export_api import router as export_router
 from .gate_api import router as gate_router
+from .intake_api import router as intake_router
 from .llm_bridge import build_prompt
 from .method_catalog import load_questions, question_ids
 from .models import Answer, Assessment, AssessmentProfile, Evidence, LlmImport
@@ -31,7 +32,7 @@ from .schemas import (
 )
 from .settings import settings
 
-app = FastAPI(title="Souveränitäts-Radar API", version="0.4.0")
+app = FastAPI(title="Souveränitäts-Radar API", version="0.5.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -41,6 +42,7 @@ app.add_middleware(
 )
 app.include_router(gate_router)
 app.include_router(export_router)
+app.include_router(intake_router)
 
 
 @app.on_event("startup")
