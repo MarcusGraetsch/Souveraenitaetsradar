@@ -39,13 +39,17 @@ class OrganizationInput(BaseModel):
     organization_type: Literal[
         "company", "public_authority", "public_body", "non_profit", "other"
     ]
+    # Product routing category, not a legal/regulatory classification.
     sector: str = Field(min_length=1, max_length=255)
+    sector_detail: str = Field(default="", max_length=500)
     employee_size: Literal["micro", "small", "medium", "large", "unknown"]
     headquarters_country: str = Field(min_length=2, max_length=128)
     headquarters_city: str = ""
     headquarters_postal_code: str = ""
     headquarters_street: str = ""
     activity_countries: list[str] = Field(default_factory=list)
+    # Retained for backward compatibility. The v0.5 UI no longer asks this as
+    # an early yes/no question; multi-entity scope is derived from legal_entities.
     group_structure: TriState = "unknown"
     annual_revenue_eur: str = ""
     balance_sheet_eur: str = ""
