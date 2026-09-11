@@ -19,12 +19,12 @@ def _payload() -> AssessmentIntakeCreate:
         "organization": {
             "name": "Beispielstadt",
             "organization_type": "public_authority",
-            "sector": "Öffentliche Verwaltung",
+            "sector": "public-administration",
+            "sector_detail": "Kommunale Verwaltung mit digitalen Bürgerdiensten",
             "employee_size": "large",
             "headquarters_country": "Deutschland",
             "headquarters_city": "Berlin",
             "activity_countries": ["Deutschland", "Frankreich"],
-            "group_structure": "yes",
             "legal_entities": [
                 {"name": "Beispielstadt", "country": "Deutschland", "city": "Berlin", "role": "primary"},
                 {"name": "Service-Tochter", "country": "Frankreich", "city": "Paris", "role": "operator"},
@@ -61,6 +61,20 @@ def test_preassessment_is_suggestive_not_final() -> None:
     assert pre.criticality_status == "unassessed"
     assert "C3A / Cloud-Autonomie" in pre.suggested_deep_dive_profiles
     assert pre.jurisdiction_complexity
+    assert "Konzern-/Gruppenstruktur klären" not in pre.missing_scope_facts
+    assert any("Mehrere juristische Einheiten" in item for item in pre.jurisdiction_complexity)
+
+
+def test_sector_detail_is_used_for_compliance_routing() -> None:
+    from apps.api.app.intake_engine import build_pre_assessment
+
+    payload = _payload().model_copy(deep=True)
+    payload.organization.sector = "other"
+    payload.organization.sector_detail = "Versicherung und Zahlungsdienste"
+    pre = build_pre_assessment(payload)
+    candidates = {candidate.framework: candidate for candidate in pre.compliance_candidates}
+
+    assert candidates["DORA"].candidate_status == "likely_applicable"
 
 
 def test_create_intake_persists_structured_context_without_fake_cia_defaults() -> None:
@@ -81,5 +95,6 @@ def test_create_intake_persists_structured_context_without_fake_cia_defaults() -
         assert intake is not None
         assert intake.schema_version == "0.5"
         assert len(result.organization.legal_entities) == 2
+        assert result.organization.sector_detail == "Kommunale Verwaltung mit digitalen Bürgerdiensten"
         assert result.workload.primary_archetype == "ai-agent"
         assert db.scalar(select(Assessment).where(Assessment.id == result.assessment_id)) is not None
